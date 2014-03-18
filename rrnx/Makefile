@@ -1,13 +1,29 @@
-
-
-# GNU Make documentation:
-# http://www.gnu.org/software/make/manual/make.html
+#*******************************{begin:header}*******************************#
+#                       rrnx - The Robust RINEX Parser                       #
+#****************************************************************************#
 #
-# For pre-defined variables, see
-# http://www.gnu.org/software/make/manual/make.html#Implicit-Variables
-# These can be cancelled with -R.
+#       Part of the GPS/INS measurement simulation system GSIM,
+#       https://code.google.com/p/gsim
+#
+#       Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#
+#       Licensed under the terms of GNU General Public License v3.
+#
+#       You should have received a copy of the GNU General Public License v3
+#       along with this program as the file LICENSE.txt; if not, please see
+#       http://www.gnu.org/licenses/gpl-3.0.html
+#
+#*********************************{end:header}*******************************#
 
+#
+# References:
+#
+# [1] GNU Make documentation:
+#     http://www.gnu.org/software/make/manual/make.html
+#
 
+# TODO: directory
+# build — The compiler's build files
 
 # Some directories
 SRCDIR=src
@@ -22,6 +38,8 @@ SOURCES=$(wildcard $(SRCDIR)/*.c)
 
 # Generate list of objects
 OBJS=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.c=.o))
+# Maybe also:
+# $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 # Delete the default suffixes (same as "-r" or "--no-builtin-rules")
 .SUFFIXES:
@@ -31,6 +49,15 @@ AR=ar
 CC=gcc
 CFLAGS=-c -Wall
 LDFLAGS=
+
+
+
+# TODO:
+#LINKER   = gcc -o
+# linking flags here
+#LFLAGS   = -Wall -I. -lm
+
+
 
 # targets which are not real
 .PHONY: clean all
