@@ -1,5 +1,5 @@
 #*******************************{begin:header}*******************************#
-#                       rrnx - The Robust RINEX Parser                       #
+#                       rrnx - The Robust RINEX Library                      #
 #****************************************************************************#
 #
 #       Part of the GPS/INS measurement simulation system GSIM,
