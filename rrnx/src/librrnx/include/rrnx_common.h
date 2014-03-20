@@ -22,6 +22,43 @@
 extern "C" {
 #endif
 
+
+//============================================================================
+// DATA TYPES: COMMON
+//============================================================================
+
+/**
+ * Date and time
+ */
+struct rrnx_time {
+        unsigned int year;
+        unsigned int month;
+        unsigned int day;
+
+        unsigned int hour;
+        unsigned int min;
+        double sec;
+};
+
+typedef struct rrnx_time rrnx_time;
+
+/**
+ * Identifies a satellite within a GNSS.
+ */
+struct rrnx_satellite_id {
+        /**
+         * GNSS identifier.
+         */
+        unsigned int system;
+
+        /**
+         * Space Vehicle identifier within the GNSS.
+         */
+        unsigned int id;
+};
+
+typedef struct rrnx_satellite_id rrnx_satellite_id;
+
 //============================================================================
 // PAYLOAD STRUCTS: COMMON CONSTANTS
 //============================================================================
@@ -101,42 +138,11 @@ struct rrnx_comment {
 typedef struct rrnx_comment rrnx_comment;
 
 
-
 //============================================================================
-// DATA TYPES: COMMON
+// COMMON CONSTANTS
 //============================================================================
 
-/**
- * Date and time
- */
-struct rrnx_time {
-        unsigned int year;
-        unsigned int month;
-        unsigned int day;
 
-        unsigned int hour;
-        unsigned int min;
-        double sec;
-};
-
-typedef struct rrnx_time rrnx_time;
-
-/**
- * Identifies a satellite within a GNSS.
- */
-struct rrnx_satellite_id {
-        /**
-         * GNSS identifier.
-         */
-        unsigned int system;
-
-        /**
-         * Space Vehicle identifier within the GNSS.
-         */
-        unsigned int id;
-};
-
-typedef struct rrnx_satellite_id rrnx_satellite_id;
 
 //============================================================================
 // SUPPORTING STRUCTS

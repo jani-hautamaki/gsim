@@ -1,5 +1,5 @@
 #*******************************{begin:header}*******************************#
-#                       rrnx - The Robust RINEX Library                      #
+#                   gsim - GPS/INS measurement simulation                    #
 #****************************************************************************#
 #
 #       Part of the GPS/INS measurement simulation system GSIM,
@@ -15,21 +15,24 @@
 #
 #*********************************{end:header}*******************************#
 
-#
-# References:
-#
-# [1] GNU Make documentation:
-#     http://www.gnu.org/software/make/manual/make.html
-#
+# Recursive
 
-.PHONY: all doc
-all:
+# List of subdirectories to make
+# "tests" depend on "librrnx"
+SUBDIRS=librrnx tests
 
-doc: | build/doc
-	doxygen
+.PHONY: all $(SUBDIRS) clean
+     
+all: $(SUBDIRS)
 
-build/doc:
-	mkdir -p build/doc
+librrnx:
+	$(MAKE) -C librrnx
+
+# librrnx must be built prior to building tests
+tests: | librrnx
+	$(MAKE) -C tests
 
 clean:
-	rm -rf build/doc
+	$(MAKE) -C librrnx clean
+	$(MAKE) -C tests clean
+

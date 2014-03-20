@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <string.h> // strdup
+#include <string.h> // strerror, strncpy
 #include <stdarg.h>
 
 
@@ -56,8 +56,16 @@ static int errmsg_syscall(
 	    &reader->errmsg[len], reader->errmsg_size-len, format, ap);
 	va_end(ap);
 
-	// strerror
-	strerror_r(errnum, &reader->errmsg[len], reader->errmsg_size-len);
+	// strerror_r(errnum, &reader->errmsg[len], reader->errmsg_size-len);
+	// strerror_r is not available in C99.
+	// Replacmeent for strerror_r:
+
+	const char *msg = strerror(errnum);
+	// Copy at most size-len-1 chars (may or may not include '\0')
+	strncpy(&reader->errmsg[len], msg, reader->errmsg_size-len-1);
+	// Append terminator to the end in any case.
+	reader->errmsg[reader->errmsg_size-1] = '\0';
+
 	reader->err = RRNX_E_SYSCALL;
 	return reader->err;
 } // errmsg_syscall()
@@ -98,7 +106,7 @@ extern rrnx_filereader *rrnx_fr_alloc(void) {
 	reader->col = 0;
 
 	// Configure with default errmsg buffer size
-	reader->errmsg_size = RRNX_FR_DEFAULT_ERRMSG_SIZE;
+	reader->errmsg_size = RRNX_DEFAULT_ERRMSG_SIZE;
 	// Allocate the errmsg buffer
 	reader->errmsg = (char *) malloc(reader->errmsg_size);
 
@@ -182,12 +190,65 @@ extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
 	// File opened succesfully
 
 	// Remember the file name
-	reader->filename = strdup(filename);
+	int len = strlen(filename);
+	reader->filename = malloc(len);
+	strncpy(reader->filename, filename, len);
 
 	// Reset locational info
 	reader->row = 0;
 	reader->col = 0;
+
+	// Reset valid buffer length
 	reader->len = 0;
+
+	return noerr(reader);
+}
+
+extern int rrnx_fr_bind(rrnx_filereader *reader, FILE *fp) {
+	if (reader->fp != NULL) {
+		// Already file open
+		return errmsg(reader, RRNX_E_ALREADY_OPEN,
+		    "bind error: previous file (%s) is still open",
+		    reader->filename);
+	} // if: file already open
+
+	// Binding
+	reader->fp = fp;
+
+	// Leave filename unset
+
+	// Reset locational info
+	reader->row = 0;
+	reader->col = 0;
+
+	// Reset head location and valid buffer length
+	reader->at = 0;
+	reader->len = 0;
+
+	return noerr(reader);
+}
+
+extern int rrnx_fr_unbind(rrnx_filereader *reader) {
+	if (reader->fp != NULL) {
+                // Remove handle
+                reader->fp = NULL;
+
+                // Free file name, if any
+		if (reader->filename != NULL) {
+	                free(reader->filename);
+        	        reader->filename = NULL;
+		}
+
+                // Reset location
+                reader->row = 0;
+                reader->col = 0;
+
+		// Reset head location and valid buffer length
+                reader->at = 0;
+                reader->len = 0;
+	} else {
+		// Already unbound, do nothing
+	} // if-else
 
 	return noerr(reader);
 }

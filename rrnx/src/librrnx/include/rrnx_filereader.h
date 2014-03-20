@@ -19,6 +19,7 @@
 #define RRNX_FILEREADER_H
 
 #include <stdio.h> // FILE
+#include "rrnx_error.h" // TODO: rrnx_errmsg, rrnx_errno?
 
 #ifdef __cplusplus
 #define extern "C" {
@@ -43,29 +44,51 @@ struct rrnx_filereader {
 	 */
 	char *buffer;
 
-    unsigned int at;
-    unsigned int len;
-    unsigned int buffer_size;
+	/**
+	 * Next read location within the valid buffer.
+	 */
+	 unsigned int at;
 
-    unsigned int row;
-    unsigned int col;
+	/**
+	 * Length of the valid buffer.
+	 */
+	unsigned int len;
 
-    int err;
-    char *errmsg;
-    unsigned int errmsg_size;
+	/**
+	 * Size of the buffer.
+	 */
+	unsigned int buffer_size;
+
+	/**
+	 * Current row.
+	 */
+	unsigned int row;
+
+	/**
+	 * Current column.
+	 */
+	unsigned int col;
+
+	/**
+	 * Last operation result
+	 */
+	int err;
+
+	/**
+	 * Human-readable error message
+	 */
+	char *errmsg;
+
+	/**
+	 * Size of the error mesage buffer.
+	 */
+	unsigned int errmsg_size;
 };
 
 typedef struct rrnx_filereader rrnx_filereader;
 
 //--- constants ------------------------------------------------------------//
 #define RRNX_FR_DEFAULT_BUFFER_SIZE 0x10000
-#define RRNX_FR_DEFAULT_ERRMSG_SIZE 0x200
-
-#define RRNX_E_OK              0
-#define RRNX_E_SYSCALL        -1
-#define RRNX_E_ALREADY_OPEN   -2
-#define RRNX_E_EOF            -3
-#define RRNX_E_OVERFLOW       -4
 
 //--- methods --------------------------------------------------------------//
 

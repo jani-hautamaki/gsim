@@ -1,0 +1,94 @@
+//******************************{begin:header}******************************//
+//                      rrnx - The Robust RINEX Library
+//**************************************************************************//
+//
+//      Part of the GPS/INS measurement simulation system GSIM
+//      https://code.google.com/p/gsim
+//
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//
+//      Licensed under the terms of GNU General Public License v3.
+//
+//      You should have received a copy of the GNU General Public License v3
+//      along with this program as the file LICENSE.txt; if not, please see
+//      http://www.gnu.org/licenses/gpl-3.0.html
+//
+//********************************{end:header}******************************//
+
+#ifndef RRNX_NAVREADER_H
+#define RRNX_NAVREADER_H
+
+#include "rrnx_string.h"
+#include "rrnx_error.h"
+#include "rrnx_filereader.h"
+#include "rrnx_nav.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * Error code list
+ */
+
+
+/**
+ * This data type should be opaque.
+ */
+struct rrnx_navreader {
+	/**
+	 * For reading lines from the underlying file.
+	 */
+	rrnx_filereader *fr;
+
+	/**
+	 * The target object that is being built.
+	 */
+	rrnx_nav *navdata;
+
+	/**
+	 * Human-readable error message.
+	 */
+	rrnx_string *errmsg;
+
+	/**
+	 * Error code
+	 */
+	//rrnx_errno err;
+	int err;
+
+	/**
+	 * Parser state
+	 */
+	int state;
+
+	/**
+	 * Null-transition indicator
+	 */
+	int eps;
+};
+
+typedef struct rrnx_navreader rrnx_navreader;
+
+extern rrnx_navreader *rrnx_navr_alloc(void);
+extern void rrnx_navr_free(rrnx_navreader *navreader);
+
+extern void rrnx_navr_readfile(
+    rrnx_navreader *navreader,
+    const char *filename
+);
+
+extern int rrnx_navr_consume(
+    rrnx_navreader *navreader,
+    const char *line
+);
+
+
+extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader);
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif
