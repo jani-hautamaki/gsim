@@ -22,8 +22,15 @@
 #     http://www.gnu.org/software/make/manual/make.html
 #
 
-.PHONY: all doc
-all:
+.PHONY: all doc src
+
+
+all: src
+
+
+src:
+	$(MAKE) -C src
+
 
 doc: | build/doc
 	doxygen
@@ -31,5 +38,7 @@ doc: | build/doc
 build/doc:
 	mkdir -p build/doc
 
+
 clean:
 	rm -rf build/doc
+	$(MAKE) -C src clean

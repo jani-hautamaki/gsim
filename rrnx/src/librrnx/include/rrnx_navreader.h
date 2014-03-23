@@ -23,14 +23,18 @@
 #include "rrnx_filereader.h"
 #include "rrnx_nav.h"
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Error code list
+ * Default size for the line buffer.
+ * Lines in RINEX files should be at most 80 chars wide.
+ * This generously more than needed.
  */
-
+#define RRNX_DEFAULT_WORKBUF_SIZE 512
 
 /**
  * This data type should be opaque.
@@ -66,6 +70,17 @@ struct rrnx_navreader {
 	 * Null-transition indicator
 	 */
 	int eps;
+
+	/**
+	 * An internal buffer for miscellaneous purposes.
+	 */
+	char *workbuf;
+
+	/**
+	 * Size of the internal buffer.
+	 */
+	unsigned int workbuf_size;
+
 };
 
 typedef struct rrnx_navreader rrnx_navreader;

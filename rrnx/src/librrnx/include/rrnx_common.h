@@ -79,18 +79,18 @@ typedef struct rrnx_satellite_id rrnx_satellite_id;
 //============================================================================
 
 /**
- * Header (RINEX VERSION / TYPE).
+ * RINEX declaration (RINEX VERSION / TYPE).
  */
-struct rrnx_header {
+struct rrnx_format_decl {
         /**
          * Format version (2.11) (F9.2)
          */
-        char *format_version;
+        char version[10];
 
         /**
          * File type, enumerated type (A1)
          */
-        char file_type;
+        char type;
 
 	/**
 	 * Satellite system (A1).
@@ -101,7 +101,7 @@ struct rrnx_header {
 	unsigned int system;
 };
 
-typedef struct rrnx_header rrnx_header;
+typedef struct rrnx_format_decl rrnx_format_decl;
 
 /**
  * Program, agency, date (PGM / RUN BY / DATE).
@@ -110,17 +110,17 @@ struct rrnx_creation_info {
         /**
          * Name of the program that created the current file (A20).
          */
-        char *program;
+        char program[21];
 
         /**
          * Name of the agency that created the current file (A20).
          */
-        char *agency;
+        char agency[21];
 
         /**
          * Date when the file was created (A20).
          */
-        char *date;
+        char date[21];
 };
 
 typedef struct rrnx_creation_info rrnx_creation_info;
@@ -132,70 +132,20 @@ struct rrnx_comment {
         /**
          * Comment (A60).
          */
-        char *text;
+        char text[61];
 };
 
 typedef struct rrnx_comment rrnx_comment;
 
 
-//============================================================================
-// COMMON CONSTANTS
-//============================================================================
-
-
-
-//============================================================================
-// SUPPORTING STRUCTS
-//============================================================================
-
-struct rrnx_node {
-        /**
-         * Node type
-         */
-        unsigned int type;
-
-	/**
-	 * Node payload size (chars).
-	 */
-	unsigned int size;
-
-        /**
-         * Node payload as a flexible array.
-         */
-        char data[];
+/*
+struct rrnx_end_header {
 };
 
-typedef struct rrnx_node rrnx_node;
+typedef struct rrnx_end_header rrnx_end_header;
+*/
 
 
-
-
-
-
-struct rrnx_list_entry {
-        /** Pointer to the next item, or NULL. */
-        struct rrnx_list_entry *next;
-
-        /** Pointer to the previous item, or NULL. */
-        struct rrnx_list_entry *prev;
-
-        /** Payload data or NULL. */
-        void *data;
-};
-
-typedef struct rrnx_list_entry rrnx_list_entry;
-
-/**
- * Generic linked-list data structure
- */
-struct rrnx_list {
-        /** Pointer to the first (head) item, or NULL. */
-        rrnx_list_entry *first;
-        /** Pointer to the last (tail) item, or NULL. */
-        rrnx_list_entry *last;
-};
-
-typedef struct rrnx_list rrnx_list;
 
 
 

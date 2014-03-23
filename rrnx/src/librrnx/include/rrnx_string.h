@@ -19,6 +19,7 @@
 #define RRNX_STRING_H
 
 #include <stddef.h> // size_t
+#include <stdarg.h> // va_list
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,12 +51,18 @@ typedef struct rrnx_string rrnx_string;
 
 extern rrnx_string *rrnx_str_alloc(void);
 extern rrnx_string *rrnx_str_alloc_size(size_t size);
+extern rrnx_string *rrnx_str_clone(rrnx_string *src);
 extern void rrnx_str_free(rrnx_string *s);
 
-extern void rrnx_str_printf(rrnx_string *s, const char *fmt, ...);
+extern void rrnx_str_format(rrnx_string *s, const char *fmt, ...);
+extern void rrnx_str_vformat(rrnx_string *s, const char *fmt, va_list args);
+
+extern void rrnx_str_concat(rrnx_string *s, const rrnx_string *q);
+extern void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list args);
+
 extern void rrnx_str_reset(rrnx_string *s);
 
-extern void rrnx_str_resize(rrnx_string *s, size_t size);
+extern int rrnx_str_resize(rrnx_string *s, size_t size);
 
 extern void rrnx_str_strcpy(rrnx_string *s, const char *cstr);
 

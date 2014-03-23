@@ -93,7 +93,7 @@ typedef struct rrnx_filereader rrnx_filereader;
 //--- methods --------------------------------------------------------------//
 
 extern rrnx_filereader *rrnx_fr_alloc(void);
-extern int rrnx_fr_free(rrnx_filereader *reader);
+extern void rrnx_fr_free(rrnx_filereader *reader);
 
 extern int rrnx_fr_fclose(rrnx_filereader *reader);
 extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename);

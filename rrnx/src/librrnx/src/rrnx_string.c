@@ -20,6 +20,7 @@
 #include <stdlib.h> // malloc, free
 #include <stdio.h> // vsnprintf
 #include <stdarg.h> // va_list, va_start, va_end
+#include <string.h> // memcpy
 
 
 extern rrnx_string *rrnx_str_alloc(void) {
@@ -27,22 +28,68 @@ extern rrnx_string *rrnx_str_alloc(void) {
 }
 
 extern rrnx_string *rrnx_str_alloc_size(size_t size) {
+	int incomplete = 1;
+
 	rrnx_string *s = malloc(sizeof(rrnx_string));
-	s->text = malloc(size);
-	s->size = size;
-	// Empty string by default
-	rrnx_str_reset(s);
+	if (s != NULL) do {
+		// Initialie members
+		s->text = NULL;
+		s->size = 0;
+
+		// Attempt further allocations
+
+		s->text = malloc(size);
+		if (s->text == NULL) {
+			// Abort
+			break;
+		}
+		s->size = size;
+
+		// Empty string by default
+		rrnx_str_reset(s);
+
+		incomplete = 0;
+	} while (0);
+
+	if (incomplete) {
+		rrnx_str_free(s);
+		s = NULL;
+	}
+
+	return s;
+}
+
+extern rrnx_string *rrnx_str_clone(rrnx_string *src) {
+	rrnx_string *s = NULL;
+	if (src != NULL) do {
+		// Attempt to allocate with same size
+		s = rrnx_str_alloc_size(src->size);
+		if (s == NULL) {
+			// Allocation failed. Abort
+			break;
+		}
+		// Copy contents
+		memcpy(s->text, src->text, src->size);
+	} while(0);
+
 	return s;
 }
 
 extern void rrnx_str_free(rrnx_string *s) {
+	if (s == NULL) {
+		// Already freed
+		return;
+	}
+	// Free text, if any.
 	free(s->text);
 	s->text = NULL;
 	s->size = 0;
+
+	// Free the object itself.
 	free(s);
 }
 
-extern void rrnx_str_printf(rrnx_string *s, const char *fmt, ...) {
+extern void rrnx_str_format(rrnx_string *s, const char *fmt, ...) {
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -52,13 +99,70 @@ extern void rrnx_str_printf(rrnx_string *s, const char *fmt, ...) {
         va_end(ap);
 }
 
+// for vargargs
+extern void rrnx_str_vformat(rrnx_string *s, const char *fmt, va_list args) {
+	vsnprintf(s->text, s->size, fmt, args);
+}
+
+extern int rrnx_str_length(const rrnx_string *s) {
+	if (s == NULL) {
+		return -1;
+	}
+	// For convenience
+	int max_length = s->size - 1;
+	const char* text = s->text;
+
+	int i = 0;
+	while ((i < max_length) && (text[i] != '\0')) {
+		i++;
+	}
+
+	return i;
+}
+
+extern void rrnx_str_concat(rrnx_string *s, const rrnx_string *q) {
+	if ((s == NULL) || (q == NULL)) {
+		return;
+	}
+
+	int len = rrnx_str_length(s);
+	int length_left = s->size-1 - len;
+	if (length_left <= 0) {
+		// No space left.
+		return;
+	}
+
+	// Copy all, and terminate
+	memcpy(&s->text[len], q->text, length_left);
+
+	// Terminate in any case.
+	s->text[s->size-1] = '\0';
+}
+
+extern void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list args) {
+	int len = rrnx_str_length(s);
+
+	// See how many bytes left in the string
+	int size_left = s->size - len;
+	// vsnprintf includes the string terminator
+	vsnprintf(&s->text[len], size_left, fmt, args);
+}
+
+
 extern void rrnx_str_reset(rrnx_string *s) {
 	s->text[0] = '\0';
 }
 
-extern void rrnx_str_resize(rrnx_string *s, size_t size) {
-	s->text = realloc(s->text, size);
-	s->size = size;
+extern int rrnx_str_resize(rrnx_string *s, size_t size) {
+	void *newptr = realloc(s->text, size);
+
+	if (newptr != NULL) {
+		s->text = realloc(s->text, size);
+		s->size = size;
+		return 1;
+	}
+
+	return 0;
 }
 
 extern void rrnx_str_strcpy(rrnx_string *s, const char *cstr) {

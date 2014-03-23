@@ -1,10 +1,28 @@
+//******************************{begin:header}******************************//
+//                      rrnx - The Robust RINEX Library
+//**************************************************************************//
+//
+//      Part of the GPS/INS measurement simulation system GSIM
+//      https://code.google.com/p/gsim
+//
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//
+//      Licensed under the terms of GNU General Public License v3.
+//
+//      You should have received a copy of the GNU General Public License v3
+//      along with this program as the file LICENSE.txt; if not, please see
+//      http://www.gnu.org/licenses/gpl-3.0.html
+//
+//********************************{end:header}******************************//
 
 #include "rrnx_navreader.h"
 #include "rrnx_labels.h"
+#include "rrnx_strutil.h"
 
 #include <stdlib.h> // malloc, free, NULL, FILE
-//#include <errno.h> // strerror_r
 #include <string.h>
+#include <errno.h> // errno
+#include <stdarg.h> // va_list, va_start, va_end
 
 static int noerr(rrnx_navreader *navreader) {
 	navreader->err = RRNX_E_OK;
@@ -25,55 +43,228 @@ static int errmsg_fr(rrnx_navreader *navreader) {
 	return navreader->err;
 }
 
+static int errmsg_none(rrnx_navreader *navreader, int err) {
+	navreader->err = err;
+	rrnx_str_reset(navreader->errmsg);
+	return navreader->err;
+}
+
+static int errmsg_format(
+    rrnx_navreader *navreader,
+    int err,
+    const char *fmt, ...
+) {
+	navreader->err = err;
+
+	va_list args;
+	va_start(args, fmt);
+	rrnx_str_vformat(navreader->errmsg, fmt, args);
+	va_end(args);
+
+	return navreader->err;
+}
+
 static int errmsg_prepend(
     rrnx_navreader *navreader,
     const char *fmt, ...
 ) {
-	// TODO
+	// Use the workbuffer for this?
+	rrnx_string *org = rrnx_str_clone(navreader->errmsg);
+	if (org != NULL) {
+		va_list args;
+		va_start(args, fmt);
+		rrnx_str_vformat(navreader->errmsg, fmt, args);
+		va_end(args);
+
+		// Append the original
+		rrnx_str_concat(navreader->errmsg, org);
+
+	} else {
+		// Allocation failed.
+		// Leave the message untouched,
+		// and ignore the error.
+	}
+
+	// Free the original
+	rrnx_str_free(org);
+
+	return navreader->err;
+}
+
+static int errmsg_prepend_location(rrnx_navreader *navreader) {
+	// For convenience
+	rrnx_filereader *fr = navreader->fr;
+	errmsg_prepend(navreader,
+	    "%s:%d: ", fr->filename, fr->row);
 	return navreader->err;
 }
 
 
-static rrnx_node *alloc_node(size_t payload_size) {
-	// TODO
-	return NULL;
+static rrnx_node *alloc_node(rrnx_navreader *navreader, int type) {
+
+	// Attempt allocation
+	rrnx_node *node = rrnx_nav_alloc_node(
+	    navreader->navdata, type);
+
+	if (node == NULL) {
+		// Allocation failed, abort
+		errmsg_none(navreader, RRNX_E_NOMEM);
+	}
+
+	return node;
 }
+
+static void parse_fortran_double(
+    rrnx_navreader *navreader,
+    double *result,
+    const char *s
+) {
+	// 1. Copy to local buffer,
+	// 2. Fix fortran exponent
+	// 3. Use libc to convert
+	// 4. Mark errors, if any
+
+	// For convenience
+	char *workbuf = navreader->workbuf;
+
+	int len = strlen(s);
+	if (len > navreader->workbuf_size) {
+		// TODO: This ought cause an error I think.
+		len = navreader->workbuf_size;
+	}
+
+	// May overlap!
+	if (s != workbuf) {
+		memmove(workbuf, s, len);
+		workbuf[len] = '\0';
+	}
+
+	rrnx_replace_fortran_exponent(workbuf);
+
+	// "Since 0 can legitimately be returned on both success and failure,
+	//  the calling program should set errno to 0 before the call,
+	//  and then determine if an error occurred by checking whether
+	//  errno has a nonzero value after the call."
+	errno = 0;
+	char *endptr;
+	*result = strtod(workbuf, &endptr);
+	int errnum = errno; // Record errno immediately
+
+	if (*endptr != '\0') {
+		// String not fully converted; error.
+		errmsg_format(
+		    navreader, RRNX_E_CONV,
+		    "Cannot convert \"%s\" to a double (Unexpected char \'%c\')",
+		    workbuf,
+		    *endptr
+		);
+	}
+
+	if (errnum != 0) {
+		// error
+		errmsg_format(
+		    navreader, RRNX_E_CONV,
+		    "Cannot convert \"%s\" to a double (%s)",
+		    workbuf,
+		    strerror(errnum)
+		);
+	}
+}
+
+static void parse_int(
+    rrnx_navreader *navreader,
+    int *result,
+    const char *s
+) {
+	// Regarding atoi():
+	// "The behavior is the same as strtol(nptr, NULL, 10)
+	//  except that atoi() does not detect errors."
+
+	// "Since 0 can legitimately be returned on both success and failure,
+	//  the calling program should set errno to 0 before the call,
+	//  and then determine if an error occurred by checking whether
+	//  errno has a nonzero value after the call."
+	errno = 0;
+	char *endptr;
+	long int value; // For an intermediate result
+	value = strtol(s, &endptr, 10); // base 10.
+	int errnum = errno; // Record errno immediately
+
+	if (*endptr != '\0') {
+		// String not fully converted; error.
+		errmsg_format(
+		    navreader, RRNX_E_CONV,
+		    "Cannot convert \"%s\" to an integer (Unexpected char \'%c\')",
+		    s, *endptr
+		);
+		return;
+	}
+
+	// Check numeric limits by converting back and forth
+
+	// Narrowing conversion; may result in loss of information.
+	*result = (int) value;
+	// Widening; lost information cannot be recovered.
+	long int check = (long int) *result;
+
+	// Check match
+	if (check != value) {
+		// The value does not fit into "int"
+		// Simulate ERANGE error
+		errnum = ERANGE;
+	}
+
+	if (errnum != 0) {
+		// error
+		errmsg_format(
+		    navreader, RRNX_E_CONV,
+		    "Cannot convert \"%s\" to a integer (%s)",
+		    s, strerror(errnum)
+		);
+	}
+	printf("Converted \"%s\" into %d\n", s, *result);
+}
+
+static void parse_fortran_double_substr(
+    rrnx_navreader *navreader,
+    double *result,
+    const char *line,
+    int offset,
+    int len
+) {
+	rrnx_substr_trimmed(navreader->workbuf, line, offset, len);
+	parse_fortran_double(navreader, result, navreader->workbuf);
+}
+
+static void parse_int_substr(
+    rrnx_navreader *navreader,
+    int *result,
+    const char *line,
+    int offset,
+    int len
+) {
+	rrnx_substr_trimmed(navreader->workbuf, line, offset, len);
+	parse_int(navreader, result, navreader->workbuf);
+}
+
+/*
+static void parse_uint_substr(
+    rrnx_navreader *navreader,
+    unsigned int *result,
+    const char *line,
+    int offset,
+    int len
+) {
+	rrnx_substr_trimmed(navreader->workbuf, line, offset, len);
+	parse_uint(navreader, result, navreader->workbuf);
+}
+*/
+
 
 static void parse_broadcast_orbit0(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	// Create a record, and append it to the list
-	//rrnx_node *node = rrnx_n_alloc(rrnx_broadcast_orbit0);
-	//rrnx_list_add(navreader->navfile->records, node);
-
-	// Pick the payload
-	//rrnx_broadcast_orbit0 *data = (void *) node->data;
-	rrnx_broadcast_orbit0 *data
-	    = malloc(sizeof(rrnx_broadcast_orbit0));
-
-	// Do parsing
-/*
-	read_double(line, 1, 2, &data->sqrtA);
-	if (navreader->err) goto err;
-
-	read_double(line, 1, 2, &data->sqrtA);
-	if (navreader->err) goto err;
-
-	read_double(line, 1, 2, &data->sqrtA);
-	if (navreader->err) goto err;
-
-	// Parse success. Append record
-*/
-
-	goto finish;
-err:
-	// Error handling
-	errmsg_prepend(navreader, "while parsing broadcast orbit 0: ");
-	goto finish;
-
-finish:
-	return;
 }
 
 static void parse_broadcast_orbit1(
@@ -128,12 +319,248 @@ static int eat_header(rrnx_navreader *navreader, const char *line) {
 }
 */
 
+static void parse_rinex_decl(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_FORMAT_DECL);
+
+	if (node == NULL) {
+		return; // Allocation failed, abort
+	}
+
+	rrnx_format_decl *data = (void *) node->data;
+
+	// Format version (F9.2)
+	rrnx_substr_trimmed(data->version, line, 0, 9);
+
+	// File type (A1)
+	data->type = line[20];
+
+	// TODO:
+	// Satellite system
+}
+
+static void parse_creation_info(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_CREATION_INFO);
+
+	if (node == NULL) {
+		return; // Allocation failed, abort
+	}
+
+	rrnx_creation_info *data = (void *) node->data;
+
+	// Program name (A20)
+	rrnx_substr_trimmed2(data->program, line, 0, 20);
+
+	// Agency name (A20)
+	rrnx_substr_trimmed2(data->agency, line, 20, 20);
+
+	// Creation date (A20)
+	rrnx_substr_trimmed2(data->date, line, 40, 20);
+
+}
+
+static void parse_comment(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_COMMENT);
+
+	if (node == NULL) {
+		return; // Allocation failed, abort
+	}
+
+	rrnx_comment *data = (void *) node->data;
+
+	// Comment (A60)
+	rrnx_substr_trimmed2(data->text, line, 0, 60);
+
+}
+
+static void parse_end_of_header(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_END_OF_HEADER);
+	if (node == NULL) return; // Allocation failed, abort
+}
+
+static void parse_ion_alpha(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_ION_ALPHA);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_ion_alpha *data = (void *) node->data;
+
+	// A0 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->alpha[0], line, 2, 12);
+	if (navreader->err) return;
+
+	// A1 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->alpha[1], line, 14, 12);
+	if (navreader->err) return;
+
+	// A2 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->alpha[2], line, 26, 12);
+	if (navreader->err) return;
+
+	// A3 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->alpha[3], line, 38, 12);
+	if (navreader->err) return;
+
+}
+
+static void parse_ion_beta(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_ION_BETA);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_ion_beta *data = (void *) node->data;
+
+	// B0 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->beta[0], line, 2, 12);
+	if (navreader->err) return;
+
+	// B1 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->beta[1], line, 14, 12);
+	if (navreader->err) return;
+
+	// B2 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->beta[2], line, 26, 12);
+	if (navreader->err) return;
+
+	// B3 (D12.4)
+	parse_fortran_double_substr(
+	    navreader, &data->beta[3], line, 38, 12);
+	if (navreader->err) return;
+
+}
+
+static void parse_delta_utc(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_DELTA_UTC);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_delta_utc *data = (void *) node->data;
+
+	// A0 (D19.12)
+	parse_fortran_double_substr(
+	    navreader, &data->a0, line, 3, 19);
+	if (navreader->err) return;
+
+	// A1 (D19.12)
+	parse_fortran_double_substr(
+	    navreader, &data->a1, line, 22, 19);
+	if (navreader->err) return;
+
+	// T (I9)
+	parse_int_substr(
+	    navreader, &data->T, line, 41, 9);
+	if (navreader->err) return;
+
+	// W (I9)
+	parse_int_substr(
+	    navreader, &data->W, line, 50, 9);
+	if (navreader->err) return;
+
+}
+
+static void parse_leap_seconds(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_LEAP_SECONDS);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_leap_seconds *data = (void *) node->data;
+
+	// Delta LS I6)
+	parse_int_substr(
+	    navreader, &data->delta_ls, line, 0, 6);
+	if (navreader->err) return;
+
+}
+
+static void parse_unknown(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+
+}
+
+
+static int parse_line(rrnx_navreader *navreader, const char *line) {
+	int label_id = rrnx_enumerate_linetype(line);
+
+	switch(label_id) {
+	case RRNX_LBL_RINEX_DECL:
+		parse_rinex_decl(navreader, line);
+		break;
+	case RRNX_LBL_CREATION_INFO:
+		parse_creation_info(navreader, line);
+		break;
+	case RRNX_LBL_COMMENT:
+		parse_comment(navreader, line);
+		break;
+	case RRNX_LBL_END_OF_HEADER:
+		parse_end_of_header(navreader, line);
+		break;
+	case RRNX_LBL_ION_ALPHA:
+		parse_ion_alpha(navreader, line);
+		break;
+	case RRNX_LBL_ION_BETA:
+		parse_ion_beta(navreader, line);
+		break;
+	case RRNX_LBL_DELTA_UTC:
+		parse_delta_utc(navreader, line);
+		break;
+	case RRNX_LBL_LEAP_SECONDS:
+		parse_leap_seconds(navreader, line);
+		break;
+
+	case RRNX_LBL_UNKNOWN:
+		parse_unknown(navreader, line);
+		break;
+
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+
 // Internal states (could use constants instead)
 #define S_HEADER                1
 #define S_DATA                  2
 #define S_ERROR                 3
 #define S_EOF                   4
-#define S_ACCEPT                5
+#define S_FINISHED              5
 #define S_EXPECT_ORBIT_OR_EOF   6
 #define S_BROADCAST_ORBIT0      7
 #define S_BROADCAST_ORBIT1      8
@@ -144,51 +571,29 @@ static int eat_header(rrnx_navreader *navreader, const char *line) {
 #define S_BROADCAST_ORBIT6      13
 #define S_BROADCAST_ORBIT7      14
 
-
-static int is_allowed_header_line(int linetype) {
-	int allowed = 1; // Allowed by default
-
-	// For every line type, always.
-	switch(linetype) {
-	case 1: // TODO
-		break;
-	default:
-		// Unknown line type.
-		// This should result in abort.
-		break;
-	}
-
-	return allowed;
-}
-
 static int cycle_data(
     rrnx_navreader *navreader,
     const char *line,
     int linetype
 ) {
+	printf("%s\n", line);
+	printf("cycle_data, linetype: %d, state: %d\n", linetype, navreader->state);
 	// For every state, always.
 	switch(navreader->state)
 	{
 	// Rename into S_EXPECT_HEADER
 	case S_HEADER:
-		linetype = rrnx_enumerate_linetype(line);
-		// Expect any header element
-		// get_label_enum()
-		// parse_record(label_enum);
-		// if label_enum == end_of_header:
-		// 	navreader->state = S_DATA;
-		switch(linetype) {
-		case RRNX_LBL_COMMENT:
-			// Comments are accepted.
-			// (This approach wont work; comments are allowed
-			// in any state, and if the comments are paresed
-			// only in a separate state, the following state
-			// will always be same; no matter wehther the system
-			// came into this state from S_HEADER or S_DATA.
-			// That is a problem).
-			//navreader->state = S_COMMENT_LINE;
-			break;
-		}
+		if (linetype != RRNX_LBL_UNKNOWN) {
+			parse_line(navreader, line);
+			if (navreader->err) {
+				navreader->state = S_ERROR;
+			}
+		} else {
+			// No more header records.
+			// Move on to broadcast orbit 0
+			navreader->state = S_BROADCAST_ORBIT0;
+			navreader->eps = 1;
+		} // if-else
 		break;
 
 	case S_DATA:
@@ -196,6 +601,9 @@ static int cycle_data(
 		break;
 
 	case S_EXPECT_ORBIT_OR_EOF:
+		// If cycle_data() is called, then line != NULL.
+		navreader->state = S_BROADCAST_ORBIT0;
+		navreader->eps = 1;
 		break;
 
 	case S_BROADCAST_ORBIT0:
@@ -292,6 +700,7 @@ static int cycle_eof(rrnx_navreader *navreader) {
 
 	case S_EXPECT_ORBIT_OR_EOF:
 		// accept
+		navreader->state = S_FINISHED;
 		break;
 
 	case S_BROADCAST_ORBIT0:
@@ -305,6 +714,10 @@ static int cycle_eof(rrnx_navreader *navreader) {
 		// unexpected
 		break;
 
+	case S_FINISHED:
+		// Already finished
+		break;
+
 	default:
 		break;
 	} // switch
@@ -313,38 +726,121 @@ static int cycle_eof(rrnx_navreader *navreader) {
 }
 
 extern rrnx_navreader *rrnx_navr_alloc(void) {
+	int incomplete = 1;
+
 	// Allocate new object
 	rrnx_navreader *navreader
 	    = malloc(sizeof(rrnx_navreader));
 
-	// Initialize members
-	navreader->fr = rrnx_fr_alloc();
-	navreader->navdata = NULL;
+	if (navreader != NULL) do {
+		// Initialize members
+		navreader->fr = NULL;
+		navreader->navdata = NULL;
+		navreader->errmsg = NULL;
+		navreader->err = RRNX_E_OK;
+		navreader->workbuf = NULL;
+		navreader->workbuf_size = 0;
 
-	navreader->errmsg = rrnx_str_alloc();
+		// These are not neccessary initializations
+		navreader->state = 0;
+		navreader->eps = 0;
 
-	noerr(navreader);
+		// Attempt further allocations
+		navreader->fr = rrnx_fr_alloc();
+		if (navreader->fr == NULL) {
+			// Abort
+			break;
+		}
+
+		navreader->errmsg = rrnx_str_alloc();
+		if (navreader->errmsg == NULL) {
+			// Abort
+			break;
+		}
+
+		int size = RRNX_DEFAULT_WORKBUF_SIZE;
+		navreader->workbuf = malloc(size);
+		if (navreader->workbuf == NULL) {
+			// Abort
+			break;
+		}
+		navreader->workbuf_size = size;
+
+		// Success
+		incomplete = 0;
+	} while (0);
+
+	if (incomplete) {
+		rrnx_navr_free(navreader);
+		navreader = NULL;
+	}
 
 	return navreader;
 }
 
 
 extern void rrnx_navr_free(rrnx_navreader *navreader) {
-	// Deallocate members
+	if (navreader == NULL) {
+		// Already freed
+		return;
+	}
+
+	// Deallocate filereader, if any
 	rrnx_fr_free(navreader->fr);
 	navreader->fr = NULL;
+
+	// Deallocate errmsg, if any
 	rrnx_str_free(navreader->errmsg);
 	navreader->errmsg = NULL;
+
+	free(navreader->workbuf);
+	navreader->workbuf = NULL;
+	navreader->workbuf_size = 0;
 
 	// Deallocate self
 	free(navreader);
 }
+
+/*
+extern int rrnx_resize_linebuf(
+    rrnx_navreader *navreader,
+    unsigned int size
+) {
+	// TODO: Validate argument
+	void *oldptr = navreader->linebuf;
+	navreader->
+
+}
+*/
 
 extern void rrnx_navr_bind(
     rrnx_navreader *navreader,
     FILE *fp
 ) {
 
+}
+
+
+extern int rrnx_navr_consume(rrnx_navreader *navreader, const char *line) {
+
+	// Determine the tag code on the line, if any
+	int linetype = rrnx_enumerate_linetype(line);
+	//enumerate_label(line);
+
+	do {
+		// Reset null-transition flag
+		navreader->eps = 0;
+
+		// Perform one cycle per loop
+		if (line != NULL) {
+			cycle_data(navreader, line, linetype);
+		} else {
+			cycle_eof(navreader);
+		} // if-else
+
+	} while (navreader->eps);
+
+	return navreader->err;
 }
 
 extern void rrnx_navr_readfile(
@@ -364,7 +860,20 @@ extern void rrnx_navr_readfile(
 
 	char line[0x200];
 
-	while (1) {
+	// Reset parser state
+	navreader->state = S_HEADER;
+
+	// Create new navdata
+	navreader->navdata = rrnx_nav_alloc();
+	if (navreader->navdata == NULL) {
+		// Allocation failed
+		errmsg_none(navreader, RRNX_E_NOMEM);
+		return;
+	}
+
+	while ((navreader->state != S_ERROR)
+	    && (navreader->state != S_FINISHED))
+	{
 		// Read a line
 		rrnx_fr_readline(fr, line, sizeof(line));
 
@@ -384,32 +893,17 @@ extern void rrnx_navr_readfile(
 			// Succesfully read a line.
 			rrnx_navr_consume(navreader, line);
 		} // if-else
+
 	} // while
+
+	// If the loop halted with an error code
+	if (navreader->err) {
+		errmsg_prepend_location(navreader);
+	}
 
 	// Close the file.
 	// If this causes an error, it hides any parsing errors.. TODO
 	rrnx_fr_fclose(fr);
 }
 
-extern int rrnx_navr_consume(rrnx_navreader *navreader, const char *line) {
-
-	// Determine the tag code on the line, if any
-	int linetype = rrnx_enumerate_linetype(line);
-	//enumerate_label(line);
-
-	do {
-		// Reset null-transition flag
-		navreader->eps = 0;
-
-		// Perform one eating cycle
-		if (line != NULL) {
-			cycle_data(navreader, line, linetype);
-		} else {
-			cycle_eof(navreader);
-		} // if-else
-
-	} while (navreader->eps);
-
-	return navreader->err;
-}
 

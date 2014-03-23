@@ -1,99 +1,67 @@
+//******************************{begin:header}******************************//
+//                      rrnx - The Robust RINEX Library
+//**************************************************************************//
+//
+//      Part of the GPS/INS measurement simulation system GSIM
+//      https://code.google.com/p/gsim
+//
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//
+//      Licensed under the terms of GNU General Public License v3.
+//
+//      You should have received a copy of the GNU General Public License v3
+//      along with this program as the file LICENSE.txt; if not, please see
+//      http://www.gnu.org/licenses/gpl-3.0.html
+//
+//********************************{end:header}******************************//
 
 #include "rrnx_labels.h"
+#include "rrnx_strutil.h"
 
 #include <string.h> // strlen()
-#include <stdio.h> // TODO: Remove this and printf()
+#include <ctype.h> // isdigit()
 
-// the label is called as a "record descriptor" in the spec.
+struct enumerated_label {
+	int id;
+	const char *text;
+};
+typedef struct enumerated_label enumerated_label;
 
-extern int rrnx_substr(
-    char *dest,
-    const char *src,
-    unsigned int offset,
-    unsigned int len
-) {
-	// Translate src pointer by the offset
-	while ((offset > 0) && (*src != '\0')) {
-		offset--;
-	}
+static const enumerated_label NAV_LABEL[] = {
+	{RRNX_LBL_RINEX_DECL, "RINEX VERSION / TYPE"},
+	{RRNX_LBL_CREATION_INFO, "PGM / RUN BY / DATE"},
+	{RRNX_LBL_COMMENT, "COMMENT"},
+	{RRNX_LBL_ION_ALPHA, "ION ALPHA"},
+	{RRNX_LBL_ION_BETA, "ION BETA"},
+	{RRNX_LBL_DELTA_UTC,"DELTA-UTC: A0,A1,T,W"},
+	{RRNX_LBL_LEAP_SECONDS, "LEAP SECONDS"},
+	{RRNX_LBL_END_OF_HEADER, "END OF HEADER"}
+};
 
-	// In effect, if the source is too short,
-	// the pointer is already at the terminator,
-	// and the destination will be made an empty string.
+// TODO: enum_navr_label?
+extern int rrnx_enumerate_label(const char *label) {
+	int labels = sizeof(NAV_LABEL) / sizeof(NAV_LABEL[0]);
 
-	int i;
-	for (i = 0; i < len; i++) {
-		char c = src[i];
-		if (c == '\0') {
-			// Halt here
-			break;
+	const enumerated_label *cur = NAV_LABEL;
+	for (int i = 0; i < labels; i++, cur++) {
+		if (strcmp(cur->text, label) == 0) {
+			return cur->id;
 		}
-		// Otherwise copy
-		dest[i] = c;
 	}
-
-	// Terminate
-	dest[i] = '\0';
-
-	return i;
+	return RRNX_LBL_UNKNOWN;
 }
-
-extern int rrnx_trim_trailing(char *s) {
-	int j = strlen(s);
-	while ((j > 0) && (s[j-1] == ' ')) {
-		j--;
-	}
-	s[j] = '\0';
-
-	return j;
-}
-
 
 extern int rrnx_enumerate_linetype(const char *line) {
 	// Identified line type
-	int type = RRNX_LBL_UNIDENTIFIED;
+	int id = RRNX_LBL_UNKNOWN;
 
 	if (line == NULL) {
-		return type;
+		return id;
 	}
 
-	// Determine the line length
-	int len = strlen(line);
-
-	// See if it is long enough
-	if (len < 60) {
-		// Too short
-		printf("Line length: %d is too short\n", len);
-		return type;
-	}
-
-	// Pluck out the label
 	char label[32];
-
-	int j = 0;
-	j = rrnx_substr(label, line+60, 0, 20);
-
-/*
-	int j = 0;
-	for (int i = 60; i < 80; i++) {
-		char c = line[i];
-		if (c == '\0') {
-			break;
-		}
-		label[j] = c;
-		j++;
-	} // for
-*/
-	// Trim trailing whitespaces
-	while ((j > 0) && (label[j-1] == ' ')) {
-		j--;
-	}
-	label[j] = '\0';
-
-	// Label is now correctly picked.
-
-	printf("label: <%s>\n", label);
-
-	return type;
+	rrnx_substr_trimmed(label, line, 60, 20);
+	id = rrnx_enumerate_label(label);
+	return id;
 }
 

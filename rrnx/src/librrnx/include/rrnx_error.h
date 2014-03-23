@@ -54,15 +54,23 @@ typedef int rrnx_errno;
 /** System call failed. */
 #define RRNX_E_SYSCALL        -1
 
-/** File already opened. */
-#define RRNX_E_ALREADY_OPEN   -2
-
 /** End-of-file reached. */
-#define RRNX_E_EOF            -3
+#define RRNX_E_EOF            -2
 
 /** Character buffer overflow; string cropped. */
-#define RRNX_E_OVERFLOW       -4
+#define RRNX_E_OVERFLOW       -3
 
+/** Memory allocation failed. */
+#define RRNX_E_NOMEM          -4
+
+/** Has already a file to operate with. */
+#define RRNX_E_HASFILE        -5
+
+/** Has no file to operate with. */
+#define RRNX_E_NOFILE         -6
+
+/** Parse error: string to number conversion failed. */
+#define RRNX_E_CONV           -7
 
 //============================================================================
 // METHODS

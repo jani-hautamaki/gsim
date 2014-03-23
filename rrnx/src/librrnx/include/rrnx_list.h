@@ -1,0 +1,78 @@
+//******************************{begin:header}******************************//
+//                      rrnx - The Robust RINEX Library
+//**************************************************************************//
+//
+//      Part of the GPS/INS measurement simulation system GSIM
+//      https://code.google.com/p/gsim
+//
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//
+//      Licensed under the terms of GNU General Public License v3.
+//
+//      You should have received a copy of the GNU General Public License v3
+//      along with this program as the file LICENSE.txt; if not, please see
+//      http://www.gnu.org/licenses/gpl-3.0.html
+//
+//********************************{end:header}******************************//
+
+#ifndef RRNX_LIST_H
+#define RRNX_LIST_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//============================================================================
+// DATA STRUCTURES
+//============================================================================
+
+struct rrnx_list_item {
+        /** Pointer to the next item, or NULL. */
+        struct rrnx_list_item *next;
+
+        /** Pointer to the previous item, or NULL. */
+        struct rrnx_list_item *prev;
+
+        /** Payload data or NULL. */
+        void *data;
+};
+
+typedef struct rrnx_list_item rrnx_list_item;
+
+/**
+ * Generic linked-list data structure
+ */
+struct rrnx_list {
+        /** Pointer to the first (head) item, or NULL. */
+        rrnx_list_item *first;
+        /** Pointer to the last (tail) item, or NULL. */
+        rrnx_list_item *last;
+	/** Pointer to the destructor function */
+	void (*destructor)(void*);
+};
+
+typedef struct rrnx_list rrnx_list;
+
+//============================================================================
+// METHODS
+//============================================================================
+
+// Construction and destruction
+
+extern rrnx_list *rrnx_list_alloc();
+extern void rrnx_list_free(rrnx_list *list);
+
+// Manipulation
+
+extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data);
+
+// Iteration and accessing are not neccessary.
+extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item);
+
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif

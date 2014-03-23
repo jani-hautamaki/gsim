@@ -86,77 +86,149 @@ static int errmsg_none(rrnx_filereader *reader, int err) {
 //--- external methods: basic primitives -----------------------------------//
 
 extern rrnx_filereader *rrnx_fr_alloc(void) {
+	int failure = 1;
+
 	// Allocate
 	rrnx_filereader *reader
-		= (rrnx_filereader *) malloc(sizeof(rrnx_filereader));
+		= malloc(sizeof(rrnx_filereader));
 
-	// Initialize
-	reader->filename = NULL;
-	reader->fp = NULL;
+	if (reader != NULL) do {
+		int size; // auxiliary
 
-	// Configure with default read buffer size
-	reader->buffer_size = RRNX_FR_DEFAULT_BUFFER_SIZE;
+		// Initialize all members first
+		reader->filename = NULL;
+		reader->fp = NULL;
 
-	// Allocate the read buffer
-	reader->buffer = (char *) malloc(reader->buffer_size);
+		reader->buffer_size = 0;
+		reader->buffer = NULL;
 
-	reader->at = 0;
-	reader->len = 0;
-	reader->row = 0;
-	reader->col = 0;
+		reader->errmsg_size = 0;
+		reader->errmsg = NULL;
 
-	// Configure with default errmsg buffer size
-	reader->errmsg_size = RRNX_DEFAULT_ERRMSG_SIZE;
-	// Allocate the errmsg buffer
-	reader->errmsg = (char *) malloc(reader->errmsg_size);
+		reader->at = 0;
+		reader->len = 0;
+		reader->row = 0;
+		reader->col = 0;
 
-	// Clear error status
-	reader->err = RRNX_E_OK;
+		reader->err = RRNX_E_OK;
+
+		// Make allocations
+
+		size = RRNX_FR_DEFAULT_BUFFER_SIZE;
+		reader->buffer = malloc(size);
+		if (reader->buffer == NULL) {
+			break; // malloc failed, abort
+		}
+		reader->buffer_size = size;
+
+		size = RRNX_DEFAULT_ERRMSG_SIZE;
+		reader->errmsg = malloc(size);
+		if (reader->errmsg == NULL) {
+			break; // malloc failed, abort
+		}
+		reader->errmsg_size = size;
+
+		// Success.
+		failure = 0;
+
+	} while (0);
+
+	if (failure) {
+		// Alloc failed.
+		rrnx_fr_free(reader);
+		reader = NULL;
+	}
 
 	return reader;
-} // rrnx_fr_create()
+}
 
-/**
- * Delete filereader
- */
-extern int rrnx_fr_free(rrnx_filereader *reader) {
-	// Close the file
+extern void rrnx_fr_free(rrnx_filereader *reader) {
+	if (reader == NULL) {
+		// Already freed
+		return;
+	}
+
+	// Close the file, if any (errors are ignored)
 	rrnx_fr_fclose(reader);
 
-	// Free buffer
+	// Free buffer, and remove dangling ptr
 	free(reader->buffer);
-	// Remove dangling pointers
 	reader->buffer = NULL;
 	reader->buffer_size = 0;
 
-	// Free errmsg buffer
+	// Free errmsg buffer, and remove dangling ptr
 	free(reader->errmsg);
-	// Remove dangling pointers
 	reader->errmsg = NULL;
 	reader->errmsg_size = 0;
 
 	// Finally, free the filereader itself
 	free(reader);
-
-	return RRNX_E_OK;
 }
 
-extern int rrnx_fr_fclose(rrnx_filereader *reader) {
+extern int rrnx_fr_set_buffer_size(rrnx_filereader *reader, int size) {
+	void *newptr = realloc(reader->buffer, size);
+
+	if (newptr != NULL) {
+		// Allocation succeeded.
+
+		// Update buffer info
+		reader->buffer = newptr;
+		reader->buffer_size = size;
+		// Reset head and valid length
+		reader->len = 0;
+		reader->at = 0;
+
+		noerr(reader);
+	} else {
+		// Allocation failed
+		errmsg_none(reader, RRNX_E_NOMEM);
+	}
+
+	return reader->err;
+}
+
+extern int rrnx_fr_set_filename(
+    rrnx_filereader *reader,
+    const char *filename
+) {
+	noerr(reader);
+
+	if (reader->filename != NULL) {
+		// Free previous
+		free(reader->filename);
+		reader->filename = NULL;
+	}
+
+	if (filename != NULL) {
+		// Attempt allocation
+		int len = strlen(filename);
+		reader->filename = malloc(len);
+		if (reader->filename != NULL) {
+			// Memory allocation succeeded. Copy
+			strncpy(reader->filename, filename, len);
+		} else {
+			// Memory allocation failed.
+			errmsg_none(reader, RRNX_E_NOMEM);
+		} // if-else
+	}
+
+	return reader->err;
+}
+
+static int fclose_silently(rrnx_filereader *reader) {
+	// errno is never set to zero by
+	// any system call or library function.
+	int errnum = 0;
+
 	if (reader->fp != NULL) {
 		// Attempt fclose
 		if (fclose(reader->fp) != 0) {
-			return errmsg_syscall(reader, errno,
-			    "%s: fclose() failed: ", reader->filename);
-		} // if: error
-
-		// Closed succesfully.
+			// Record errno
+			errnum = errno;
+		}
 
 		// Remove handle
 		reader->fp = NULL;
-
-		// Free file name
-		free(reader->filename);
-		reader->filename = NULL;
 
 		// Reset location
 		reader->row = 0;
@@ -165,14 +237,34 @@ extern int rrnx_fr_fclose(rrnx_filereader *reader) {
 		reader->at = 0;
 	} // if
 
-	return noerr(reader);
+	return errnum;
+}
+
+extern int rrnx_fr_fclose(rrnx_filereader *reader) {
+	noerr(reader);
+
+	if (reader->fp != NULL) {
+		int errnum = fclose_silently(reader);
+
+		if (errnum != 0) {
+			errmsg_syscall(reader, errnum,
+			    "%s: fclose() failed: ", reader->filename);
+		} // if: error
+
+		// Free file name, if any.
+		rrnx_fr_set_filename(reader, NULL);
+	} // if
+
+	return reader->err;
 } // rrnx_fr_fclose()
 
 extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
+	// Reset error
+	noerr(reader);
 
 	if (reader->fp != NULL) {
 		// Already file open
-		return errmsg(reader, RRNX_E_ALREADY_OPEN,
+		return errmsg(reader, RRNX_E_HASFILE,
 		    "%s: cannot open, because previous file (%s) is still open",
 		    filename, reader->filename);
 	} // if: file already open
@@ -187,27 +279,31 @@ extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
 		    "%s: fopen() failed: ", filename);
 	} // if: fopen failed
 
-	// File opened succesfully
+	// File opened succesfully.
 
-	// Remember the file name
-	int len = strlen(filename);
-	reader->filename = malloc(len);
-	strncpy(reader->filename, filename, len);
-
-	// Reset locational info
+	// Reset locational info.
 	reader->row = 0;
 	reader->col = 0;
-
-	// Reset valid buffer length
+	// Reset valid buffer length and head position
 	reader->len = 0;
+	reader->at = 0;
 
-	return noerr(reader);
+	// Remember the file name
+	rrnx_fr_set_filename(reader, filename);
+	if (reader->err) {
+		// Memory allocation failed. Abort.
+		// Silently close the file
+		fclose_silently(reader);
+		// Error is propagated upwards.
+	}
+
+	return reader->err;
 }
 
 extern int rrnx_fr_bind(rrnx_filereader *reader, FILE *fp) {
 	if (reader->fp != NULL) {
 		// Already file open
-		return errmsg(reader, RRNX_E_ALREADY_OPEN,
+		return errmsg(reader, RRNX_E_HASFILE,
 		    "bind error: previous file (%s) is still open",
 		    reader->filename);
 	} // if: file already open
@@ -234,10 +330,7 @@ extern int rrnx_fr_unbind(rrnx_filereader *reader) {
                 reader->fp = NULL;
 
                 // Free file name, if any
-		if (reader->filename != NULL) {
-	                free(reader->filename);
-        	        reader->filename = NULL;
-		}
+		rrnx_fr_set_filename(reader, NULL);
 
                 // Reset location
                 reader->row = 0;
@@ -254,6 +347,10 @@ extern int rrnx_fr_unbind(rrnx_filereader *reader) {
 }
 
 extern int rrnx_fr_buffer(rrnx_filereader *reader) {
+	if (reader->fp == NULL) {
+		// No open file
+		return errmsg_none(reader, RRNX_E_NOFILE);
+	}
 
 	// Attempt reading from the file
 	reader->len = fread(
@@ -269,8 +366,9 @@ extern int rrnx_fr_buffer(rrnx_filereader *reader) {
 		if (ferror(reader->fp)) {
 			// Error
 			errmsg_syscall(reader, errno,
-			    "%s:%d: fread() failed: ",
-			    reader->filename, reader->row);
+			    "fread() failed: ");
+			    //"%s:%d: fread() failed: ",
+			    //reader->filename, reader->row);
 		} else {
 			// Eof; nothing to buffer.
 			errmsg_none(reader, RRNX_E_EOF);
@@ -382,8 +480,10 @@ extern int rrnx_fr_readline(
 	else if (overflow) {
 		// No error, but overflow
 		errmsg(reader, RRNX_E_OVERFLOW,
-		    "%s:%d: line too long (%d chars, while %d expected at most)",
-		    reader->filename, reader->row, reader->col, maxlen);
+		    "Line too long (%d chars, while %d expected at most)",
+		    reader->col, maxlen);
+		    //"%s:%d: line too long (%d chars, while %d expected at most)",
+		    //reader->filename, reader->row, reader->col, maxlen);
 	}
 	else {
 		// No error, no overflow; success!

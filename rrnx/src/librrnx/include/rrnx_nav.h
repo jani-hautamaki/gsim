@@ -30,6 +30,8 @@
 #define RRNX_NAV_H
 
 #include "rrnx_common.h"
+#include "rrnx_list.h"
+#include "rrnx_node.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,7 +88,7 @@ struct rrnx_delta_utc {
 	 * UTC reference week number,
 	 * not mod(1024).
 	 */
-	unsigned int W;
+	int W;
 };
 
 typedef struct rrnx_delta_utc rrnx_delta_utc;
@@ -186,7 +188,7 @@ struct rrnx_broadcast_orbit1 {
 	double M0;
 };
 
-typedef struct rrnx_broadcast_orbit1 rrnx_broardcast_orbit1;
+typedef struct rrnx_broadcast_orbit1 rrnx_broadcast_orbit1;
 
 /**
  * Broadcast orbit, line 2 (BROADCAST ORBIT - 2)
@@ -213,7 +215,7 @@ struct rrnx_broadcast_orbit2 {
 	double sqrtA;
 };
 
-typedef struct rrnx_broadcast_orbit2 rrnx_broardcast_orbit2;
+typedef struct rrnx_broadcast_orbit2 rrnx_broadcast_orbit2;
 
 /**
  * Broadcast orbit, line 3 (BROADCAST ORBIT - 3)
@@ -240,7 +242,7 @@ struct rrnx_broadcast_orbit3 {
 	double Cis;
 };
 
-typedef struct rrnx_broadcast_orbit3 rrnx_broardcast_orbit3;
+typedef struct rrnx_broadcast_orbit3 rrnx_broadcast_orbit3;
 
 /**
  * Broadcast orbit, line 4 (BROADCAST ORBIT - 4)
@@ -267,7 +269,7 @@ struct rrnx_broadcast_orbit4 {
 	double OMEGADOT;
 };
 
-typedef struct rrnx_broadcast_orbit4 rrnx_broardcast_orbit4;
+typedef struct rrnx_broadcast_orbit4 rrnx_broadcast_orbit4;
 
 /**
  * Broadcast orbit, line 5 (BROADCAST ORBIT - 5)
@@ -294,7 +296,7 @@ struct rrnx_broadcast_orbit5 {
 	double L2_P_flag;
 };
 
-typedef struct rrnx_broadcast_orbit5 rrnx_broardcast_orbit5;
+typedef struct rrnx_broadcast_orbit5 rrnx_broadcast_orbit5;
 
 /**
  * Broadcast orbit, line 6 (BROADCAST ORBIT - 6)
@@ -321,7 +323,7 @@ struct rrnx_broadcast_orbit6 {
 	double IODC;
 };
 
-typedef struct rrnx_broadcast_orbit6 rrnx_broardcast_orbit6;
+typedef struct rrnx_broadcast_orbit6 rrnx_broadcast_orbit6;
 
 /**
  * Broadcast orbit, line 7 (BROADCAST ORBIT - 7)
@@ -349,7 +351,7 @@ struct rrnx_broadcast_orbit7 {
 	double unused2;
 };
 
-typedef struct rrnx_broadcast_orbit7 rrnx_broardcast_orbit7;
+typedef struct rrnx_broadcast_orbit7 rrnx_broadcast_orbit7;
 
 
 
@@ -582,11 +584,21 @@ struct rrnx_navmsg_gps {
 
 };
 
+// TODO
 struct rrnx_nav {
-	// TODO
+	/**
+	 * Node list
+	 */
+	rrnx_list *nodelist;
 };
 
 typedef struct rrnx_nav rrnx_nav;
+
+
+extern rrnx_nav *rrnx_nav_alloc();
+extern void rrnx_nav_free(rrnx_nav *nav);
+
+extern rrnx_node *rrnx_nav_alloc_node(rrnx_nav *nav, int type);
 
 #ifdef __cplusplus
 } // extern "C"

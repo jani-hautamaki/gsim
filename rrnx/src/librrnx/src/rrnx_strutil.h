@@ -5,7 +5,7 @@
 //      Part of the GPS/INS measurement simulation system GSIM
 //      https://code.google.com/p/gsim
 //
-//      Copyright (C) 2013 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
 //
 //      Licensed under the terms of GNU General Public License v3.
 //
@@ -15,39 +15,37 @@
 //
 //********************************{end:header}******************************//
 
-/*
- *
- * Reference:
- *
- * Gurtner W, Estey L.
- * RINEX: The Received Independent Exchange Format Version 2.11.
- * 10 Dec 2007 [updated 26 Jun 2012].
- * Available from: ftp://igs.org/pub/data/format/rinex211.txt
- *
- */
-
-#ifndef RRNX_H
-#define RRNX_H
-
-//#include "rrnx_common.h" // Included through rrnx_nav and rrnx_obs
-#include "rrnx_nav.h"
-#include "rrnx_obs.h"
+#ifndef STRUTIL_H
+#define STRUTIL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+extern int rrnx_substr(
+    char *dest,
+    const char *src,
+    unsigned int offset,
+    unsigned int len
+);
 
-struct rrnx_sat_health {
-};
-typedef struct rrnx_sat_health rrnx_sat_health;
+extern int rrnx_trim_trailing(char *s);
 
-//============================================================================
-// METHODS:
-//============================================================================
+extern int rrnx_substr_trimmed2(
+    char *dest,
+    const char *src,
+    int offset,
+    int len
+);
 
-extern char rrnx_system2char();
-extern unsigned int rrnx_char2system();
+extern int rrnx_substr_trimmed(
+        char *buffer,
+        const char *line,
+        int offset,
+        int len
+);
+
+extern void rrnx_replace_fortran_exponent(char *s);
 
 
 #ifdef __cplusplus
@@ -55,4 +53,3 @@ extern unsigned int rrnx_char2system();
 #endif
 
 #endif
-
