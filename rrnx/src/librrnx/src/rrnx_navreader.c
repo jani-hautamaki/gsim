@@ -119,6 +119,10 @@ static void parse_fortran_double(
     double *result,
     const char *s
 ) {
+	if (navreader->err) {
+		return;
+	}
+
 	// 1. Copy to local buffer,
 	// 2. Fix fortran exponent
 	// 3. Use libc to convert
@@ -176,6 +180,10 @@ static void parse_int(
     int *result,
     const char *s
 ) {
+	if (navreader->err) {
+		return;
+	}
+
 	// Regarding atoi():
 	// "The behavior is the same as strtol(nptr, NULL, 10)
 	//  except that atoi() does not detect errors."
@@ -222,7 +230,6 @@ static void parse_int(
 		    s, strerror(errnum)
 		);
 	}
-	printf("Converted \"%s\" into %d\n", s, *result);
 }
 
 static void parse_fortran_double_substr(
@@ -259,55 +266,6 @@ static void parse_uint_substr(
 	parse_uint(navreader, result, navreader->workbuf);
 }
 */
-
-
-static void parse_broadcast_orbit0(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit1(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit2(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit3(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit4(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit5(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit6(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
-
-static void parse_broadcast_orbit7(
-    rrnx_navreader *navreader,
-    const char *line
-) {
-}
 
 
 /*
@@ -406,23 +364,18 @@ static void parse_ion_alpha(
 	// A0 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->alpha[0], line, 2, 12);
-	if (navreader->err) return;
 
 	// A1 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->alpha[1], line, 14, 12);
-	if (navreader->err) return;
 
 	// A2 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->alpha[2], line, 26, 12);
-	if (navreader->err) return;
 
 	// A3 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->alpha[3], line, 38, 12);
-	if (navreader->err) return;
-
 }
 
 static void parse_ion_beta(
@@ -438,22 +391,18 @@ static void parse_ion_beta(
 	// B0 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->beta[0], line, 2, 12);
-	if (navreader->err) return;
 
 	// B1 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->beta[1], line, 14, 12);
-	if (navreader->err) return;
 
 	// B2 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->beta[2], line, 26, 12);
-	if (navreader->err) return;
 
 	// B3 (D12.4)
 	parse_fortran_double_substr(
 	    navreader, &data->beta[3], line, 38, 12);
-	if (navreader->err) return;
 
 }
 
@@ -470,23 +419,19 @@ static void parse_delta_utc(
 	// A0 (D19.12)
 	parse_fortran_double_substr(
 	    navreader, &data->a0, line, 3, 19);
-	if (navreader->err) return;
 
 	// A1 (D19.12)
 	parse_fortran_double_substr(
 	    navreader, &data->a1, line, 22, 19);
-	if (navreader->err) return;
 
 	// T (I9)
+	// TODO: This is optional!
 	parse_int_substr(
 	    navreader, &data->T, line, 41, 9);
-	if (navreader->err) return;
 
 	// W (I9)
 	parse_int_substr(
 	    navreader, &data->W, line, 50, 9);
-	if (navreader->err) return;
-
 }
 
 static void parse_leap_seconds(
@@ -499,11 +444,261 @@ static void parse_leap_seconds(
 
 	rrnx_leap_seconds *data = (void *) node->data;
 
-	// Delta LS I6)
 	parse_int_substr(
 	    navreader, &data->delta_ls, line, 0, 6);
-	if (navreader->err) return;
+}
 
+
+static void parse_broadcast_orbit0(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT0);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit0 *data = (void *) node->data;
+
+	// Satellite PRN number (I2)
+	parse_int_substr(
+	    navreader, &data->sv_id, line, 0, 2);
+
+	// Epoch: year (I2.2)
+	parse_int_substr(
+	    navreader, &data->Toc_year, line, 3, 2);
+
+	// Epoch: month (I2)
+	parse_int_substr(
+	    navreader, &data->Toc_month, line, 6, 2);
+
+	// Epoch: day (I2)
+	parse_int_substr(
+	    navreader, &data->Toc_day, line, 9, 2);
+
+	// Epoch: hour (I2)
+	parse_int_substr(
+	    navreader, &data->Toc_hour, line, 12, 2);
+
+	// Epoch: minute (I2)
+	parse_int_substr(
+	    navreader, &data->Toc_min, line, 15, 2);
+
+	// Epoch: second (F5.1)
+	parse_fortran_double_substr(
+	    navreader, &data->Toc_sec, line, 17, 5);
+
+	// Clock bias (D19.12)
+	parse_fortran_double_substr(
+	    navreader, &data->af0, line, 22, 19);
+
+	// Clock drift (D19.12)
+	parse_fortran_double_substr(
+	    navreader, &data->af1, line, 41, 19);
+
+	// Clock drift rate (D19.12)
+	// TODO: This is optional
+	parse_fortran_double_substr(
+	    navreader, &data->af2, line, 60, 19);
+
+}
+
+static void parse_broadcast_orbit_line(
+    rrnx_navreader *navreader,
+    const char *line,
+    double *values
+) {
+	int offset = 3;
+	int len = 19;
+	for (int i = 0; i < 4; i++) {
+		parse_fortran_double_substr(
+		    navreader, &values[i], line, offset, len);
+		offset += len;
+	}
+}
+
+static void parse_broadcast_orbit1(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT1);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit1 *data = (void *) node->data;
+
+	/*
+	double *v = navreader->v; // For convenience
+	parse_broadcast_orbit_line(navreader, line, v);
+	data->IODE = (int) v[0];
+	data->Crs = v[1];
+	data->delta_n = v[2];
+	data->M0 = v[3];
+	*/
+
+	double val;
+	parse_fortran_double_substr(
+	    navreader, &val, line, 3, 19);
+	data->IODE = (int) val;
+
+	parse_fortran_double_substr(
+	    navreader, &data->Crs, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->delta_n, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->M0, line, 60, 19);
+
+}
+
+static void parse_broadcast_orbit2(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT2);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit2 *data = (void *) node->data;
+
+	parse_fortran_double_substr(
+	    navreader, &data->Cuc, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->e, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->Cus, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->sqrtA, line, 60, 19);
+
+}
+
+static void parse_broadcast_orbit3(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT3);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit3 *data = (void *) node->data;
+
+	parse_fortran_double_substr(
+	    navreader, &data->Toe, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->Cic, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->OMEGA, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->Cis, line, 60, 19);
+
+}
+
+static void parse_broadcast_orbit4(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT4);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit4 *data = (void *) node->data;
+
+	parse_fortran_double_substr(
+	    navreader, &data->i0, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->Crc, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->omega, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->OMEGADOT, line, 60, 19);
+
+}
+
+static void parse_broadcast_orbit5(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT5);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit5 *data = (void *) node->data;
+
+	double value_as_dbl = 0.0;
+
+	parse_fortran_double_substr(
+	    navreader, &data->IDOT, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->L2_codes, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &value_as_dbl, line, 41, 19);
+	data->Toe_week = (int) value_as_dbl;
+
+	parse_fortran_double_substr(
+	    navreader, &value_as_dbl, line, 60, 19);
+	data->L2_P_flag = (int) value_as_dbl;
+}
+
+static void parse_broadcast_orbit6(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT6);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit6 *data = (void *) node->data;
+
+	double value_as_dbl = 0.0;
+
+	parse_fortran_double_substr(
+	    navreader, &data->accuracy, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->health, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->Tgd, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &value_as_dbl, line, 60, 19);
+	data->IODC = (int) value_as_dbl;
+}
+
+static void parse_broadcast_orbit7(
+    rrnx_navreader *navreader,
+    const char *line
+) {
+	rrnx_node *node = alloc_node(
+	    navreader, RRNX_ID_BROADCAST_ORBIT7);
+	if (node == NULL) return; // Allocation failed, abort
+
+	rrnx_broadcast_orbit7 *data = (void *) node->data;
+
+	//double value_as_dbl = 0.0;
+
+	parse_fortran_double_substr(
+	    navreader, &data->Tsend, line, 3, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->fit_interval, line, 22, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->unused1, line, 41, 19);
+
+	parse_fortran_double_substr(
+	    navreader, &data->unused2, line, 60, 19);
 }
 
 static void parse_unknown(
@@ -576,8 +771,6 @@ static int cycle_data(
     const char *line,
     int linetype
 ) {
-	printf("%s\n", line);
-	printf("cycle_data, linetype: %d, state: %d\n", linetype, navreader->state);
 	// For every state, always.
 	switch(navreader->state)
 	{
@@ -801,6 +994,13 @@ extern void rrnx_navr_free(rrnx_navreader *navreader) {
 	free(navreader);
 }
 
+extern int rrnx_navr_errno(const rrnx_navreader *navreader) {
+	return navreader->err;
+}
+extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader) {
+	return navreader->errmsg->text;
+}
+
 /*
 extern int rrnx_resize_linebuf(
     rrnx_navreader *navreader,
@@ -863,6 +1063,8 @@ extern void rrnx_navr_readfile(
 	// Reset parser state
 	navreader->state = S_HEADER;
 
+	// TODO: if previous navdata exists, free it?
+
 	// Create new navdata
 	navreader->navdata = rrnx_nav_alloc();
 	if (navreader->navdata == NULL) {
@@ -904,6 +1106,12 @@ extern void rrnx_navr_readfile(
 	// Close the file.
 	// If this causes an error, it hides any parsing errors.. TODO
 	rrnx_fr_fclose(fr);
+}
+
+extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader) {
+	rrnx_nav *navdata = navreader->navdata;
+	navreader->navdata = NULL;
+	return navdata;
 }
 
 

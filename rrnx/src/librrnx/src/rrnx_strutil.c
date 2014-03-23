@@ -29,6 +29,7 @@ extern int rrnx_substr(
 	// Translate src pointer by the offset
 	while ((offset > 0) && (*src != '\0')) {
 		offset--;
+		src++;
 	}
 
 	// In effect, if the source is too short,

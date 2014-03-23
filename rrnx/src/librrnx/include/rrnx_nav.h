@@ -112,6 +112,7 @@ typedef struct rrnx_leap_seconds rrnx_leap_seconds;
 struct rrnx_broadcast_orbit0 {
 	/**
 	 * Satellite PRN number (I2).
+	 * TODO: Should probably include the system too.
 	 */
 	int sv_id;
 
@@ -170,7 +171,7 @@ struct rrnx_broadcast_orbit1 {
 	/**
 	 * Issue of data, Ephemeris (D19.12)
 	 */
-	double IODE;
+	int IODE;
 
 	/**
 	 * Orbit radius: sine harmonic corr [m], (D19.12).
@@ -288,12 +289,12 @@ struct rrnx_broadcast_orbit5 {
 	/**
 	 * Toe: week number, GPS system time [1], (D19.12).
 	 */
-	double Toe_week;
+	int Toe_week;
 
 	/**
 	 * L2 P data flag (D19.12)
 	 */
-	double L2_P_flag;
+	int L2_P_flag;
 };
 
 typedef struct rrnx_broadcast_orbit5 rrnx_broadcast_orbit5;
@@ -320,7 +321,7 @@ struct rrnx_broadcast_orbit6 {
 	/**
 	 * Issue of Data, clock, (D19.12)
 	 */
-	double IODC;
+	int IODC;
 };
 
 typedef struct rrnx_broadcast_orbit6 rrnx_broadcast_orbit6;

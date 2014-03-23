@@ -81,6 +81,11 @@ struct rrnx_navreader {
 	 */
 	unsigned int workbuf_size;
 
+	/**
+	 * Buffer for the values in a broadcast orbit line.
+	 */
+	double v[4];
+
 };
 
 typedef struct rrnx_navreader rrnx_navreader;
@@ -99,6 +104,12 @@ extern int rrnx_navr_consume(
 );
 
 
+extern int rrnx_navr_errno(const rrnx_navreader *navreader);
+extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader);
+
+/**
+ * Transfer the ownership of the built navdata to the caller.
+ */
 extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader);
 
 

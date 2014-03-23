@@ -78,6 +78,10 @@ extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data) {
 	item->prev = list->last;
 
 	// Maintain the existing links
+	if (list->first == NULL) {
+		list->first = item;
+	}
+
 	if (list->last != NULL) {
 		list->last->next = item;
 	}
@@ -113,4 +117,32 @@ extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item) {
 	// free the node itself
 	free(item);
 }
+
+/*
+// Internally rrnx_list_iterator is just rrnx_list_item
+typedef struct rrnx_list_item rrnx_list_iter;
+
+extern rrnx_list_item *rrnx_list_iterator(rrnx_list *list) {
+	rrnx_list_item *item = NULL;
+	if (list != NULL) {
+		item = list->first;
+	}
+	return item;
+}
+extern rrnx_list_item *rrnx_list_next(rrnx_list_item *item) {
+	if (item != NULL) {
+		item = item->next;
+	}
+	return item;
+}
+
+extern int rrnx_list_has_next(const rrnx_list_item *item) {
+	if (item != NULL) {
+		return item->next != NULL;
+	}
+	return 0;
+}
+
+
+*/
 

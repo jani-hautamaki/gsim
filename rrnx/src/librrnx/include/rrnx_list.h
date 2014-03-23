@@ -53,6 +53,7 @@ struct rrnx_list {
 
 typedef struct rrnx_list rrnx_list;
 
+
 //============================================================================
 // METHODS
 //============================================================================
@@ -66,10 +67,21 @@ extern void rrnx_list_free(rrnx_list *list);
 
 extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data);
 
-// Iteration and accessing are not neccessary.
 extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item);
 
+// Iteration and accessing are not neccessary....
 
+/**
+ * Opaque list iterator
+ */
+
+/*
+// Return an iterator
+extern rrnx_list_iter *rrnx_list_iterator(rrnx_list *list);
+extern rrnx_list_iter *rrnx_list_next(rrnx_list_iter *iter);
+extern int rrnx_list_has_next(const rrnx_list_iter *iter);
+extern void *rrnx_list_data(rrnx_list_iter *iter);
+*/
 
 #ifdef __cplusplus
 } // extern "C"
