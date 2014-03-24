@@ -23,11 +23,13 @@
 #include "rrnx_filereader.h"
 #include "rrnx_nav.h"
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//============================================================================
+// CONSTANTS
+//============================================================================
 
 /**
  * Default size for the line buffer.
@@ -35,6 +37,10 @@ extern "C" {
  * This generously more than needed.
  */
 #define RRNX_DEFAULT_WORKBUF_SIZE 512
+
+//============================================================================
+// DATA TYPES
+//============================================================================
 
 /**
  * This data type should be opaque.
@@ -90,8 +96,16 @@ struct rrnx_navreader {
 
 typedef struct rrnx_navreader rrnx_navreader;
 
+//============================================================================
+// METHODS: CONSTRUCTION & DESTRUCTION
+//============================================================================
+
 extern rrnx_navreader *rrnx_navr_alloc(void);
 extern void rrnx_navr_free(rrnx_navreader *navreader);
+
+//============================================================================
+// METHODS: OTHER METHODS
+//============================================================================
 
 extern void rrnx_navr_readfile(
     rrnx_navreader *navreader,
@@ -103,14 +117,17 @@ extern int rrnx_navr_consume(
     const char *line
 );
 
-
-extern int rrnx_navr_errno(const rrnx_navreader *navreader);
-extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader);
-
 /**
  * Transfer the ownership of the built navdata to the caller.
  */
 extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader);
+
+//============================================================================
+// METHODS: ERROR MANAGEMENT
+//============================================================================
+
+extern int rrnx_navr_errno(const rrnx_navreader *navreader);
+extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader);
 
 
 #ifdef __cplusplus

@@ -70,13 +70,13 @@ static void dump_delta_utc(void *ptr) {
 	printf("  a0:         %19.12g\n", data->a0);
 	printf("  a1:         %19.12g\n", data->a1);
 	printf("  T:          %19d\n", data->T);
-	printf("  W:          %19d\n", data->W);
+	printf("  T_week:     %19d\n", data->T_week);
 }
 
 static void dump_leap_seconds(void *ptr) {
 	const rrnx_leap_seconds *data = ptr;
 	printf("Node: leap seconds\n");
-	printf("  delta_ls:   %19d\n", data->delta_ls);
+	printf("  leap secs:  %19d\n", data->leap_seconds);
 }
 
 static void dump_end_of_header(void *ptr) {
@@ -86,9 +86,16 @@ static void dump_end_of_header(void *ptr) {
 static void dump_broadcast_orbit0(void *ptr) {
 	const rrnx_broadcast_orbit0 *data = ptr;
 	printf("Node: broadcast orbit 0\n");
+	/*
+	const rrnx_time *Toc = &data->Toc; // For convenience
 	printf("  Toc:       %02d-%02d-%02d %02d:%02d:%05.2f\n",
-	    data->Toc_year, data->Toc_month, data->Toc_day,
-	    data->Toc_hour, data->Toc_min, data->Toc_sec
+	    data->Toc.year, data->Toc.month, data->Toc.day,
+	    data->Toc.hour, data->Toc.min, data->Toc.sec
+	);
+	*/
+	printf("  toc:       %02d-%02d-%02d %02d:%02d:%05.2f\n",
+	    data->toc_year, data->toc_month, data->toc_day,
+	    data->toc_hour, data->toc_min, data->toc_sec
 	);
 	printf("  SV ID:      %19d\n", data->sv_id);
 	printf("  af0:        %19.12g\n", data->af0);
@@ -117,9 +124,9 @@ static void dump_broadcast_orbit2(void *ptr) {
 static void dump_broadcast_orbit3(void *ptr) {
 	const rrnx_broadcast_orbit3 *data = ptr;
 	printf("Node: broadcast orbit 3\n");
-	printf("  Toe:        %19.12g\n", data->Toe);
+	printf("  toe:        %19.12g\n", data->toe);
 	printf("  Cic:        %19.12g\n", data->Cic);
-	printf("  OMEGA:      %19.12g\n", data->OMEGA);
+	printf("  OMEGA:      %19.12g\n", data->OMEGA0);
 	printf("  Cis:        %19.12g\n", data->Cis);
 }
 
@@ -128,17 +135,17 @@ static void dump_broadcast_orbit4(void *ptr) {
 	printf("Node: broadcast orbit 4\n");
 	printf("  i0:         %19.12g\n", data->i0);
 	printf("  Crc:        %19.12g\n", data->Crc);
-	printf("  omega:      %19.12g\n", data->omega);
+	printf("  w:          %19.12g\n", data->w);
 	printf("  OMEGADOT:   %19.12g\n", data->OMEGADOT);
 }
 
 static void dump_broadcast_orbit5(void *ptr) {
 	const rrnx_broadcast_orbit5 *data = ptr;
 	printf("Node: broadcast orbit 5\n");
-	printf("  IDOT:       %19.12g\n", data->IDOT);
-	printf("  L2_codes:   %19.12g\n", data->L2_codes);
-	printf("  Toe_week:   %19d\n", data->Toe_week);
-	printf("  L2 P flag:  %19d\n", data->L2_P_flag);
+	printf("  IDOT:       %19.12g\n", data->idot);
+	printf("  L2 codes:   %19.12g\n", data->L2_codes);
+	printf("  toe_week:   %19d\n", data->toe_week);
+	printf("  L2P data:   %19d\n", data->L2P_dataflag);
 }
 
 static void dump_broadcast_orbit6(void *ptr) {
@@ -153,7 +160,7 @@ static void dump_broadcast_orbit6(void *ptr) {
 static void dump_broadcast_orbit7(void *ptr) {
 	const rrnx_broadcast_orbit7 *data = ptr;
 	printf("Node: broadcast orbit 7\n");
-	printf("  Tsend:      %19.12g\n", data->Tsend);
+	printf("  toz:        %19.12g\n", data->toz);
 	printf("  Fit intvl:  %19.12g\n", data->fit_interval);
 	printf("  Spare1:     %19.12g\n", data->unused1);
 	printf("  Spare2:     %19.12g\n", data->unused2);

@@ -55,25 +55,23 @@ typedef struct rrnx_list rrnx_list;
 
 
 //============================================================================
-// METHODS
+// METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
-
-// Construction and destruction
 
 extern rrnx_list *rrnx_list_alloc();
 extern void rrnx_list_free(rrnx_list *list);
 
-// Manipulation
+//============================================================================
+// METHODS: MANIPULATION
+//============================================================================
 
 extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data);
-
 extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item);
+
 
 // Iteration and accessing are not neccessary....
 
-/**
- * Opaque list iterator
- */
+// TODO: opaque list iterator?
 
 /*
 // Return an iterator

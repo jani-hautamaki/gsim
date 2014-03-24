@@ -31,12 +31,25 @@ extern "C" {
  * Date and time
  */
 struct rrnx_time {
-        unsigned int year;
-        unsigned int month;
-        unsigned int day;
+	/**
+         * Year (two decimal digits).
+         * 80-99: 1980-1999, and 00-79: 2000-2079.
+         */
+        int year;
 
-        unsigned int hour;
-        unsigned int min;
+	/** Month (1-12). */
+        int month;
+
+	/** Day (1-31). */
+        int day;
+
+	/** Hour (0-23). */
+        int hour;
+
+	/** Minute (0-59). */
+        int min;
+
+	/** Second (0 <= sec < 60). */
         double sec;
 };
 
@@ -71,8 +84,8 @@ typedef struct rrnx_satellite_id rrnx_satellite_id;
 #define RRNX_SYSTEM_GPS                 'G'
 #define RRNX_SYSTEM_GLONASS             'R'
 #define RRNX_SYSTEM_GALILEO             'E'
-#define RRNX_SYSTEM_BEIDOU              'B' ??
-#define RRNX_SYSTEM_QZSS                'Q' ??
+#define RRNX_SYSTEM_BEIDOU              'B'
+#define RRNX_SYSTEM_QZSS                'Q'
 
 //============================================================================
 // PAYLOAD STRUCTS: COMMON
@@ -137,16 +150,12 @@ struct rrnx_comment {
 
 typedef struct rrnx_comment rrnx_comment;
 
-
 /*
 struct rrnx_end_header {
 };
 
 typedef struct rrnx_end_header rrnx_end_header;
 */
-
-
-
 
 
 #ifdef __cplusplus

@@ -25,6 +25,17 @@
 #define extern "C" {
 #endif
 
+
+//============================================================================
+// CONSTANTS
+//============================================================================
+
+#define RRNX_FR_DEFAULT_BUFFER_SIZE 0x10000
+
+//============================================================================
+// DATA TYPES
+//============================================================================
+
 /**
  * File reader
  */
@@ -87,20 +98,22 @@ struct rrnx_filereader {
 
 typedef struct rrnx_filereader rrnx_filereader;
 
-//--- constants ------------------------------------------------------------//
-#define RRNX_FR_DEFAULT_BUFFER_SIZE 0x10000
 
-//--- methods --------------------------------------------------------------//
+//============================================================================
+// METHODS: CONSTRUCTION & DESTRUCTION
+//============================================================================
 
 extern rrnx_filereader *rrnx_fr_alloc(void);
 extern void rrnx_fr_free(rrnx_filereader *reader);
+
+//============================================================================
+// METHODS: OTHER METHODS
+//============================================================================
 
 extern int rrnx_fr_fclose(rrnx_filereader *reader);
 extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename);
 extern int rrnx_fr_buffer(rrnx_filereader *reader);
 
-
-//--- methods --------------------------------------------------------------//
 extern int rrnx_fr_readchar(rrnx_filereader *reader, char *dest);
 extern int rrnx_fr_readline(rrnx_filereader *reader, char *dest, size_t maxlen);
 

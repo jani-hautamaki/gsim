@@ -25,8 +25,16 @@
 extern "C" {
 #endif
 
+//============================================================================
+// CONSTANTS
+//============================================================================
+
 /** Default memory size for a string. */
 #define RRNX_DEFAULT_STRING_SIZE 0x200
+
+//============================================================================
+// DATA TYPES
+//============================================================================
 
 /**
  * Simple string object
@@ -46,13 +54,17 @@ struct rrnx_string {
 typedef struct rrnx_string rrnx_string;
 
 //============================================================================
-// METHODS
+// METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
 extern rrnx_string *rrnx_str_alloc(void);
 extern rrnx_string *rrnx_str_alloc_size(size_t size);
 extern rrnx_string *rrnx_str_clone(rrnx_string *src);
 extern void rrnx_str_free(rrnx_string *s);
+
+//============================================================================
+// METHODS: OTHER
+//============================================================================
 
 extern void rrnx_str_format(rrnx_string *s, const char *fmt, ...);
 extern void rrnx_str_vformat(rrnx_string *s, const char *fmt, va_list args);
@@ -61,9 +73,7 @@ extern void rrnx_str_concat(rrnx_string *s, const rrnx_string *q);
 extern void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list args);
 
 extern void rrnx_str_reset(rrnx_string *s);
-
 extern int rrnx_str_resize(rrnx_string *s, size_t size);
-
 extern void rrnx_str_strcpy(rrnx_string *s, const char *cstr);
 
 

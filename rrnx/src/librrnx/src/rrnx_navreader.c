@@ -431,7 +431,7 @@ static void parse_delta_utc(
 
 	// W (I9)
 	parse_int_substr(
-	    navreader, &data->W, line, 50, 9);
+	    navreader, &data->T_week, line, 50, 9);
 }
 
 static void parse_leap_seconds(
@@ -444,8 +444,9 @@ static void parse_leap_seconds(
 
 	rrnx_leap_seconds *data = (void *) node->data;
 
+	// Leap seconds (I6)
 	parse_int_substr(
-	    navreader, &data->delta_ls, line, 0, 6);
+	    navreader, &data->leap_seconds, line, 0, 6);
 }
 
 
@@ -463,29 +464,52 @@ static void parse_broadcast_orbit0(
 	parse_int_substr(
 	    navreader, &data->sv_id, line, 0, 2);
 
+	/*
+	// For convenience
+	rrnx_time *Toc = &data->Toc;
 	// Epoch: year (I2.2)
 	parse_int_substr(
-	    navreader, &data->Toc_year, line, 3, 2);
+	    navreader, &Toc->year, line, 3, 2);
+	// Epoch: month (I2)
+	parse_int_substr(
+	    navreader, &Toc->month, line, 6, 2);
+	// Epoch: day (I2)
+	parse_int_substr(
+	    navreader, &Toc->day, line, 9, 2);
+	// Epoch: hour (I2)
+	parse_int_substr(
+	    navreader, &Toc->hour, line, 12, 2);
+	// Epoch: minute (I2)
+	parse_int_substr(
+	    navreader, &Toc->min, line, 15, 2);
+	// Epoch: second (F5.1)
+	parse_fortran_double_substr(
+	    navreader, &Toc->sec, line, 17, 5);
+	*/
+
+	// Epoch: year (I2.2)
+	parse_int_substr(
+	    navreader, &data->toc_year, line, 3, 2);
 
 	// Epoch: month (I2)
 	parse_int_substr(
-	    navreader, &data->Toc_month, line, 6, 2);
+	    navreader, &data->toc_month, line, 6, 2);
 
 	// Epoch: day (I2)
 	parse_int_substr(
-	    navreader, &data->Toc_day, line, 9, 2);
+	    navreader, &data->toc_day, line, 9, 2);
 
 	// Epoch: hour (I2)
 	parse_int_substr(
-	    navreader, &data->Toc_hour, line, 12, 2);
+	    navreader, &data->toc_hour, line, 12, 2);
 
 	// Epoch: minute (I2)
 	parse_int_substr(
-	    navreader, &data->Toc_min, line, 15, 2);
+	    navreader, &data->toc_min, line, 15, 2);
 
 	// Epoch: second (F5.1)
 	parse_fortran_double_substr(
-	    navreader, &data->Toc_sec, line, 17, 5);
+	    navreader, &data->toc_sec, line, 17, 5);
 
 	// Clock bias (D19.12)
 	parse_fortran_double_substr(
@@ -586,13 +610,13 @@ static void parse_broadcast_orbit3(
 	rrnx_broadcast_orbit3 *data = (void *) node->data;
 
 	parse_fortran_double_substr(
-	    navreader, &data->Toe, line, 3, 19);
+	    navreader, &data->toe, line, 3, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &data->Cic, line, 22, 19);
 
 	parse_fortran_double_substr(
-	    navreader, &data->OMEGA, line, 41, 19);
+	    navreader, &data->OMEGA0, line, 41, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &data->Cis, line, 60, 19);
@@ -616,7 +640,7 @@ static void parse_broadcast_orbit4(
 	    navreader, &data->Crc, line, 22, 19);
 
 	parse_fortran_double_substr(
-	    navreader, &data->omega, line, 41, 19);
+	    navreader, &data->w, line, 41, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &data->OMEGADOT, line, 60, 19);
@@ -636,18 +660,18 @@ static void parse_broadcast_orbit5(
 	double value_as_dbl = 0.0;
 
 	parse_fortran_double_substr(
-	    navreader, &data->IDOT, line, 3, 19);
+	    navreader, &data->idot, line, 3, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &data->L2_codes, line, 22, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &value_as_dbl, line, 41, 19);
-	data->Toe_week = (int) value_as_dbl;
+	data->toe_week = (int) value_as_dbl;
 
 	parse_fortran_double_substr(
 	    navreader, &value_as_dbl, line, 60, 19);
-	data->L2_P_flag = (int) value_as_dbl;
+	data->L2P_dataflag = (int) value_as_dbl;
 }
 
 static void parse_broadcast_orbit6(
@@ -689,7 +713,7 @@ static void parse_broadcast_orbit7(
 	//double value_as_dbl = 0.0;
 
 	parse_fortran_double_substr(
-	    navreader, &data->Tsend, line, 3, 19);
+	    navreader, &data->toz, line, 3, 19);
 
 	parse_fortran_double_substr(
 	    navreader, &data->fit_interval, line, 22, 19);

@@ -22,13 +22,11 @@
 extern "C" {
 #endif
 
-
-
-// TODO: Should the labels be extern const char * variables?
-
 //============================================================================
 // CONSTANTS
 //============================================================================
+
+// TODO: Should the labels be extern const char * variables?
 
 // Common pseudo-tag
 #define RRNX_ID_INVALID            0xffff
@@ -79,7 +77,7 @@ struct rrnx_node {
 typedef struct rrnx_node rrnx_node;
 
 //============================================================================
-// METHODS
+// METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
 extern rrnx_node *rrnx_node_alloc(int type);
