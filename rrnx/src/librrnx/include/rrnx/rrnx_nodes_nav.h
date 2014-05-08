@@ -16,23 +16,19 @@
 //********************************{end:header}******************************//
 
 /*
- *
- * Reference:
- *
- * Gurtner W, Estey L.
- * RINEX: The Received Independent Exchange Format Version 2.11.
- * 10 Dec 2007 [updated 26 Jun 2012].
- * Available from: ftp://igs.org/pub/data/format/rinex211.txt
+ * Nodes for GPS navigation message files.
  *
  */
 
 /*
- * TBC:
+ * TODO #1:
  * Some of the broadcast orbit fields are defined as integers,
  * even though the file allows them to be floating-points.
+ *
  * These fields should probably be doubles, and leave it
  * to the caller to decide whether to convert them into ints,
  * and what to do when the value is not an integer.
+ *
  *
  * TBC:
  * Different GNSS have different kind of broadcast orbit data.
@@ -44,18 +40,14 @@
  * TBC:
  * It is not possible for broadcast_orbitN structs
  * to appear in a random order. In other words, they are not
- * indpenedent of each other. This suggests that these
+ * independent of each other. This suggests that these
  * structs should be put into a single big struct that
  * represents the set of repeating 8 lines (epoch+broadcast orbits).
  *
  */
 
-#ifndef RRNX_NAV_H
-#define RRNX_NAV_H
-
-#include "rrnx_common.h"
-#include "rrnx_list.h"
-#include "rrnx_node.h"
+#ifndef RRNX_NODES_NAV_H
+#define RRNX_NODES_NAV_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,7 +63,7 @@ extern "C" {
  */
 struct rrnx_ion_alpha {
 	/**
-	 * Ionospheric parameters A0-A3 of almanac.
+	 * Ionospheric parameters A0-A3 of almanac, 4(D12.4).
 	 */
 	double alpha[4];
 };
@@ -84,7 +76,7 @@ typedef struct rrnx_ion_alpha rrnx_ion_alpha;
  */
 struct rrnx_ion_beta {
 	/**
-	 * Ionospheric parameters B0-B3 of almanac.
+	 * Ionospheric parameters B0-B3 of almanac, 4(D12.4).
 	 */
 	double beta[4];
 };
@@ -97,22 +89,22 @@ typedef struct rrnx_ion_beta rrnx_ion_beta;
  */
 struct rrnx_delta_utc {
 	/**
-	 * a0 term of the polynomial
+	 * a0 term of the polynomial, (D19.12).
 	 */
 	double a0;
 
 	/**
-	 * a1 term of the polynomial
+	 * a1 term of the polynomial, (D19.12).
 	 */
 	double a1;
 
 	/**
-	 * Reference time for UTC data, GPS time of week
+	 * Reference time for UTC data, GPS time of week [s], (I9).
 	 */
 	int T;
 
 	/**
-	 * Reference time for UTC data, GPS week.
+	 * Reference time for UTC data, GPS week, (I9).
 	 * The week number is continuous, not modulo 1024.
 	 */
 	int T_week;
@@ -139,6 +131,10 @@ typedef struct rrnx_leap_seconds rrnx_leap_seconds;
 
 /**
  * GPS Broadcast orbit, line 0 (PRN / EPOCH / SV CLK)
+ *
+ * TODO: Rename into rrnx_prn_epoch_clock, because
+ * this differs dramatically from "BROADCAST ORBIT N" fields.
+ *
  */
 struct rrnx_broadcast_orbit0 {
 	/**
@@ -216,7 +212,7 @@ struct rrnx_broadcast_orbit1 {
 	double delta_n;
 
 	/**
-	 * Mean anomaly at reference time [rad]; (D19.12).
+	 * Mean anomaly at the refernce time [rad]; (D19.12).
 	 */
 	double M0;
 };
@@ -432,35 +428,6 @@ struct rrnx_broadcast_orbit7 {
 
 typedef struct rrnx_broadcast_orbit7 rrnx_broadcast_orbit7;
 
-//============================================================================
-// DATA TYPES: GPS NAV MESSAGE FILE
-//============================================================================
-
-/**
- * Reprents a navigation message file as a list of individual nodes.
- */
-struct rrnx_nav {
-	/**
-	 * Node list
-	 */
-	rrnx_list *nodelist;
-};
-
-typedef struct rrnx_nav rrnx_nav;
-
-
-//============================================================================
-// METHODS: CONSTRUCTION & DESTRUCTION
-//============================================================================
-
-extern rrnx_nav *rrnx_nav_alloc();
-extern void rrnx_nav_free(rrnx_nav *nav);
-
-//============================================================================
-// METHODS: OTHER
-//============================================================================
-
-extern rrnx_node *rrnx_nav_alloc_node(rrnx_nav *nav, int type);
 
 
 #ifdef __cplusplus

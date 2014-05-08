@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_string.h"
+#include "rrnx/rrnx_string.h"
 
 #include <stdlib.h> // malloc, free
 #include <stdio.h> // vsnprintf

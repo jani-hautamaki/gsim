@@ -15,35 +15,41 @@
 //
 //********************************{end:header}******************************//
 
-#ifndef RRNX_LABELS_H
-#define RRNX_LABELS_H
+/*
+ *
+ * Reference:
+ *
+ * Gurtner W, Estey L.
+ * RINEX: The Received Independent Exchange Format Version 2.11.
+ * 10 Dec 2007 [updated 26 Jun 2012].
+ * Available from: ftp://igs.org/pub/data/format/rinex211.txt
+ *
+ */
+
+#ifndef RRNX_H
+#define RRNX_H
+
+//#include "rrnx_common.h" // Included through rrnx_nav and rrnx_obs
+#include "rrnx_nav.h"
+#include "rrnx_obs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Pseudo type
-#define RRNX_LBL_UNKNOWN         -1
 
-// Common to both OBS and NAV
-#define RRNX_LBL_RINEX_DECL      1
-#define RRNX_LBL_CREATION_INFO   2
-#define RRNX_LBL_COMMENT         3
-#define RRNX_LBL_END_OF_HEADER   4
+//============================================================================
+// METHODS:
+//============================================================================
 
-// NAV specific
-#define RRNX_LBL_ION_ALPHA       5
-#define RRNX_LBL_ION_BETA        6
-#define RRNX_LBL_DELTA_UTC       7
-#define RRNX_LBL_LEAP_SECONDS    8
-
-// OBS specific
-
-
-extern int rrnx_enumerate_linetype(const char *line);
+/*
+extern char rrnx_system2char();
+extern unsigned int rrnx_char2system();
+*/
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
 #endif
+

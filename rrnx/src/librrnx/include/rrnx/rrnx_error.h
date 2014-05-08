@@ -72,6 +72,9 @@ typedef int rrnx_errno;
 /** Parse error: string to number conversion failed. */
 #define RRNX_E_CONV           -7
 
+/** Parse error: unknown node type. */
+#define RRNX_E_NODETYPE       -8
+
 //============================================================================
 // METHODS
 //============================================================================

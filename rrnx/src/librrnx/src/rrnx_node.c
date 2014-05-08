@@ -15,8 +15,8 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_node.h"
-#include "rrnx_nav.h"
+#include "rrnx/rrnx_node.h"
+#include "rrnx/rrnx_nav.h"
 
 #include <stdlib.h>
 #include <unistd.h> // ssize_t
@@ -66,6 +66,10 @@ static ssize_t get_data_size(int type) {
 	return -1;
 }
 
+extern int rrnx_node_is_valid_type(int type) {
+	return get_data_size(type) >= 0;
+}
+
 extern rrnx_node *rrnx_node_alloc(int type) {
 	// Determine payload size.
 	// Returns -1 if type is unknown.
@@ -76,8 +80,18 @@ extern rrnx_node *rrnx_node_alloc(int type) {
 	// needs to signaled differently to the caller.
 
 	if (data_size < 0) {
-		data_size = 0;
-		type = RRNX_ID_INVALID;
+		// Error! Unknown node type.
+
+		// There is a dilemma here:
+		// The caller should be notified about this specific
+		// problem, but all that can be done is to return NULL.
+		// However, NULL is also returned when a memory allocation
+		// occurs.
+		//
+		// Consequently, tthe caller must differentiate between
+		// these two situations.
+
+		return NULL;
 	}
 
 	// Determine the total size to allocate

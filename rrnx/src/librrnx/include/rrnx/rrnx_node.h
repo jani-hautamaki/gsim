@@ -5,7 +5,7 @@
 //      Part of the GPS/INS measurement simulation system GSIM
 //      https://code.google.com/p/gsim
 //
-//      Copyright (C) 2013 Jani Hautamaki <jani.hautamaki@hotmail.com>
+//      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
 //
 //      Licensed under the terms of GNU General Public License v3.
 //
@@ -53,6 +53,7 @@ extern "C" {
 #define RRNX_ID_BROADCAST_ORBIT7   0x200c
 
 
+
 //============================================================================
 // DATA STRUCTURES
 //============================================================================
@@ -82,6 +83,12 @@ typedef struct rrnx_node rrnx_node;
 
 extern rrnx_node *rrnx_node_alloc(int type);
 extern void rrnx_node_free(rrnx_node *node);
+
+//============================================================================
+// METHODS: CONSTRUCTION & DESTRUCTION
+//============================================================================
+
+extern int rrnx_node_is_valid_type(int type);
 
 
 #ifdef __cplusplus

@@ -17,8 +17,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "rrnx_filereader.h"
-#include "rrnx_navreader.h"
+#include "rrnx/rrnx_filereader.h"
+#include "rrnx/rrnx_navreader.h"
 
 
 int main(int argc, char *argv[]) {

@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_filereader.h"
+#include "rrnx/rrnx_filereader.h"
 
 #include <stdlib.h>
 #include <stdio.h>

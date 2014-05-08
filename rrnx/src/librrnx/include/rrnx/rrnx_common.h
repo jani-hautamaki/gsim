@@ -30,7 +30,7 @@ extern "C" {
 /**
  * Date and time
  */
-struct rrnx_time {
+struct rrnx_datetime {
 	/**
          * Year (two decimal digits).
          * 80-99: 1980-1999, and 00-79: 2000-2079.
@@ -53,7 +53,7 @@ struct rrnx_time {
         double sec;
 };
 
-typedef struct rrnx_time rrnx_time;
+typedef struct rrnx_datetime rrnx_datetime;
 
 /**
  * Identifies a satellite within a GNSS.

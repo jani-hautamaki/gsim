@@ -398,7 +398,7 @@ struct rrnx_meas_epoch {
 	/**
 	 * Epoch time: year, month, day, hour, min, sec (I2.2, 4I2, F11.7).
 	 */
-	rrnx_time t;
+	rrnx_datetime t;
 
 	/**
 	 * Epoch flag (I1)
@@ -444,7 +444,7 @@ struct rrnx_obs_epoch {
         /**
          * Epoch time
          */
-	rrnx_time t;
+	rrnx_datetime t;
 
         /**
          * Number of satellites

@@ -15,8 +15,8 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_nav.h"
-#include "rrnx_list.h"
+#include "rrnx/rrnx_nav.h"
+#include "rrnx/rrnx_list.h"
 #include <stdlib.h>
 
 
@@ -50,6 +50,11 @@ extern void rrnx_nav_free(rrnx_nav *nav) {
 	free(nav);
 }
 
+/*
+ * TODO: These should probably be separated into
+ * "rrnx_nodelist" struct.
+*/
+
 extern rrnx_node *rrnx_nav_alloc_node(rrnx_nav *nav, int type) {
 	// Return value
 	rrnx_node *node = NULL;
@@ -64,7 +69,7 @@ extern rrnx_node *rrnx_nav_alloc_node(rrnx_nav *nav, int type) {
 		item->data = rrnx_node_alloc(type);
 
 		if (item->data == NULL) {
-			// malloc failed, abort
+			// Either invalid type or malloc failed.
 			break;
 		}
 
@@ -78,6 +83,11 @@ extern rrnx_node *rrnx_nav_alloc_node(rrnx_nav *nav, int type) {
 	}
 
 	return node;
+}
+
+extern int rrnx_nav_is_node_type_valid(int type) {
+	return rrnx_node_is_valid_type(type);
+
 }
 
 extern void rrnx_nav_append(rrnx_nav *nav, rrnx_node *node) {

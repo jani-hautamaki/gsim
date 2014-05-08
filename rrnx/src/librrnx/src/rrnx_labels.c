@@ -15,6 +15,7 @@
 //
 //********************************{end:header}******************************//
 
+// These are internal
 #include "rrnx_labels.h"
 #include "rrnx_strutil.h"
 

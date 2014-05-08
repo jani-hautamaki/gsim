@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_list.h"
+#include "rrnx/rrnx_list.h"
 #include <stdlib.h> // free
 
 static void free_payload(rrnx_list *list, rrnx_list_item *item) {

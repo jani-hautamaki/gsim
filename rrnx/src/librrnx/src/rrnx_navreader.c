@@ -15,7 +15,9 @@
 //
 //********************************{end:header}******************************//
 
-#include "rrnx_navreader.h"
+#include "rrnx/rrnx_navreader.h"
+
+// internal
 #include "rrnx_labels.h"
 #include "rrnx_strutil.h"
 
@@ -101,15 +103,28 @@ static int errmsg_prepend_location(rrnx_navreader *navreader) {
 
 
 static rrnx_node *alloc_node(rrnx_navreader *navreader, int type) {
+	// Validate the node type prior to allocation attempt.
+	if (rrnx_nav_is_node_type_valid(type) == 0) {
+		// Error! Invalid node type.
+		errmsg_format(
+		    navreader, RRNX_E_NODETYPE,
+		    "Cannot allocate node (unknown node type %d)",
+		    type
+		);
+		return NULL;
+	}
 
 	// Attempt allocation
 	rrnx_node *node = rrnx_nav_alloc_node(
 	    navreader->navdata, type);
 
 	if (node == NULL) {
+		// Either a) malloc failed; or b) invalid node type.
+		// The option b) has been excluded, so..
+
 		// Allocation failed, abort
 		errmsg_none(navreader, RRNX_E_NOMEM);
-	}
+	} // if
 
 	return node;
 }

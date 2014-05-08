@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "rrnx_navreader.h"
+#include "rrnx/rrnx_navreader.h"
 
 static void dump_node_unknown(const rrnx_node *node) {
 	printf("Node: unknown\n");
