@@ -15,62 +15,12 @@
 //
 //********************************{end:header}******************************//
 
-#ifndef RRNX_COMMON_H
-#define RRNX_COMMON_H
+#ifndef RRNX_NODES_COMMON_H
+#define RRNX_NODES_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-//============================================================================
-// DATA TYPES: COMMON
-//============================================================================
-
-/**
- * Date and time
- */
-struct rrnx_datetime {
-	/**
-         * Year (two decimal digits).
-         * 80-99: 1980-1999, and 00-79: 2000-2079.
-         */
-        int year;
-
-	/** Month (1-12). */
-        int month;
-
-	/** Day (1-31). */
-        int day;
-
-	/** Hour (0-23). */
-        int hour;
-
-	/** Minute (0-59). */
-        int min;
-
-	/** Second (0 <= sec < 60). */
-        double sec;
-};
-
-typedef struct rrnx_datetime rrnx_datetime;
-
-/**
- * Identifies a satellite within a GNSS.
- */
-struct rrnx_satellite_id {
-        /**
-         * GNSS identifier.
-         */
-        unsigned int system;
-
-        /**
-         * Space Vehicle identifier within the GNSS.
-         */
-        unsigned int id;
-};
-
-typedef struct rrnx_satellite_id rrnx_satellite_id;
 
 //============================================================================
 // PAYLOAD STRUCTS: COMMON CONSTANTS

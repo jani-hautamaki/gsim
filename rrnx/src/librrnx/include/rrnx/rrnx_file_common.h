@@ -15,41 +15,60 @@
 //
 //********************************{end:header}******************************//
 
-/*
- *
- * Reference:
- *
- * Gurtner W, Estey L.
- * RINEX: The Received Independent Exchange Format Version 2.11.
- * 10 Dec 2007 [updated 26 Jun 2012].
- * Available from: ftp://igs.org/pub/data/format/rinex211.txt
- *
- */
-
-#ifndef RRNX_H
-#define RRNX_H
-
-//#include "rrnx_common.h" // Included through rrnx_nav and rrnx_obs
-#include "rrnx_file_nav.h"
-#include "rrnx_file_obs.h"
+#ifndef RRNX_FILE_COMMON_H
+#define RRNX_FILE_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * Date and time
+ */
+struct rrnx_datetime {
+	/**
+         * Year (two decimal digits).
+         * 80-99: 1980-1999, and 00-79: 2000-2079.
+         */
+        int year;
 
-//============================================================================
-// METHODS:
-//============================================================================
+	/** Month (1-12). */
+        int month;
 
-/*
-extern char rrnx_system2char();
-extern unsigned int rrnx_char2system();
-*/
+	/** Day (1-31). */
+        int day;
+
+	/** Hour (0-23). */
+        int hour;
+
+	/** Minute (0-59). */
+        int min;
+
+	/** Second (0 <= sec < 60). */
+        double sec;
+};
+
+typedef struct rrnx_datetime rrnx_datetime;
+
+/**
+ * Identifies a satellite within a GNSS.
+ */
+struct rrnx_satellite_id {
+        /**
+         * GNSS identifier.
+         */
+        unsigned int system;
+
+        /**
+         * Space Vehicle identifier within the GNSS.
+         */
+        unsigned int id;
+};
+
+typedef struct rrnx_satellite_id rrnx_satellite_id;
 
 #ifdef __cplusplus
-} // extern "C"
+} // extern C
 #endif
 
 #endif
-

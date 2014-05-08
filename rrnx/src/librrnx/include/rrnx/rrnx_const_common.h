@@ -15,41 +15,18 @@
 //
 //********************************{end:header}******************************//
 
-/*
- *
- * Reference:
- *
- * Gurtner W, Estey L.
- * RINEX: The Received Independent Exchange Format Version 2.11.
- * 10 Dec 2007 [updated 26 Jun 2012].
- * Available from: ftp://igs.org/pub/data/format/rinex211.txt
- *
- */
-
-#ifndef RRNX_H
-#define RRNX_H
-
-//#include "rrnx_common.h" // Included through rrnx_nav and rrnx_obs
-#include "rrnx_file_nav.h"
-#include "rrnx_file_obs.h"
+#ifndef RRNX_CONST_COMMON_H
+#define RRNX_CONST_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-//============================================================================
-// METHODS:
-//============================================================================
 
-/*
-extern char rrnx_system2char();
-extern unsigned int rrnx_char2system();
-*/
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
 #endif
-
