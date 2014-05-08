@@ -18,11 +18,11 @@
 #ifndef GENERIC_LIST_INTERNAL_H
 #define GENERIC_LIST_INTERNAL_H
 
+#include "cgenerics/generic_list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
 
 /**
  * Deletes the given listentry from a list.

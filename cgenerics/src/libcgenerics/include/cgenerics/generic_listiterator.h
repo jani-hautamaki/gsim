@@ -66,12 +66,12 @@ extern generic_listiterator *generic_listiterator_from_end(
 // INITIALIZATION
 //================
 
-extern void generic_listiterator_set_head(
+extern void generic_listiterator_begin(
 	generic_listiterator *iter,
 	generic_list *list
 );
 
-extern void generic_listiterator_set_tail(
+extern void generic_listiterator_end(
 	generic_listiterator *iter,
 	generic_list *list
 );

@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "generic_list.h"
+#include "cgenerics/generic_list.h"
 
 // malloc, free, NULL
 #include <stdlib.h>
@@ -43,6 +43,7 @@ extern void generic_list_init(generic_list *list) {
 	list->head = NULL;
 	list->tail = NULL;
 	list->err = 0;
+	list->free = NULL;
 }
 
 extern void generic_list_deinit(generic_list *list) {
@@ -141,6 +142,8 @@ extern generic_listentry *generic_list_insert_after(
 		if (rval->next == NULL) {
 			// This is the list's new tail.
 			list->tail = rval;
+		} else {
+			rval->next->prev = rval;
 		}
 
 	} else {
@@ -169,10 +172,13 @@ extern generic_listentry *generic_list_insert_before(
 		if (rval->prev == NULL) {
 			// This is the list's new head
 			list->head = rval;
+		} else {
+			rval->prev->next = rval;
 		}
 
 	} else {
 		// Not enough memory.
+		printf("creation failed\n");
 	}
 
 	return rval;

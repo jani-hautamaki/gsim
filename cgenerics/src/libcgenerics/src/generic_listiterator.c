@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "generic_listiterator.h"
+#include "cgenerics/generic_listiterator.h"
 #include "generic_list_internal.h"
 
 // malloc, free, NULL
@@ -52,7 +52,7 @@ extern generic_listiterator *generic_listiterator_from_begin(
 ) {
 	generic_listiterator *iter = generic_listiterator_create();
 	if (iter != NULL) {
-		generic_listiterator_set_head(iter, list);
+		generic_listiterator_begin(iter, list);
 	} else {
 		// Not enough memory
 	}
@@ -64,7 +64,7 @@ extern generic_listiterator *generic_listiterator_from_end(
 ) {
 	generic_listiterator *iter = generic_listiterator_create();
 	if (iter != NULL) {
-		generic_listiterator_set_tail(iter, list);
+		generic_listiterator_end(iter, list);
 	} else {
 		// Not enough memory
 	}
@@ -74,7 +74,7 @@ extern generic_listiterator *generic_listiterator_from_end(
 // INITIALIZATION
 //================
 
-extern void generic_listiterator_set_head(
+extern void generic_listiterator_begin(
         generic_listiterator *iter,
         generic_list *list
 ) {
@@ -85,7 +85,7 @@ extern void generic_listiterator_set_head(
 }
 
 
-extern void generic_listiterator_set_tail(
+extern void generic_listiterator_end(
         generic_listiterator *iter,
         generic_list *list
 ) {
@@ -214,6 +214,7 @@ extern void generic_listiterator_insert_after(
         void *itemptr
 ) {
 	if (iter->cur != NULL) {
+		printf("insert_after: cur\n");
 		// Has current.
 		generic_list_insert_after(
 		    iter->list, iter->cur, itemptr);
@@ -222,6 +223,7 @@ extern void generic_listiterator_insert_after(
 		iter->next = iter->cur->next;
 
 	} else if (iter->next != NULL) {
+		printf("insert_after: next\n");
 		// cur==NULL && next!=NULL.
 		// 1) We are at the beginning of a list (prev==NULL),
 		// 2) We are inbetween entries (prev!=NULL)
@@ -233,6 +235,7 @@ extern void generic_listiterator_insert_after(
 		// Refresh next
 		iter->next = iter->next->prev;
 	} else if (iter->prev != NULL) {
+		printf("insert_after: prev\n");
 		// prev!=NULL && cur==NULL && next==NULL
 		// We are at the end of a list.
 
@@ -243,6 +246,7 @@ extern void generic_listiterator_insert_after(
 		// Refresh next
 		iter->next = iter->prev->next;
 	} else {
+		printf("insert_after: empty\n");
 		// The list is empty.
 		generic_list_append(iter->list, itemptr);
 		iter->next = iter->list->head;
@@ -254,6 +258,7 @@ extern void generic_listiterator_insert_before(
         void *itemptr
 ) {
 	if (iter->cur != NULL) {
+		printf("cur\n");
 		// Has current.
 		generic_list_insert_before(
 		    iter->list, iter->cur, itemptr);
@@ -262,6 +267,7 @@ extern void generic_listiterator_insert_before(
 		iter->prev = iter->cur->prev;
 
 	} else if (iter->prev != NULL) {
+		printf("prev\n");
 		// prev!=NULL && cur==NULL.
 		// 1) We are at the end of a list (next==NULL),
 		// 2) We are inbetween entries (next!=NULL)
@@ -273,6 +279,7 @@ extern void generic_listiterator_insert_before(
 		// Refresh next
 		iter->prev = iter->prev->next;
 	} else if (iter->next != NULL) {
+		printf("next\n");
 		// prev==NULL && cur==NULL && next!=NULL
 		// We are at the beginning of a list.
 
@@ -283,6 +290,7 @@ extern void generic_listiterator_insert_before(
 		// Refresh next
 		iter->prev = iter->next->prev;
 	} else {
+		printf("empty\n");
 		// The list is empty.
 		generic_list_prepend(iter->list, itemptr);
 		iter->prev = iter->list->tail;
