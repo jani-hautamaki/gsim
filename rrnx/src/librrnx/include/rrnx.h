@@ -74,7 +74,6 @@ typedef struct rrnx_utc rrnx_utc;
  * Clock correction parameters, GPS.
  */
 struct rrnx_clock {
-
 	/**
 	 * Issue of Data (clock).
 	 */
@@ -207,7 +206,7 @@ struct rrnx_ephemeris {
 typedef struct rrnx_ephemeris rrnx_ephemeris;
 
 // struct rrnx_broadcast_orbit_gps {
-struct rrnx_navmessage {
+struct rrnx_navmsg {
 
 	/** GPS Satellite PRN number. */
 	int sv_id;
@@ -248,6 +247,8 @@ struct rrnx_navmessage {
 	int fit_interval;
 
 
+	/** Time of transmission */
+	double toz;
 
 	// Subframe 3
 
@@ -261,10 +262,8 @@ struct rrnx_navmessage {
 	// UTC: A0, A1, Tot, WNt, delta_LS,DN, delta_LSF
 };
 
+typedef struct rrnx_navmsg rrnx_navmsg;
 
-struct rrnx_navmsg_file {
-	// each navmsg entry
-};
 
 //============================================================================
 // METHODS:

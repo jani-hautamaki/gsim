@@ -79,7 +79,7 @@ struct rrnx_ion_alpha {
 typedef struct rrnx_ion_alpha rrnx_ion_alpha;
 
 /**
- * Ionospheric parameters B0-B3 of almanac (ION BETA)
+ * Ionospheric parameters B0-B3 of almanac (ION BETA).
  * This is node is specific to GPS.
  */
 struct rrnx_ion_beta {
@@ -92,7 +92,7 @@ struct rrnx_ion_beta {
 typedef struct rrnx_ion_beta rrnx_ion_beta;
 
 /**
- * Almanac parameters for UTC computation (DELTA-UTC: A0,A1,T,W)
+ * UTC parameters of almanac (DELTA-UTC: A0,A1,T,W).
  * This is node is specific to GPS.
  */
 struct rrnx_delta_utc {
