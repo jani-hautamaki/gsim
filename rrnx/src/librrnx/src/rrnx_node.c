@@ -16,7 +16,9 @@
 //********************************{end:header}******************************//
 
 #include "rrnx/rrnx_node.h"
-#include "rrnx/rrnx_nav.h"
+// Include all known nodes
+#include "rrnx/rrnx_nodes_common.h"
+#include "rrnx/rrnx_nodes_nav.h"
 
 #include <stdlib.h>
 #include <unistd.h> // ssize_t
@@ -43,22 +45,8 @@ static ssize_t get_data_size(int type) {
 	case RRNX_ID_LEAP_SECONDS:
 		return sizeof(rrnx_leap_seconds);
 
-	case RRNX_ID_BROADCAST_ORBIT0:
-		return sizeof(rrnx_broadcast_orbit0);
-	case RRNX_ID_BROADCAST_ORBIT1:
-		return sizeof(rrnx_broadcast_orbit1);
-	case RRNX_ID_BROADCAST_ORBIT2:
-		return sizeof(rrnx_broadcast_orbit2);
-	case RRNX_ID_BROADCAST_ORBIT3:
-		return sizeof(rrnx_broadcast_orbit3);
-	case RRNX_ID_BROADCAST_ORBIT4:
-		return sizeof(rrnx_broadcast_orbit4);
-	case RRNX_ID_BROADCAST_ORBIT5:
-		return sizeof(rrnx_broadcast_orbit5);
-	case RRNX_ID_BROADCAST_ORBIT6:
-		return sizeof(rrnx_broadcast_orbit6);
-	case RRNX_ID_BROADCAST_ORBIT7:
-		return sizeof(rrnx_broadcast_orbit7);
+	case RRNX_ID_DATARECORD_NAV:
+		return sizeof(rrnx_datarecord_nav);
 
 	default:
 		break;
@@ -66,7 +54,7 @@ static ssize_t get_data_size(int type) {
 	return -1;
 }
 
-extern int rrnx_node_is_valid_type(int type) {
+extern int rrnx_node_is_type_valid(int type) {
 	return get_data_size(type) >= 0;
 }
 
@@ -123,14 +111,7 @@ extern void rrnx_node_free(rrnx_node *node) {
 	case RRNX_ID_ION_BETA:
 	case RRNX_ID_DELTA_UTC:
 	case RRNX_ID_LEAP_SECONDS:
-	case RRNX_ID_BROADCAST_ORBIT0:
-	case RRNX_ID_BROADCAST_ORBIT1:
-	case RRNX_ID_BROADCAST_ORBIT2:
-	case RRNX_ID_BROADCAST_ORBIT3:
-	case RRNX_ID_BROADCAST_ORBIT4:
-	case RRNX_ID_BROADCAST_ORBIT5:
-	case RRNX_ID_BROADCAST_ORBIT6:
-	case RRNX_ID_BROADCAST_ORBIT7:
+	case RRNX_ID_DATARECORD_NAV:
 		// No special considerations
 		break;
 	case RRNX_ID_INVALID:

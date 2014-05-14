@@ -22,6 +22,9 @@
 extern "C" {
 #endif
 
+/**
+ * Satellite system IDs.
+ */
 
 
 

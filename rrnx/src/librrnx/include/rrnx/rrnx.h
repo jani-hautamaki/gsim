@@ -29,6 +29,9 @@
 #ifndef RRNX_H
 #define RRNX_H
 
+// Error codes.
+#include "rrnx_error.h"
+
 //#include "rrnx_common.h" // Included through rrnx_nav and rrnx_obs
 #include "rrnx_file_nav.h"
 #include "rrnx_file_obs.h"
@@ -38,9 +41,28 @@ extern "C" {
 #endif
 
 
-//============================================================================
-// METHODS:
-//============================================================================
+// OTHER METHODS
+//===============
+
+/**
+ * Read a NAV file.
+ * Returns error code.
+ */
+extern int rrnx_read_navfile(const char *filename, rrnx_file_nav **nav);
+
+/**
+ * Allocate and initialize a NAV file object.
+ * Provided for convenience.
+ */
+extern rrnx_file_nav *rrnx_alloc_navfile();
+
+/**
+ * Free NAV file object.
+ * Provided for convenience.
+ */
+extern void rrnx_free_navfile(rrnx_file_nav *nav);
+
+
 
 /*
 extern char rrnx_system2char();

@@ -42,15 +42,8 @@ extern "C" {
 #define RRNX_ID_ION_BETA           0x2002
 #define RRNX_ID_DELTA_UTC          0x2003
 #define RRNX_ID_LEAP_SECONDS       0x2004
-// NAV only (pseudo tags)
-#define RRNX_ID_BROADCAST_ORBIT0   0x2005
-#define RRNX_ID_BROADCAST_ORBIT1   0x2006
-#define RRNX_ID_BROADCAST_ORBIT2   0x2007
-#define RRNX_ID_BROADCAST_ORBIT3   0x2008
-#define RRNX_ID_BROADCAST_ORBIT4   0x2009
-#define RRNX_ID_BROADCAST_ORBIT5   0x200a
-#define RRNX_ID_BROADCAST_ORBIT6   0x200b
-#define RRNX_ID_BROADCAST_ORBIT7   0x200c
+// The NAV data record
+#define RRNX_ID_DATARECORD_NAV     0x2010
 
 
 
@@ -88,7 +81,7 @@ extern void rrnx_node_free(rrnx_node *node);
 // METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
-extern int rrnx_node_is_valid_type(int type);
+extern int rrnx_node_is_type_valid(int type);
 
 
 #ifdef __cplusplus

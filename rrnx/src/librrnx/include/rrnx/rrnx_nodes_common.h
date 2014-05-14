@@ -23,21 +23,6 @@ extern "C" {
 #endif
 
 //============================================================================
-// PAYLOAD STRUCTS: COMMON CONSTANTS
-//============================================================================
-
-/**
- * These identify the satellite system.
- *
- */
-
-#define RRNX_SYSTEM_GPS                 'G'
-#define RRNX_SYSTEM_GLONASS             'R'
-#define RRNX_SYSTEM_GALILEO             'E'
-#define RRNX_SYSTEM_BEIDOU              'B'
-#define RRNX_SYSTEM_QZSS                'Q'
-
-//============================================================================
 // PAYLOAD STRUCTS: COMMON
 //============================================================================
 

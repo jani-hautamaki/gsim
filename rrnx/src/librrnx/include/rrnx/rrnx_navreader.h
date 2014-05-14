@@ -18,10 +18,11 @@
 #ifndef RRNX_NAVREADER_H
 #define RRNX_NAVREADER_H
 
-#include "rrnx_string.h"
+#include "rrnx_string.h" // rrnx_string
+#include "rrnx_list.h" // rrnx_list
 #include "rrnx_error.h"
+#include "rrnx_basetypes_nav.h" // rrnx_navmsg
 #include "rrnx_filereader.h"
-#include "rrnx_nav.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,10 +52,15 @@ struct rrnx_navreader {
 	 */
 	rrnx_filereader *fr;
 
+        /**
+         * Parsed nodes as a linked-list.
+         */
+        rrnx_list *nodelist;
+
 	/**
-	 * The target object that is being built.
+	 * Current navmsg that is being built or NULL.
 	 */
-	rrnx_nav *navdata;
+	rrnx_navmsg *cur_navmsg;
 
 	/**
 	 * Human-readable error message.
@@ -87,11 +93,6 @@ struct rrnx_navreader {
 	 */
 	unsigned int workbuf_size;
 
-	/**
-	 * Buffer for the values in a broadcast orbit line.
-	 */
-	double v[4];
-
 };
 
 typedef struct rrnx_navreader rrnx_navreader;
@@ -120,7 +121,7 @@ extern int rrnx_navr_consume(
 /**
  * Transfer the ownership of the built navdata to the caller.
  */
-extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader);
+extern rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader);
 
 //============================================================================
 // METHODS: ERROR MANAGEMENT

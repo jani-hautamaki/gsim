@@ -17,19 +17,26 @@
 
 #include "rrnx/rrnx_navreader.h"
 
+#include "rrnx/rrnx_node.h"
+#include "rrnx/rrnx_nodes_common.h"
+#include "rrnx/rrnx_nodes_nav.h"
+
 // internal
 #include "rrnx_labels.h"
 #include "rrnx_strutil.h"
+
 
 #include <stdlib.h> // malloc, free, NULL, FILE
 #include <string.h>
 #include <errno.h> // errno
 #include <stdarg.h> // va_list, va_start, va_end
 
+/*
 static int noerr(rrnx_navreader *navreader) {
 	navreader->err = RRNX_E_OK;
 	return navreader->err;
 }
+*/
 
 static int errmsg_fr(rrnx_navreader *navreader) {
 	// TODO: Should the error be copied from the fr,
@@ -101,10 +108,41 @@ static int errmsg_prepend_location(rrnx_navreader *navreader) {
 	return navreader->err;
 }
 
+static rrnx_node *nodelist_alloc_node(rrnx_list *nodelist, int nodetype) {
+	// Return value
+
+	rrnx_list_item *listitem = NULL;
+	rrnx_node *node = NULL;
+
+	int complete = 0;
+	do {
+		// Allocate a node with sizeof(nodetype)
+		node = rrnx_node_alloc(nodetype);
+		if (node == NULL) break;
+
+		listitem = rrnx_list_append(nodelist, node);
+		if (listitem == NULL) break;
+
+		complete = 1;
+	} while(0);
+
+	if (complete == 0) {
+		if (listitem != NULL) {
+			rrnx_list_remove(nodelist, listitem);
+			listitem = NULL;
+		}
+		if (node != NULL) {
+			rrnx_node_free(node);
+			node = NULL;
+		}
+	}
+
+	return node;
+}
 
 static rrnx_node *alloc_node(rrnx_navreader *navreader, int type) {
 	// Validate the node type prior to allocation attempt.
-	if (rrnx_nav_is_node_type_valid(type) == 0) {
+	if (rrnx_node_is_type_valid(type) == 0) {
 		// Error! Invalid node type.
 		errmsg_format(
 		    navreader, RRNX_E_NODETYPE,
@@ -115,8 +153,8 @@ static rrnx_node *alloc_node(rrnx_navreader *navreader, int type) {
 	}
 
 	// Attempt allocation
-	rrnx_node *node = rrnx_nav_alloc_node(
-	    navreader->navdata, type);
+	//rrnx_node *node = rrnx_nav_alloc_node(navreader->navdata, type);
+	rrnx_node *node = nodelist_alloc_node(navreader->nodelist, type);
 
 	if (node == NULL) {
 		// Either a) malloc failed; or b) invalid node type.
@@ -127,6 +165,23 @@ static rrnx_node *alloc_node(rrnx_navreader *navreader, int type) {
 	} // if
 
 	return node;
+}
+
+static rrnx_navmsg *alloc_datarecord_node(
+    rrnx_navreader *navreader
+) {
+	rrnx_navmsg *rval = NULL;
+
+	rrnx_node *node = alloc_node(navreader, RRNX_ID_DATARECORD_NAV);
+	if (node != NULL) {
+		rrnx_datarecord_nav *datarecord = (void *) node->data;
+		// Allocation success.
+		rval = &datarecord->navmsg;
+	} else {
+		// Allocation failed. Abort
+	} // if-else
+
+	return rval;
 }
 
 static void parse_fortran_double(
@@ -268,29 +323,6 @@ static void parse_int_substr(
 	rrnx_substr_trimmed(navreader->workbuf, line, offset, len);
 	parse_int(navreader, result, navreader->workbuf);
 }
-
-/*
-static void parse_uint_substr(
-    rrnx_navreader *navreader,
-    unsigned int *result,
-    const char *line,
-    int offset,
-    int len
-) {
-	rrnx_substr_trimmed(navreader->workbuf, line, offset, len);
-	parse_uint(navreader, result, navreader->workbuf);
-}
-*/
-
-
-/*
-static int eat_header(rrnx_navreader *navreader, const char *line) {
-	// copy the record label into a work buffer,
-	// translate the label into tag code, and switch.
-
-
-}
-*/
 
 static void parse_rinex_decl(
     rrnx_navreader *navreader,
@@ -465,23 +497,74 @@ static void parse_leap_seconds(
 }
 
 
+/**
+ * Parses a fortran double field (Fx.y) in a BROADCAST ORBIT line.
+ *
+ * The BC orbit field is specified by "fieldnum".
+ * Its value must be within 0-3.
+ *
+ * The result is stored into the variable pointed by "result".
+ *
+ * If unempty_flag is not NULL, then the variable is set to either 0 or 1
+ * depending on whether the field is empty (0) or unempty (1).
+ * If unempty_flag is NULL, then empty field results in an error.
+ *
+ */
+static void parse_bco_value(
+    rrnx_navreader *navreader,
+    const char *line,
+    int fieldnum,
+    double *result,
+    int *unempty_flag
+) {
+	// Length of a field
+	int len = 19;
+	// Compute the starting offset for the requested field.
+	int offset = 3 + (fieldnum * len);
+
+	int workbuf_len = rrnx_substr_trimmed(
+	    navreader->workbuf, line, offset, len);
+
+	// Record field blank status
+	if (unempty_flag != NULL) {
+		*unempty_flag = (workbuf_len > 0);
+	}
+
+	if (workbuf_len > 0) {
+		// Attempt parsing
+		parse_fortran_double(
+		    navreader, result, navreader->workbuf);
+	} else if (unempty_flag != NULL) {
+		// Blanks are allowed.
+	} else {
+		// Error. Blanks are not allowed.
+		errmsg_format(
+		    navreader, RRNX_E_BLANK,
+		    "Cannot convert broadcast orbit line\'s field #%d to a number: the field is blank",
+	    	    fieldnum+1
+		); // ermsg_format()
+	} // if-else
+}
+
 static void parse_broadcast_orbit0(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT0);
-	if (node == NULL) return; // Allocation failed, abort
+	// Allocate a new data record node,
+	// and store a pointer to the navmsg
+	// that is currently being built.
+	navreader->cur_navmsg = alloc_datarecord_node(navreader);
 
-	rrnx_broadcast_orbit0 *data = (void *) node->data;
+	rrnx_navmsg *data = navreader->cur_navmsg;
+	if (data == NULL) return; // Alloc failed, abort.
+
 
 	// Satellite PRN number (I2)
 	parse_int_substr(
 	    navreader, &data->sv_id, line, 0, 2);
 
-	/*
 	// For convenience
-	rrnx_time *Toc = &data->Toc;
+	rrnx_datetime *Toc = &data->toc;
 	// Epoch: year (I2.2)
 	parse_int_substr(
 	    navreader, &Toc->year, line, 3, 2);
@@ -500,93 +583,38 @@ static void parse_broadcast_orbit0(
 	// Epoch: second (F5.1)
 	parse_fortran_double_substr(
 	    navreader, &Toc->sec, line, 17, 5);
-	*/
 
-	// Epoch: year (I2.2)
-	parse_int_substr(
-	    navreader, &data->toc_year, line, 3, 2);
+	// Ordinary broadcast orbit line items.
 
-	// Epoch: month (I2)
-	parse_int_substr(
-	    navreader, &data->toc_month, line, 6, 2);
+	parse_bco_value(navreader, line, 1, &data->af0, NULL);
+	if (navreader->err) return;
 
-	// Epoch: day (I2)
-	parse_int_substr(
-	    navreader, &data->toc_day, line, 9, 2);
+	parse_bco_value(navreader, line, 2, &data->af1, NULL);
+	if (navreader->err) return;
 
-	// Epoch: hour (I2)
-	parse_int_substr(
-	    navreader, &data->toc_hour, line, 12, 2);
+	parse_bco_value(navreader, line, 3,
+	    &data->af2, &data->valid_af2);
+	if (navreader->err) return;
 
-	// Epoch: minute (I2)
-	parse_int_substr(
-	    navreader, &data->toc_min, line, 15, 2);
-
-	// Epoch: second (F5.1)
-	parse_fortran_double_substr(
-	    navreader, &data->toc_sec, line, 17, 5);
-
-	// Clock bias (D19.12)
-	parse_fortran_double_substr(
-	    navreader, &data->af0, line, 22, 19);
-
-	// Clock drift (D19.12)
-	parse_fortran_double_substr(
-	    navreader, &data->af1, line, 41, 19);
-
-	// Clock drift rate (D19.12)
-	// TODO: This is optional
-	parse_fortran_double_substr(
-	    navreader, &data->af2, line, 60, 19);
-
-}
-
-static void parse_broadcast_orbit_line(
-    rrnx_navreader *navreader,
-    const char *line,
-    double *values
-) {
-	int offset = 3;
-	int len = 19;
-	for (int i = 0; i < 4; i++) {
-		parse_fortran_double_substr(
-		    navreader, &values[i], line, offset, len);
-		offset += len;
-	}
 }
 
 static void parse_broadcast_orbit1(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT1);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit1 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->IODE, NULL);
+	if (navreader->err) return;
 
-	/*
-	double *v = navreader->v; // For convenience
-	parse_broadcast_orbit_line(navreader, line, v);
-	data->IODE = (int) v[0];
-	data->Crs = v[1];
-	data->delta_n = v[2];
-	data->M0 = v[3];
-	*/
+	parse_bco_value(navreader, line, 1, &data->Crs, NULL);
+	if (navreader->err) return;
 
-	double val;
-	parse_fortran_double_substr(
-	    navreader, &val, line, 3, 19);
-	data->IODE = (int) val;
+	parse_bco_value(navreader, line, 2, &data->delta_n, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->Crs, line, 22, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->delta_n, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->M0, line, 60, 19);
+	parse_bco_value(navreader, line, 3, &data->M0, NULL);
+	if (navreader->err) return;
 
 }
 
@@ -594,71 +622,57 @@ static void parse_broadcast_orbit2(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT2);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit2 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->Cuc, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->Cuc, line, 3, 19);
+	parse_bco_value(navreader, line, 1, &data->e, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->e, line, 22, 19);
+	parse_bco_value(navreader, line, 2, &data->Cus, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->Cus, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->sqrtA, line, 60, 19);
-
+	parse_bco_value(navreader, line, 3, &data->sqrtA, NULL);
+	if (navreader->err) return;
 }
 
 static void parse_broadcast_orbit3(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT3);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit3 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->toe, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->toe, line, 3, 19);
+	parse_bco_value(navreader, line, 1, &data->Cic, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->Cic, line, 22, 19);
+	parse_bco_value(navreader, line, 2, &data->OMEGA0, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->OMEGA0, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->Cis, line, 60, 19);
-
+	parse_bco_value(navreader, line, 3, &data->Cis, NULL);
+	if (navreader->err) return;
 }
 
 static void parse_broadcast_orbit4(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT4);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit4 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->i0, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->i0, line, 3, 19);
+	parse_bco_value(navreader, line, 1, &data->Crc, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->Crc, line, 22, 19);
+	parse_bco_value(navreader, line, 2, &data->w, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->w, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->OMEGADOT, line, 60, 19);
+	parse_bco_value(navreader, line, 3, &data->OMEGADOT, NULL);
+	if (navreader->err) return;
 
 }
 
@@ -666,87 +680,71 @@ static void parse_broadcast_orbit5(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT5);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit5 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->idot, NULL);
+	if (navreader->err) return;
 
-	double value_as_dbl = 0.0;
+	parse_bco_value(navreader, line, 1, &data->L2_codes, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->idot, line, 3, 19);
+	parse_bco_value(navreader, line, 2, &data->toe_week, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->L2_codes, line, 22, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &value_as_dbl, line, 41, 19);
-	data->toe_week = (int) value_as_dbl;
-
-	parse_fortran_double_substr(
-	    navreader, &value_as_dbl, line, 60, 19);
-	data->L2P_dataflag = (int) value_as_dbl;
+	parse_bco_value(navreader, line, 3, &data->L2P_dataflag, NULL);
+	if (navreader->err) return;
 }
 
 static void parse_broadcast_orbit6(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT6);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit6 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->accuracy, NULL);
+	if (navreader->err) return;
 
-	double value_as_dbl = 0.0;
+	parse_bco_value(navreader, line, 1, &data->health, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->accuracy, line, 3, 19);
+	parse_bco_value(navreader, line, 2, &data->Tgd, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->health, line, 22, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->Tgd, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &value_as_dbl, line, 60, 19);
-	data->IODC = (int) value_as_dbl;
+	parse_bco_value(navreader, line, 3, &data->IODC, NULL);
+	if (navreader->err) return;
 }
 
 static void parse_broadcast_orbit7(
     rrnx_navreader *navreader,
     const char *line
 ) {
-	rrnx_node *node = alloc_node(
-	    navreader, RRNX_ID_BROADCAST_ORBIT7);
-	if (node == NULL) return; // Allocation failed, abort
+	rrnx_navmsg *data = navreader->cur_navmsg;
 
-	rrnx_broadcast_orbit7 *data = (void *) node->data;
+	parse_bco_value(navreader, line, 0, &data->tow, NULL);
+	if (navreader->err) return;
 
-	//double value_as_dbl = 0.0;
+	parse_bco_value(navreader, line, 1, &data->fit_interval, NULL);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->toz, line, 3, 19);
+	parse_bco_value(navreader, line, 2,
+	    &data->spare1, &data->valid_spare1);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->fit_interval, line, 22, 19);
+	parse_bco_value(navreader, line, 3,
+	    &data->spare2, &data->valid_spare2);
+	if (navreader->err) return;
 
-	parse_fortran_double_substr(
-	    navreader, &data->unused1, line, 41, 19);
-
-	parse_fortran_double_substr(
-	    navreader, &data->unused2, line, 60, 19);
+	// The navigation message is now complete.
+	// Consequently, unset the current navmsg
+	navreader->cur_navmsg = NULL;
 }
 
 static void parse_unknown(
     rrnx_navreader *navreader,
     const char *line
 ) {
-
+	// Dummy. TODO: Remove this function??
 }
-
 
 static int parse_line(rrnx_navreader *navreader, const char *line) {
 	int label_id = rrnx_enumerate_linetype(line);
@@ -820,11 +818,20 @@ static int cycle_data(
 			if (navreader->err) {
 				navreader->state = S_ERROR;
 			}
-		} else {
+		}
+		if (linetype == RRNX_LBL_END_OF_HEADER) {
 			// No more header records.
-			// Move on to broadcast orbit 0
-			navreader->state = S_BROADCAST_ORBIT0;
-			navreader->eps = 1;
+			// Move on to expect broadcast orbit 0 or eof.
+			navreader->state = S_EXPECT_ORBIT_OR_EOF;
+		} else if (linetype == RRNX_LBL_UNKNOWN) {
+			// Unknown header label.
+	                errmsg_format(
+         	           navreader, RRNX_E_SYNTAX,
+                	    "Unexpected header label"
+			);
+			navreader->state = S_ERROR;
+		} else {
+			// Keep on expecting header lines.
 		} // if-else
 		break;
 
@@ -833,7 +840,8 @@ static int cycle_data(
 		break;
 
 	case S_EXPECT_ORBIT_OR_EOF:
-		// If cycle_data() is called, then line != NULL.
+		// If cycle_data() is called instead of cycle_eof(),
+		// then it is known that line != NULL.
 		navreader->state = S_BROADCAST_ORBIT0;
 		navreader->eps = 1;
 		break;
@@ -967,7 +975,9 @@ extern rrnx_navreader *rrnx_navr_alloc(void) {
 	if (navreader != NULL) do {
 		// Initialize members
 		navreader->fr = NULL;
-		navreader->navdata = NULL;
+		//navreader->navdata = NULL;
+		navreader->nodelist = NULL;
+		navreader->cur_navmsg = NULL;
 		navreader->errmsg = NULL;
 		navreader->err = RRNX_E_OK;
 		navreader->workbuf = NULL;
@@ -1016,6 +1026,11 @@ extern void rrnx_navr_free(rrnx_navreader *navreader) {
 		// Already freed
 		return;
 	}
+
+
+	// Release the currently held nodelist, if any.
+	rrnx_list_free(navreader->nodelist);
+	navreader->nodelist = NULL;
 
 	// Deallocate filereader, if any
 	rrnx_fr_free(navreader->fr);
@@ -1102,15 +1117,18 @@ extern void rrnx_navr_readfile(
 	// Reset parser state
 	navreader->state = S_HEADER;
 
-	// TODO: if previous navdata exists, free it?
+	// If there's a previous nodelist, free it first.
+	rrnx_list_free(navreader->nodelist);
+	navreader->nodelist = NULL;
 
-	// Create new navdata
-	navreader->navdata = rrnx_nav_alloc();
-	if (navreader->navdata == NULL) {
-		// Allocation failed
+	// Allocate a new nodelist
+	navreader->nodelist = rrnx_list_alloc();
+	if (navreader->nodelist == NULL) {
+		// Mem alloc failed, abort.
 		errmsg_none(navreader, RRNX_E_NOMEM);
-		return;
 	}
+	// Configure a custom destructor for the nodelist.
+	navreader->nodelist->destructor = (void *) rrnx_node_free;
 
 	while ((navreader->state != S_ERROR)
 	    && (navreader->state != S_FINISHED))
@@ -1147,10 +1165,9 @@ extern void rrnx_navr_readfile(
 	rrnx_fr_fclose(fr);
 }
 
-extern rrnx_nav *rrnx_navr_pop(rrnx_navreader *navreader) {
-	rrnx_nav *navdata = navreader->navdata;
-	navreader->navdata = NULL;
-	return navdata;
+extern rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader) {
+	rrnx_list *nodelist = navreader->nodelist;
+	navreader->nodelist = NULL;
+	return nodelist;
 }
-
 
