@@ -4,5 +4,5 @@ syntax: glob
 rrnx/build
 cgenerics/build
 gsim/build
-cgps/build
+coregps/build
 
