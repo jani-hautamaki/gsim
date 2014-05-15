@@ -15,8 +15,8 @@
 //
 //********************************{end:header}******************************//
 
-#include "cgenerics/generic_listiterator.h"
-#include "generic_list_internal.h"
+#include "cgenerics/cg_listiterator.h"
+#include "cg_list_internal.h"
 
 // malloc, free, NULL
 #include <stdlib.h>
@@ -24,9 +24,9 @@
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern generic_listiterator *generic_listiterator_create() {
-	generic_listiterator *iter
-	    = malloc(sizeof(generic_listiterator));
+extern cg_listiterator *cg_listiterator_create() {
+	cg_listiterator *iter
+	    = malloc(sizeof(cg_listiterator));
 
 	if (iter != NULL) {
 		// Initialize
@@ -41,30 +41,30 @@ extern generic_listiterator *generic_listiterator_create() {
 	return iter;
 }
 
-extern void generic_listiterator_free(generic_listiterator *iter) {
+extern void cg_listiterator_free(cg_listiterator *iter) {
 	if (iter != NULL) {
 		free(iter);
 	}
 }
 
-extern generic_listiterator *generic_listiterator_from_begin(
-        generic_list *list
+extern cg_listiterator *cg_listiterator_from_begin(
+        cg_list *list
 ) {
-	generic_listiterator *iter = generic_listiterator_create();
+	cg_listiterator *iter = cg_listiterator_create();
 	if (iter != NULL) {
-		generic_listiterator_begin(iter, list);
+		cg_listiterator_begin(iter, list);
 	} else {
 		// Not enough memory
 	}
 	return iter;
 }
 
-extern generic_listiterator *generic_listiterator_from_end(
-        generic_list *list
+extern cg_listiterator *cg_listiterator_from_end(
+        cg_list *list
 ) {
-	generic_listiterator *iter = generic_listiterator_create();
+	cg_listiterator *iter = cg_listiterator_create();
 	if (iter != NULL) {
-		generic_listiterator_end(iter, list);
+		cg_listiterator_end(iter, list);
 	} else {
 		// Not enough memory
 	}
@@ -74,9 +74,9 @@ extern generic_listiterator *generic_listiterator_from_end(
 // INITIALIZATION
 //================
 
-extern void generic_listiterator_begin(
-        generic_listiterator *iter,
-        generic_list *list
+extern void cg_listiterator_begin(
+        cg_listiterator *iter,
+        cg_list *list
 ) {
 	iter->list = list;
 	iter->prev = NULL;
@@ -85,9 +85,9 @@ extern void generic_listiterator_begin(
 }
 
 
-extern void generic_listiterator_end(
-        generic_listiterator *iter,
-        generic_list *list
+extern void cg_listiterator_end(
+        cg_listiterator *iter,
+        cg_list *list
 ) {
 	iter->list = list;
 	iter->prev = list->tail;
@@ -98,14 +98,14 @@ extern void generic_listiterator_end(
 // ACCESS METHODS
 //================
 
-extern int generic_listiterator_has_current(
-        const generic_listiterator *iter
+extern int cg_listiterator_has_current(
+        const cg_listiterator *iter
 ) {
 	return iter->cur != NULL;
 }
 
-extern void *generic_listiterator_get_current(
-        generic_listiterator *iter
+extern void *cg_listiterator_get_current(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 
@@ -121,24 +121,24 @@ extern void *generic_listiterator_get_current(
 // TRAVERSAL
 //===========
 
-extern int generic_listiterator_has_next(
-        const generic_listiterator *iter
+extern int cg_listiterator_has_next(
+        const cg_listiterator *iter
 ) {
 	return iter->next != NULL;
 }
 
-extern int generic_listiterator_has_previous(
-        const generic_listiterator *iter
+extern int cg_listiterator_has_previous(
+        const cg_listiterator *iter
 ) {
 	return iter->prev != NULL;
 }
 
-extern void *generic_listiterator_next(
-        generic_listiterator *iter
+extern void *cg_listiterator_next(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 
-	generic_listentry *next = iter->next;
+	cg_listentry *next = iter->next;
 	if (next != NULL) {
 		// Return value
 		rval = next->itemptr;
@@ -146,7 +146,10 @@ extern void *generic_listiterator_next(
 		iter->prev = next->prev;
 		iter->cur = next;
 		iter->next = next->next;
-
+	} else if (iter->cur != NULL) {
+		iter->prev = iter->cur;
+		iter->cur = NULL;
+		iter->next = NULL;
 	} else {
 		// Error, no next available.
 	}
@@ -154,12 +157,12 @@ extern void *generic_listiterator_next(
 	return rval;
 }
 
-extern void *generic_listiterator_previous(
-        generic_listiterator *iter
+extern void *cg_listiterator_previous(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 
-	generic_listentry *prev = iter->prev;
+	cg_listentry *prev = iter->prev;
 	if (prev != NULL) {
 		// Return value
 		rval = prev->itemptr;
@@ -167,7 +170,10 @@ extern void *generic_listiterator_previous(
 		iter->next = prev->next;
 		iter->cur = prev;
 		iter->prev = prev->prev;
-
+	} else if (iter->cur != NULL) {
+		iter->next = iter->cur;
+		iter->cur = NULL;
+		iter->prev = NULL;
 	} else {
 		// Error, no previous available.
 	}
@@ -179,11 +185,11 @@ extern void *generic_listiterator_previous(
 // LIST MANIPULATION: INSERTION
 //==============================
 
-extern void *generic_listiterator_set_current(
-        generic_listiterator *iter,
+extern void *cg_listiterator_set_current(
+        cg_listiterator *iter,
         void *itemptr
 ) {
-	generic_listentry *cur = iter->cur;
+	cg_listentry *cur = iter->cur;
 	void *rval = NULL;
 
 	if (cur != NULL) {
@@ -196,11 +202,11 @@ extern void *generic_listiterator_set_current(
 	return rval;
 }
 
-extern void generic_listiterator_replace_current(
-        generic_listiterator *iter,
+extern void cg_listiterator_replace_current(
+        cg_listiterator *iter,
         void *itemptr
 ) {
-	void *origptr = generic_listiterator_set_current(iter, itemptr);
+	void *origptr = cg_listiterator_set_current(iter, itemptr);
 
 	void (*free_itemptr)(void*);
 	free_itemptr = iter->list->free;
@@ -209,90 +215,82 @@ extern void generic_listiterator_replace_current(
 	}
 }
 
-extern void generic_listiterator_insert_after(
-        generic_listiterator *iter,
+extern void cg_listiterator_insert_after(
+        cg_listiterator *iter,
         void *itemptr
 ) {
 	if (iter->cur != NULL) {
-		printf("insert_after: cur\n");
 		// Has current.
-		generic_list_insert_after(
+		cg_list_insert_after(
 		    iter->list, iter->cur, itemptr);
 
 		// Refresh next
 		iter->next = iter->cur->next;
 
 	} else if (iter->next != NULL) {
-		printf("insert_after: next\n");
 		// cur==NULL && next!=NULL.
 		// 1) We are at the beginning of a list (prev==NULL),
 		// 2) We are inbetween entries (prev!=NULL)
 
 		// The new entry becomes the new head
-		generic_list_insert_before(
+		cg_list_insert_before(
 		    iter->list, iter->next, itemptr);
 
 		// Refresh next
 		iter->next = iter->next->prev;
 	} else if (iter->prev != NULL) {
-		printf("insert_after: prev\n");
 		// prev!=NULL && cur==NULL && next==NULL
 		// We are at the end of a list.
 
 		// The new entry becomes the new tail.
-		generic_list_insert_after(
+		cg_list_insert_after(
 		    iter->list, iter->prev, itemptr);
 
 		// Refresh next
 		iter->next = iter->prev->next;
 	} else {
-		printf("insert_after: empty\n");
 		// The list is empty.
-		generic_list_append(iter->list, itemptr);
+		cg_list_append(iter->list, itemptr);
 		iter->next = iter->list->head;
 	}
 }
 
-extern void generic_listiterator_insert_before(
-        generic_listiterator *iter,
+extern void cg_listiterator_insert_before(
+        cg_listiterator *iter,
         void *itemptr
 ) {
 	if (iter->cur != NULL) {
-		printf("cur\n");
 		// Has current.
-		generic_list_insert_before(
+		cg_list_insert_before(
 		    iter->list, iter->cur, itemptr);
 
 		// Refresh previous
 		iter->prev = iter->cur->prev;
 
 	} else if (iter->prev != NULL) {
-		printf("prev\n");
 		// prev!=NULL && cur==NULL.
 		// 1) We are at the end of a list (next==NULL),
 		// 2) We are inbetween entries (next!=NULL)
 
 		// The new entry becomes the new head
-		generic_list_insert_after(
+		cg_list_insert_after(
 		    iter->list, iter->prev, itemptr);
 
 		// Refresh next
 		iter->prev = iter->prev->next;
 	} else if (iter->next != NULL) {
-		printf("next\n");
 		// prev==NULL && cur==NULL && next!=NULL
 		// We are at the beginning of a list.
 
 		// The new entry becomes the new head.
-		generic_list_insert_before(
+		cg_list_insert_before(
 		    iter->list, iter->next, itemptr);
 
 		// Refresh next
 		iter->prev = iter->next->prev;
 	} else {
-		printf("empty\n");
 		// The list is empty.
-		generic_list_prepend(iter->list, itemptr);
+		cg_list_prepend(iter->list, itemptr);
 		iter->prev = iter->list->tail;
 	}
 }
@@ -304,40 +302,40 @@ extern void generic_listiterator_insert_before(
 // LIST MANIPULATION: DELETION
 //=============================
 
-extern void generic_listiterator_delete_current(
-        generic_listiterator *iter
+extern void cg_listiterator_delete_current(
+        cg_listiterator *iter
 ) {
 	if (iter->cur != NULL) {
-		generic_list_delete(iter->list, iter->cur, 1);
+		cg_list_delete(iter->list, iter->cur, 1);
 		iter->cur = NULL;
 	} else {
 		// Error. No current entry.
 	}
 }
 
-extern void generic_listiterator_delete_next(
-        generic_listiterator *iter
+extern void cg_listiterator_delete_next(
+        cg_listiterator *iter
 ) {
-	generic_listentry *next = iter->next;
+	cg_listentry *next = iter->next;
 	if (next != NULL) {
 		// Update next
 		iter->next = next->next;
 		// Remove entry
-		generic_list_delete(iter->list, next, 1);
+		cg_list_delete(iter->list, next, 1);
 	} else {
 		// Error. No next entry.
 	}
 }
 
-extern void generic_listiterator_delete_previous(
-        generic_listiterator *iter
+extern void cg_listiterator_delete_previous(
+        cg_listiterator *iter
 ) {
-	generic_listentry *prev = iter->prev;
+	cg_listentry *prev = iter->prev;
 	if (prev != NULL) {
 		// Update previous
 		iter->prev = prev->prev;
 		// Remove entry
-		generic_list_delete(iter->list, prev, 1);
+		cg_list_delete(iter->list, prev, 1);
 	} else {
 		// Error. No previou entry.
 	}
@@ -347,12 +345,12 @@ extern void generic_listiterator_delete_previous(
 // LIST MANIPULATION: REMOVAL
 //============================
 
-extern void *generic_listiterator_remove_current(
-        generic_listiterator *iter
+extern void *cg_listiterator_remove_current(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 	if (iter->cur != NULL) {
-		rval = generic_list_delete(iter->list, iter->cur, 0);
+		rval = cg_list_delete(iter->list, iter->cur, 0);
 		iter->cur = NULL;
 	} else {
 		// Error. No current entry.
@@ -360,34 +358,34 @@ extern void *generic_listiterator_remove_current(
 	return rval;
 }
 
-extern void *generic_listiterator_remove_next(
-        generic_listiterator *iter
+extern void *cg_listiterator_remove_next(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 
-	generic_listentry *next = iter->next;
+	cg_listentry *next = iter->next;
 	if (next != NULL) {
 		// Update next
 		iter->next = next->next;
 		// Remove entry
-		rval = generic_list_delete(iter->list, next, 0);
+		rval = cg_list_delete(iter->list, next, 0);
 	} else {
 		// Error. No next entry.
 	}
 	return rval;
 }
 
-extern void *generic_listiterator_remove_previous(
-        generic_listiterator *iter
+extern void *cg_listiterator_remove_previous(
+        cg_listiterator *iter
 ) {
 	void *rval = NULL;
 
-	generic_listentry *prev = iter->prev;
+	cg_listentry *prev = iter->prev;
 	if (prev != NULL) {
 		// Update previous
 		iter->prev = prev->prev;
 		// Remove entry
-		rval = generic_list_delete(iter->list, prev, 0);
+		rval = cg_list_delete(iter->list, prev, 0);
 	} else {
 		// Error. No next entry.
 	}

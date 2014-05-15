@@ -15,10 +15,10 @@
 //
 //********************************{end:header}******************************//
 
-#ifndef GENERIC_LIST_INTERNAL_H
-#define GENERIC_LIST_INTERNAL_H
+#ifndef CG_LIST_INTERNAL_H
+#define CG_LIST_INTERNAL_H
 
-#include "cgenerics/generic_list.h"
+#include "cgenerics/cg_list.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,21 +36,21 @@ extern "C" {
  * Return value is the itemptr of the removed
  * entry, even if it was freed.
  */
-extern void *generic_list_delete(
-	generic_list *list,
-	generic_listentry *entry,
+extern void *cg_list_delete(
+	cg_list *list,
+	cg_listentry *entry,
 	int free_itemptr
 );
 
-extern generic_listentry *generic_list_insert_after(
-	generic_list *list,
-	generic_listentry *entry,
+extern cg_listentry *cg_list_insert_after(
+	cg_list *list,
+	cg_listentry *entry,
 	void *itemptr
 );
 
-extern generic_listentry *generic_list_insert_before(
-	generic_list *list,
-	generic_listentry *entry,
+extern cg_listentry *cg_list_insert_before(
+	cg_list *list,
+	cg_listentry *entry,
 	void *itemptr
 );
 
