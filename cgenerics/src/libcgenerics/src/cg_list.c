@@ -362,4 +362,86 @@ extern void cg_list_delete_all(
 	}
 }
 
+// SORTING
+//=========
+
+/**
+ * Swap listentries and maintains head/tail
+ */
+extern void cg_list_swap(
+    cg_list *list,
+    cg_listentry *e1,
+    cg_listentry *e2
+) {
+
+	cg_listentry *e1prev = e1->prev;
+	cg_listentry *e1next = e1->next;
+
+	cg_listentry *e2prev = e2->prev;
+	cg_listentry *e2next = e2->next;
+
+	if (e1next == e2) {
+		e1->prev = e2;
+		e2->next = e1;
+	} else {
+		e1->prev = e2prev;
+		e2->next = e1next;
+
+		if (e2prev != NULL) {
+			e2prev->next = e1;
+		} else {
+			list->head = e1;
+		}
+
+		if (e1next != NULL) {
+			e1next->prev = e2;
+		} else {
+			list->tail = e2;
+		}
+	}
+
+	if (e2next == e1) {
+		e1->next = e2;
+		e2->prev = e1;
+	} else {
+		e1->next = e2next;
+		e2->prev = e1prev;
+
+		if (e2next != NULL) {
+			e2next->prev = e1;
+		} else {
+			list->tail = e1;
+		}
+		if (e1prev != NULL) {
+			e1prev->next = e2;
+		} else {
+			list->head = e2;
+		}
+	}
+}
+
+extern void cg_list_bubblesort(
+    cg_list *list,
+    int (*compare)(const void *itemptr1, const void *itemptr2)
+) {
+	cg_listentry *e = list->head;
+	while (e != NULL) {
+		cg_listentry *smallest = e;
+		cg_listentry *cur = e->next;
+		while (cur != NULL) {
+			if (compare(smallest->itemptr, cur->itemptr) > 0) {
+				// cur is smaller
+				smallest = cur;
+			}
+			cur = cur->next;
+		} // while
+
+		if (smallest != e) {
+			cg_list_swap(list, e, smallest);
+			e = smallest->next;
+		} else {
+			e = e->next;
+		}
+	} // while
+}
 

@@ -306,7 +306,7 @@ extern void cg_listiterator_delete_current(
         cg_listiterator *iter
 ) {
 	if (iter->cur != NULL) {
-		cg_list_delete(iter->list, iter->cur, 1);
+		cg_list_delete(iter->list, iter->cur);
 		iter->cur = NULL;
 	} else {
 		// Error. No current entry.
@@ -321,7 +321,7 @@ extern void cg_listiterator_delete_next(
 		// Update next
 		iter->next = next->next;
 		// Remove entry
-		cg_list_delete(iter->list, next, 1);
+		cg_list_delete(iter->list, next);
 	} else {
 		// Error. No next entry.
 	}
@@ -335,7 +335,7 @@ extern void cg_listiterator_delete_previous(
 		// Update previous
 		iter->prev = prev->prev;
 		// Remove entry
-		cg_list_delete(iter->list, prev, 1);
+		cg_list_delete(iter->list, prev);
 	} else {
 		// Error. No previou entry.
 	}
@@ -350,7 +350,7 @@ extern void *cg_listiterator_remove_current(
 ) {
 	void *rval = NULL;
 	if (iter->cur != NULL) {
-		rval = cg_list_delete(iter->list, iter->cur, 0);
+		rval = cg_list_remove(iter->list, iter->cur);
 		iter->cur = NULL;
 	} else {
 		// Error. No current entry.
@@ -368,7 +368,7 @@ extern void *cg_listiterator_remove_next(
 		// Update next
 		iter->next = next->next;
 		// Remove entry
-		rval = cg_list_delete(iter->list, next, 0);
+		rval = cg_list_remove(iter->list, next);
 	} else {
 		// Error. No next entry.
 	}
@@ -385,7 +385,7 @@ extern void *cg_listiterator_remove_previous(
 		// Update previous
 		iter->prev = prev->prev;
 		// Remove entry
-		rval = cg_list_delete(iter->list, prev, 0);
+		rval = cg_list_remove(iter->list, prev);
 	} else {
 		// Error. No next entry.
 	}

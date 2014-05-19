@@ -143,6 +143,27 @@ extern void cg_list_remove_all(
 	cg_list *list
 );
 
+// SORTING
+//=========
+
+extern void cg_list_bubblesort(
+    cg_list *list,
+    int (*compare)(const void *itemptr1, const void *itemptr2)
+);
+
+/*
+extern void cg_list_find_first_geq(
+    cg_list *list,
+    int (*compare)(const void *itemptr, const void *value)
+    const void *value
+);
+
+extern void cg_list_find_last_lt(
+    cg_list *list,
+    int (*compare)(const void *itemptr, const void *value)
+    const void *value
+);
+*/
 
 
 #ifdef __cplusplus

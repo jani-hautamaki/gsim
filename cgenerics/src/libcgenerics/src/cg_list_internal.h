@@ -24,23 +24,16 @@
 extern "C" {
 #endif
 
-/**
- * Deletes the given listentry from a list.
- *
- * When free_itemptr is nonzero,
- * the itemptr will be freed using list->free,
- * if it is not NULL.
- *
- * The list's head and tail are maintained.
- *
- * Return value is the itemptr of the removed
- * entry, even if it was freed.
- */
-extern void *cg_list_delete(
-	cg_list *list,
-	cg_listentry *entry,
-	int free_itemptr
+extern void *cg_list_remove(
+    cg_list *list,
+    cg_listentry *entry
 );
+
+extern void cg_list_delete(
+    cg_list *list,
+    cg_listentry *entry
+);
+
 
 extern cg_listentry *cg_list_insert_after(
 	cg_list *list,
