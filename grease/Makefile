@@ -1,5 +1,5 @@
 #*******************************{begin:header}*******************************#
-#            cgenerics - The C Library for Generic Data Structures           #
+#               grease - The Grease Utilities for Applications               #
 #****************************************************************************#
 #
 #       Part of the GPS/INS measurement simulation system GSIM
@@ -32,62 +32,60 @@ LD=gcc
 
 _default: _rebuild_library _rebuild_samples
 
-_rebuild_library: $(libcgenerics_LIBNAME)
 
-
-
-
-# Target: libcgenerics
+# Target: libgrease
 #######################
 
 # Input
 ########
 
-libcgenerics_INCDIR=src/libcgenerics/include
-libcgenerics_SRCDIR=src/libcgenerics/src
-libcgenerics_SOURCES=$(wildcard $(libcgenerics_SRCDIR)/*.c)
+libgrease_INCDIR := src/libgrease/include
+libgrease_SRCDIR := src/libgrease/src
+libgrease_SOURCES := $(wildcard $(libgrease_SRCDIR)/*.c)
 
 # Output
 #########
 
-libcgenerics_LIBDIR=build/lib
-libcgenerics_OBJDIR=build/obj/libcgenerics
-libcgenerics_LIBNAME=$(libcgenerics_LIBDIR)/libcgenerics.a
-libcgenerics_OBJS=$(patsubst $(libcgenerics_SRCDIR)/%,$(libcgenerics_OBJDIR)/%,$(libcgenerics_SOURCES:.c=.o))
+libgrease_LIBDIR := build/lib
+libgrease_OBJDIR := build/obj/libgrease
+libgrease_LIBNAME := $(libgrease_LIBDIR)/libgrease.a
+libgrease_OBJS := $(patsubst $(libgrease_SRCDIR)/%,$(libgrease_OBJDIR)/%,$(libgrease_SOURCES:.c=.o))
 
 # Output generation
 ####################
 
-libcgenerics_CFLAGS=-Wall -std=c99 -I$(libcgenerics_INCDIR)
-#libcgenerics_CPPFLAGS=
+libgrease_CFLAGS=-Wall -std=c99 -I$(libgrease_INCDIR)
+#libgrease_CPPFLAGS=
 
 
 
 # The rule for constructing the library:
-# All *.c files in the src/libcgenerics directory
+# All *.c files in the src/libgrease directory
 # must be compiled into the library
 #
 
-# Create libcgenerics.a
-$(libcgenerics_LIBNAME): $(libcgenerics_OBJS) | $(libcgenerics_LIBDIR)
-	$(AR) rs $(libcgenerics_LIBNAME) $(libcgenerics_OBJS)
+_rebuild_library: $(libgrease_LIBNAME)
+
+# Create libgrease.a
+$(libgrease_LIBNAME): $(libgrease_OBJS) | $(libgrease_LIBDIR)
+	$(AR) rs $(libgrease_LIBNAME) $(libgrease_OBJS)
 
 # Pull in previously computed dependencies
--include $(libcgenerics_OBJS:.o=.d)
+-include $(libgrease_OBJS:.o=.d)
 
 # Compile a single object
-$(libcgenerics_OBJDIR)/%.o: $(libcgenerics_SRCDIR)/%.c | $(libcgenerics_OBJDIR)
-	$(CC) -c $(libcgenerics_CFLAGS) $(libcgenerics_CPPFLAGS) -o $@ $<
-	@$(CC) $(libcgenerics_CFLAGS) -MM -MT"$@" $< -MF"$(patsubst %.o,%.d,$@)"
+$(libgrease_OBJDIR)/%.o: $(libgrease_SRCDIR)/%.c | $(libgrease_OBJDIR)
+	$(CC) -c $(libgrease_CFLAGS) $(libgrease_CPPFLAGS) -o $@ $<
+	@$(CC) $(libgrease_CFLAGS) -MM -MT"$@" $< -MF"$(patsubst %.o,%.d,$@)"
 
 # Directory creation.
 # These are order-only prerequisities for other recipes
 
-$(libcgenerics_OBJDIR):
-	-mkdir -p $(libcgenerics_OBJDIR)
+$(libgrease_OBJDIR):
+	-mkdir -p $(libgrease_OBJDIR)
 
-$(libcgenerics_LIBDIR):
-	-mkdir -p $(libcgenerics_LIBDIR)
+$(libgrease_LIBDIR):
+	-mkdir -p $(libgrease_LIBDIR)
 
 
 
@@ -97,10 +95,10 @@ $(libcgenerics_LIBDIR):
 # Input
 ########
 
-samples_INCDIR=src/libcgenerics/include
+samples_INCDIR=src/libgrease/include
 samples_SRCDIR=src/samples
 samples_SOURCES=$(wildcard $(samples_SRCDIR)/*.c)
-samples_LIBS=$(libcgenerics_LIBNAME)
+samples_LIBS=$(libgrease_LIBNAME)
 
 # Output
 #########
@@ -114,9 +112,9 @@ samples_BINS=$(patsubst $(samples_SRCDIR)/%,$(samples_BINDIR)/%,$(samples_SOURCE
 # Output generation
 ####################
 
-samples_CFLAGS=-Wall -std=c99 -I$(libcgenerics_INCDIR)
-samples_LDLIBS=-lcgenerics
-samples_LDFLAGS=-L $(libcgenerics_LIBDIR)
+samples_CFLAGS=-Wall -std=c99 -I$(libgrease_INCDIR)
+samples_LDLIBS=
+samples_LDFLAGS=
 
 # Keep all intermediate files 
 .SECONDARY: $(samples_OBJS)

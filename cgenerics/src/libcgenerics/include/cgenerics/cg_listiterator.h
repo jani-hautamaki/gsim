@@ -102,8 +102,16 @@ extern void *cg_listiterator_next(
 	cg_listiterator *iter
 );
 
+extern void *cg_listiterator_get_next(
+    const cg_listiterator *iter
+);
+
 extern void *cg_listiterator_previous(
 	cg_listiterator *iter
+);
+
+extern void *cg_listiterator_get_previous(
+    const cg_listiterator *iter
 );
 
 

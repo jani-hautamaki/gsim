@@ -173,6 +173,11 @@ struct cgps_navmsg {
 	 */
 	int sat_id;
 
+	/**
+	 * Transmission time, GPS time of week [s].
+	 */
+	double tow;
+
 	// SUBFRAME 1
 	//============
 
@@ -180,7 +185,7 @@ struct cgps_navmsg {
 	 * (Maps to RINEX how?) Transmission week number (mod 1024?).
 	 * Location: subframe 1 / word 3.
 	 */
-	double week;
+	int week;
 
 	/**
 	 * Codes on L2 channel, 2-bit value.

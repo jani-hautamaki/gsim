@@ -157,6 +157,16 @@ extern void *cg_listiterator_next(
 	return rval;
 }
 
+extern void *cg_listiterator_get_next(
+    const cg_listiterator *iter
+) {
+	void *rval = NULL;
+	if (iter->next != NULL) {
+		rval = iter->next->itemptr;
+	}
+	return rval;
+}
+
 extern void *cg_listiterator_previous(
         cg_listiterator *iter
 ) {
@@ -178,6 +188,16 @@ extern void *cg_listiterator_previous(
 		// Error, no previous available.
 	}
 
+	return rval;
+}
+
+extern void *cg_listiterator_get_previous(
+    const cg_listiterator *iter
+) {
+	void *rval = NULL;
+	if (iter->prev != NULL) {
+		rval = iter->prev->itemptr;
+	}
 	return rval;
 }
 
