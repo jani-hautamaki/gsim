@@ -92,7 +92,7 @@ extern void lat_ellipsoid_set_af(
  */
 extern void lat_ellipsoid_geo2xyz(
     const lat_ellipsoid *ellipsoid,
-    const double *lla,
+    const double *geo,
     double *xyz
 );
 
@@ -103,7 +103,7 @@ extern void lat_ellipsoid_geo2xyz(
  */
 extern void lat_ellipsoid_xyz2geo(
     const lat_ellipsoid *ellipsoid,
-    const double *xyz,
+    const double *geo,
     double *lla
 );
 
@@ -112,7 +112,7 @@ extern void lat_ellipsoid_xyz2geo(
  */
 extern void lat_ellipsoid_geo2enu(
     const lat_ellipsoid *ellipsoid,
-    const double *lla,
+    const double *geo,
     lat_localframe *frame
 );
 
@@ -154,6 +154,12 @@ extern double lat_ellipsoid_torsion_normal_section(
     double height
 );
 
+
+extern void lat_ellipsoid_localframe_at(
+    const lat_ellipsoid *ellipsoid,
+    const double *geo,
+    double *frame
+);
 
 
 #ifdef __cplusplus

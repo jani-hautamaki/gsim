@@ -153,13 +153,13 @@ extern double lat_ellipsoid_R_alfa(
  */
 extern void lat_ellipsoid_geo2xyz(
     const lat_ellipsoid *ellipsoid,
-    const double *lla,
+    const double *geo,
     double *xyz
 ) {
 	// For convenience
-	double lon = lla[0];
-	double lat = lla[1];
-	double h = lla[2];
+	double lon = geo[0];
+	double lat = geo[1];
+	double h = geo[2];
 	double e2 = ellipsoid->e * ellipsoid->e;
 
 	double N = lat_ellipsoid_N(ellipsoid, lat);
@@ -174,7 +174,7 @@ extern void lat_ellipsoid_geo2xyz(
 extern void lat_ellipsoid_xyz2geo(
     const lat_ellipsoid *ellipsoid,
     const double *xyz,
-    double *lla
+    double *geo
 ) {
 	// For convenience
 	double a = ellipsoid->a;
@@ -212,23 +212,23 @@ extern void lat_ellipsoid_xyz2geo(
 
 	// Compute longitude
 	// (Jekeli, 2-42, Eq 2.137)
-	lla[0] = atan2(y, x);
+	geo[0] = atan2(y, x);
 	// Assign latitude and height
-	lla[1] = lat;
-	lla[2] = h;
+	geo[1] = lat;
+	geo[2] = h;
 }
 
 /**
  * Get local coordinate basis at LLA.
  */
-extern void lat_ellipsoid_localframe_at_lla(
+extern void lat_ellipsoid_localframe_at_geo(
     const lat_ellipsoid *ellipsoid,
-    const double *lla,
+    const double *geo,
     lat_localframe *frame
 ) {
 	// For convenience and clarity
-	double lon = lla[0];
-	double lat = lla[1];
+	double lon = geo[0];
+	double lat = geo[1];
 	// double h = lla[2]; // Unused
 
 	// Denoting the equation (Jekeli, 2-41, Eq 2.136) by f(lon, lat, h),
@@ -258,15 +258,38 @@ extern void lat_ellipsoid_localframe_at_lla(
 	frame->u[0] = cos(lat)*cos(lon);
 	frame->u[1] = cos(lat)*sin(lon);
 	frame->u[2] = sin(lat);
+}
+
+extern void lat_ellipsoid_localframe_at(
+    const lat_ellipsoid *ellipsoid,
+    const double *geo,
+    double *frame
+) {
+	// For convenience and clarity
+	double lon = geo[0];
+	double lat = geo[1];
+
+	frame[0*3+0] = -sin(lon);
+	frame[1*3+0] = cos(lon);
+	frame[2*3+0] = 0.0;
+
+	frame[0*3+1] = -sin(lat)*cos(lon);
+	frame[1*3+1] = -sin(lat)*sin(lon);
+	frame[2*3+1] = cos(lat);
+
+	frame[0*3+2] = cos(lat)*cos(lon);
+	frame[1*3+2] = cos(lat)*sin(lon);
+	frame[2*3+2] = sin(lat);
 
 }
 
+
 extern void lat_ellipsoid_geo2enu(
     const lat_ellipsoid *ellipsoid,
-    const double *lla,
+    const double *geo,
     lat_localframe *frame
 ) {
-	lat_ellipsoid_localframe_at_lla(ellipsoid, lla, frame);
+	lat_ellipsoid_localframe_at_geo(ellipsoid, geo, frame);
 }
 
 
