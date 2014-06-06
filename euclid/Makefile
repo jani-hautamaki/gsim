@@ -112,8 +112,8 @@ samples_BINS=$(patsubst $(samples_SRCDIR)/%,$(samples_BINDIR)/%,$(samples_SOURCE
 ####################
 
 samples_CFLAGS=-Wall -std=c99 -I$(libeuclid_INCDIR)
-samples_LDLIBS=-lsundial
-samples_LDFLAGS=-L $(libeuclid_LIBDIR)
+samples_LDLIBS=
+samples_LDFLAGS=-lm
 
 # Keep all intermediate files 
 .SECONDARY: $(samples_OBJS)

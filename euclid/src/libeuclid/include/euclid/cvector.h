@@ -45,6 +45,8 @@ extern void cvector_memcpy(double *vdest, const double *vorg, int n);
 
 // Specific for 3d vectors
 
+extern void cvector_xyz(double *v, double x, double y, double z);
+
 extern void cvector_xrotate(double *vdest, const double *vorg, double rad);
 extern void cvector_yrotate(double *vdest, const double *vorg, double rad);
 extern void cvector_zrotate(double *vdest, const double *vorg, double rad);

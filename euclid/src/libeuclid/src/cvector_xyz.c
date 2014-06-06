@@ -17,14 +17,11 @@
 
 #include "euclid/cvector.h"
 
-// sin, cos
-#include <math.h>
+extern void cvector_xyz(double *v, double x, double y, double z) {
 
-extern void cvector_yrotate(double *vdest, const double *vorg, double rad) {
-
-	vdest[0] = vorg[0]*cos(rad) - vorg[2]*sin(rad);
-	vdest[1] = vorg[1];
-	vdest[2] = vorg[0]*sin(rad) + vorg[2]*cos(rad);
+	v[0] = x;
+	v[1] = y;
+	v[2] = z;
 
 }
 

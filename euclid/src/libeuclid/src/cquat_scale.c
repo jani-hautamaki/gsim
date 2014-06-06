@@ -15,16 +15,12 @@
 //
 //********************************{end:header}******************************//
 
-#include "euclid/cvector.h"
+#include "euclid/cquat.h"
 
-// sin, cos
-#include <math.h>
-
-extern void cvector_zrotate(double *vdest, const double *vorg, double rad) {
-
-	vdest[0] =  vorg[0]*cos(rad) + vorg[1]*sin(rad);
-	vdest[1] = -vorg[0]*sin(rad) + vorg[1]*cos(rad);
-	vdest[2] = vorg[2];
-
+extern void cquat_scale(double *qdest, double c, const double *qorg) {
+	qdest[0] = c * qorg[0];
+	qdest[1] = c * qorg[1];
+	qdest[2] = c * qorg[2];
+	qdest[3] = c * qorg[3];
 }
 
