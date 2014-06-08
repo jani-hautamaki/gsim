@@ -33,6 +33,17 @@
 /** Application-specific error. */
 #define GUT_E_USER              -4
 
+// gut_datafile
+//==============
+
+/** malloc() failed; out of memory. */
+#define GUT_E_NOMEM             -5
+
+/** Syscall failed; consult errno. */
+#define GUT_E_SYSCALL           -6
+
+/** Unexpected end-of-file. */
+#define GUT_E_EOF               -7
 
 /**
  * Human-readable error message for the error code.
