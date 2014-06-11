@@ -37,9 +37,9 @@ SRCDIR := src
 # general targets
 ##################
 
-.PHONY: _rebuild_all _rebuild_navmssgen _rebuild_statgen _rebuild_libgsim
+.PHONY: _rebuild_all _rebuild_navmssgen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump
 
-_rebuild_all: _rebuild_navmsggen _rebuild_statgen _rebuild_libgsim
+_rebuild_all: _rebuild_navmsggen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump
 
 
 # navmsggen input
@@ -143,15 +143,69 @@ $(statgen_OBJDIR):
 
 
 
+# TARGET: msgdump
+##################
+
+# msgdump input
+################
+
+msgdump_SRCDIR := $(SRCDIR)/msgdump
+msgdump_SOURCES := $(wildcard $(msgdump_SRCDIR)/*.c)
+
+msgdump_INCDIR := src/libgsim/include ../grease/src/libgrease/include 
+msgdump_LIBS := build/lib/libgsim.a ../grease/build/lib/libgrease.a 
+
+# msgdump output
+#################
+
+msgdump_OBJDIR := $(OBJDIR)/msgdump
+msgdump_OBJS := $(patsubst $(msgdump_SRCDIR)/%,$(msgdump_OBJDIR)/%,$(msgdump_SOURCES:.c=.o))
+
+msgdump_BIN := $(BINDIR)/msgdump
+
+# msgdump output generation
+############################
+
+msgdump_CFLAGS := -Wall -std=c99 $(addprefix -I ,$(msgdump_INCDIR))
+msgdump_LDLIBS :=
+msgdump_LDFLAGS := -lm
+
+# msgdump recipes
+##################
+
+_rebuild_msgdump: $(msgdump_BIN)
+
+# Pull in previously computed dependencies
+-include $(msgdump_OBJS:.o=.d)
+
+# Compile a single object
+$(msgdump_OBJDIR)/%.o: $(msgdump_SRCDIR)/%.c | $(msgdump_OBJDIR)
+	$(CC) -c $(msgdump_CFLAGS) $(msgdump_CPPFLAGS) -o $@ $<
+	@$(CC) $(msgdump_CFLAGS) -MM -MT"$@" $< -MF"$(patsubst %.o,%.d,$@)"
+
+# Link a single binary
+$(msgdump_BIN): $(msgdump_OBJS) $(msgdump_LIBS) | $(BINDIR)
+	$(LD) $(msgdump_LDFLAGS) $^ $(msgdump_LDLIBS) -o $@
+
+
+# Create directory
+$(msgdump_OBJDIR):
+	-mkdir -p $(msgdump_OBJDIR)
+
+
+
+
 # TARGET: libgsim
 ##################
 
 # libgsim input
 ################
 
-libgsim_INCDIR := $(SRCDIR)/libgsim/include
+libgsim_INCDIR := $(SRCDIR)/libgsim/include ../grease/src/libgrease/include
 libgsim_SRCDIR := $(SRCDIR)/libgsim/src
 libgsim_SOURCES := $(wildcard $(libgsim_SRCDIR)/*.c)
+
+libgsim_LIBS := 
 
 # libgsim output
 #################
@@ -164,7 +218,7 @@ libgsim_OBJS := $(patsubst $(libgsim_SRCDIR)/%,$(libgsim_OBJDIR)/%,$(libgsim_SOU
 # libgsim output generation
 ############################
 
-libgsim_CFLAGS=-Wall -std=c99 -I$(liblatitude_INCDIR)
+libgsim_CFLAGS := -Wall -std=c99 $(addprefix -I ,$(libgsim_INCDIR))
 
 _rebuild_libgsim: $(libgsim_LIBNAME)
 

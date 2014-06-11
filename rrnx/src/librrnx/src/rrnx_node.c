@@ -54,11 +54,11 @@ static ssize_t get_data_size(int type) {
 	return -1;
 }
 
-extern int rrnx_node_is_type_valid(int type) {
+int rrnx_node_is_type_valid(int type) {
 	return get_data_size(type) >= 0;
 }
 
-extern rrnx_node *rrnx_node_alloc(int type) {
+rrnx_node *rrnx_node_alloc(int type) {
 	// Determine payload size.
 	// Returns -1 if type is unknown.
 	ssize_t data_size = get_data_size(type);
@@ -95,7 +95,7 @@ extern rrnx_node *rrnx_node_alloc(int type) {
 	return node;
 }
 
-extern void rrnx_node_free(rrnx_node *node) {
+void rrnx_node_free(rrnx_node *node) {
 	if (node == NULL) {
 		// Already freed
 		return;

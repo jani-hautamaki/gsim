@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_zero(double *m, int rows, int cols) {
+void cmatrix_zero(double *m, int rows, int cols) {
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			CMATRIX_ELEM(m, i, j, cols) = 0.0;

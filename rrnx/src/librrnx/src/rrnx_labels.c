@@ -40,7 +40,7 @@ static const enumerated_label NAV_LABEL[] = {
 };
 
 // TODO: enum_navr_label?
-extern int rrnx_enumerate_label(const char *label) {
+int rrnx_enumerate_label(const char *label) {
 	int labels = sizeof(NAV_LABEL) / sizeof(NAV_LABEL[0]);
 
 	const enumerated_label *cur = NAV_LABEL;
@@ -52,7 +52,7 @@ extern int rrnx_enumerate_label(const char *label) {
 	return RRNX_LBL_UNKNOWN;
 }
 
-extern int rrnx_enumerate_linetype(const char *line) {
+int rrnx_enumerate_linetype(const char *line) {
 	// Identified line type
 	int id = RRNX_LBL_UNKNOWN;
 

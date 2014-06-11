@@ -83,7 +83,7 @@
  *
  */
 
-extern void cquat_mul(double *q, const double *a, const double *b) {
+void cquat_mul(double *q, const double *a, const double *b) {
 
 	// For convenience
 	#define W CQUAT_W

@@ -40,7 +40,7 @@ extern "C" {
 // OBS specific
 
 
-extern int rrnx_enumerate_linetype(const char *line);
+int rrnx_enumerate_linetype(const char *line);
 
 #ifdef __cplusplus
 } // extern "C"

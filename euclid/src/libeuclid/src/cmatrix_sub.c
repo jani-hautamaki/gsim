@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_sub(
+void cmatrix_sub(
     double *m,
     const double *a,
     const double *b,

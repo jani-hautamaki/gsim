@@ -20,8 +20,7 @@
 
 #include "sundial/sundial.h"
 
-
-extern void sun_datetime_set_date(
+void sun_datetime_set_date(
     sun_datetime *dt,
     int year,
     int month,
@@ -32,7 +31,7 @@ extern void sun_datetime_set_date(
 	dt->day = day;
 }
 
-extern void sun_datetime_set_time(
+void sun_datetime_set_time(
     sun_datetime *dt,
     int hour,
     int min,
@@ -52,7 +51,7 @@ extern void sun_datetime_set_time(
 /* TODO:
  * Cite some reference
  */
-extern int sun_date_to_mjulianday(
+int sun_date_to_mjulianday(
     int year,
     int month,
     int day
@@ -69,7 +68,7 @@ extern int sun_date_to_mjulianday(
 }
 
 void sun_mjulianday_to_date(
-   unsigned int mjd,
+    unsigned int mjd,
     int* year,
     int* month,
     int* day

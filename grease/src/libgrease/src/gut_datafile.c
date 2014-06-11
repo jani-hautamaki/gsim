@@ -29,7 +29,7 @@
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern gut_datafile *gut_datafile_create() {
+gut_datafile *gut_datafile_create(void) {
 	gut_datafile *df = NULL;
 
 	int complete = 0;
@@ -51,13 +51,13 @@ extern gut_datafile *gut_datafile_create() {
 	return df;
 }
 
-extern void gut_datafile_free(gut_datafile *df) {
+void gut_datafile_free(gut_datafile *df) {
 	gut_datafile_deinit(df);
 	free(df);
 }
 
 
-extern int gut_datafile_init(gut_datafile *df) {
+int gut_datafile_init(gut_datafile *df) {
 	int complete = 0;
 
 	df->file = NULL;
@@ -93,7 +93,7 @@ extern int gut_datafile_init(gut_datafile *df) {
 	return complete;
 }
 
-extern void gut_datafile_deinit(gut_datafile *df) {
+void gut_datafile_deinit(gut_datafile *df) {
 	if (df != NULL) {
 		if (df->buffer != NULL) {
 			free(df->buffer);
@@ -107,7 +107,7 @@ extern void gut_datafile_deinit(gut_datafile *df) {
 // LOW-LEVEL READ/WRITE METHODS
 //==============================
 
-extern int gut_datafile_open(
+int gut_datafile_open(
     gut_datafile *df,
     const char *path,
     const char *mode
@@ -132,7 +132,7 @@ extern int gut_datafile_open(
 	return rval;
 }
 
-extern int gut_datafile_close(gut_datafile *df) {
+int gut_datafile_close(gut_datafile *df) {
 	int rval = 0;
 
 	if (df->file != NULL) {
@@ -149,15 +149,19 @@ extern int gut_datafile_close(gut_datafile *df) {
 	return rval;
 }
 
-extern int gut_datafile_error(gut_datafile *df) {
+int gut_datafile_error(gut_datafile *df) {
 	return ferror(df->file);
 }
 
-extern int gut_datafile_eof(gut_datafile *df) {
+int gut_datafile_eof(gut_datafile *df) {
 	return feof(df->file);
 }
 
-extern int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
+int gut_datafile_is_open(gut_datafile *df) {
+	return df->file != NULL;
+}
+
+int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
 	int rval = 0;
 	void *ptr;
 
@@ -174,14 +178,14 @@ extern int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
 	return rval;
 }
 
-extern int gut_datafile_get_buffer_size(gut_datafile *df) {
+int gut_datafile_get_buffer_size(gut_datafile *df) {
 	return df->size;
 }
 
 /**
  * Read data from file to buffer.
  */
-extern int gut_datafile_readbuf(gut_datafile *df) {
+int gut_datafile_readbuf(gut_datafile *df) {
 	int rval = 0;
 
 	// "On success, fread() and fwrite() return the number of
@@ -216,7 +220,7 @@ extern int gut_datafile_readbuf(gut_datafile *df) {
 /**
  * Returns the next byte in file, or -1 when eof/error.
  */
-extern int gut_datafile_read_byte(gut_datafile *df) {
+int gut_datafile_read_byte(gut_datafile *df) {
 	int rval = 0;
 
 	// See if there's data in the buffer
@@ -236,8 +240,7 @@ extern int gut_datafile_read_byte(gut_datafile *df) {
 	return rval;
 }
 
-
-extern int gut_datafile_read(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_read(gut_datafile *df, void *ptr, int size) {
 	int rval = 0;
 	char *data = ptr;
 
@@ -259,7 +262,7 @@ extern int gut_datafile_read(gut_datafile *df, void *ptr, int size) {
 	return rval;
 }
 
-extern int gut_datafile_read_r(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_read_r(gut_datafile *df, void *ptr, int size) {
 	int rval = 0;
 	char *data = ptr;
 
@@ -281,7 +284,7 @@ extern int gut_datafile_read_r(gut_datafile *df, void *ptr, int size) {
 	return rval;
 }
 
-extern int gut_datafile_read_obj(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_read_obj(gut_datafile *df, void *ptr, int size) {
 
 	switch(df->endianness) {
 	case GUT_DATAFILE_BIG_ENDIAN:
@@ -295,9 +298,7 @@ extern int gut_datafile_read_obj(gut_datafile *df, void *ptr, int size) {
 	return -1; // Never reached
 }
 
-
-
-extern int gut_datafile_writebuf(gut_datafile *df) {
+int gut_datafile_writebuf(gut_datafile *df) {
 	int rval = 0;
 
 	// "On success, fread() and fwrite() return the number of
@@ -328,7 +329,7 @@ extern int gut_datafile_writebuf(gut_datafile *df) {
 /**
  * Writes a byte into the file. Returns -1 when eof/error.
  */
-extern int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval) {
+int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval) {
 	int rval = 0;
 
 	// See if there's space in the buffer.
@@ -348,7 +349,7 @@ extern int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval) {
 	return rval;
 }
 
-extern int gut_datafile_flush(gut_datafile *df) {
+int gut_datafile_flush(gut_datafile *df) {
 	int rval = 0;
 
 	do {
@@ -370,9 +371,7 @@ extern int gut_datafile_flush(gut_datafile *df) {
 	return rval;
 }
 
-
-
-extern int gut_datafile_write(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_write(gut_datafile *df, void *ptr, int size) {
 	int rval = -1;
 	char *data = ptr;
 
@@ -388,7 +387,7 @@ extern int gut_datafile_write(gut_datafile *df, void *ptr, int size) {
 	return rval;
 }
 
-extern int gut_datafile_write_r(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_write_r(gut_datafile *df, void *ptr, int size) {
 	int rval = -1;
 	char *data = ptr;
 
@@ -404,7 +403,7 @@ extern int gut_datafile_write_r(gut_datafile *df, void *ptr, int size) {
 	return rval;
 }
 
-extern int gut_datafile_write_obj(gut_datafile *df, void *ptr, int size) {
+int gut_datafile_write_obj(gut_datafile *df, void *ptr, int size) {
 	switch(df->endianness) {
 	case GUT_DATAFILE_BIG_ENDIAN:
 		return gut_datafile_write_r(df, ptr, size);
@@ -420,7 +419,7 @@ extern int gut_datafile_write_obj(gut_datafile *df, void *ptr, int size) {
 // READ METHODS
 //==============
 
-extern char gut_datafile_read_char8(gut_datafile *df) {
+char gut_datafile_read_char8(gut_datafile *df) {
 	#if CHAR_MIN < 0
 		// char is signed
 		return (char) gut_datafile_read_int8(df);
@@ -431,7 +430,7 @@ extern char gut_datafile_read_char8(gut_datafile *df) {
 }
 
 
-extern unsigned int gut_datafile_read_uint8(gut_datafile *df) {
+unsigned int gut_datafile_read_uint8(gut_datafile *df) {
 	unsigned char data[1];
 
 	gut_datafile_read_obj(df, data, 1);
@@ -439,7 +438,7 @@ extern unsigned int gut_datafile_read_uint8(gut_datafile *df) {
 	return (unsigned int) data[0];
 }
 
-extern unsigned int gut_datafile_read_uint16(gut_datafile *df) {
+unsigned int gut_datafile_read_uint16(gut_datafile *df) {
 	unsigned char data[2];
 
 	gut_datafile_read_obj(df, data, 2);
@@ -452,7 +451,7 @@ extern unsigned int gut_datafile_read_uint16(gut_datafile *df) {
 	return rval;
 }
 
-extern unsigned int gut_datafile_read_uint32(gut_datafile *df) {
+unsigned int gut_datafile_read_uint32(gut_datafile *df) {
 	unsigned char data[4];
 
 	gut_datafile_read_obj(df, data, 4);
@@ -465,7 +464,7 @@ extern unsigned int gut_datafile_read_uint32(gut_datafile *df) {
 	return rval;
 }
 
-extern unsigned long gut_datafile_read_ulong32(gut_datafile *df) {
+unsigned long gut_datafile_read_ulong32(gut_datafile *df) {
 	unsigned char data[4];
 
 	gut_datafile_read_obj(df, data, 4);
@@ -478,8 +477,7 @@ extern unsigned long gut_datafile_read_ulong32(gut_datafile *df) {
 	return rval;
 }
 
-
-extern int gut_datafile_read_int8(gut_datafile *df) {
+int gut_datafile_read_int8(gut_datafile *df) {
 	int rval = 0;
 	unsigned int uval = gut_datafile_read_uint8(df);
 
@@ -492,7 +490,7 @@ extern int gut_datafile_read_int8(gut_datafile *df) {
 	return rval;
 }
 
-extern int gut_datafile_read_int16(gut_datafile *df) {
+int gut_datafile_read_int16(gut_datafile *df) {
 	int rval = 0;
 	unsigned int uval = gut_datafile_read_uint16(df);
 
@@ -505,7 +503,7 @@ extern int gut_datafile_read_int16(gut_datafile *df) {
 	return rval;
 }
 
-extern int gut_datafile_read_int32(gut_datafile *df) {
+int gut_datafile_read_int32(gut_datafile *df) {
 	int rval = 0;
 	unsigned int uval = gut_datafile_read_uint32(df);
 
@@ -518,7 +516,7 @@ extern int gut_datafile_read_int32(gut_datafile *df) {
 	return rval;
 }
 
-extern long gut_datafile_read_long32(gut_datafile *df) {
+long gut_datafile_read_long32(gut_datafile *df) {
 	long rval = 0;
 	unsigned long uval = gut_datafile_read_uint32(df);
 
@@ -531,21 +529,19 @@ extern long gut_datafile_read_long32(gut_datafile *df) {
 	return rval;
 }
 
-
-
-extern float gut_datafile_read_float32(gut_datafile *df) {
+float gut_datafile_read_float32(gut_datafile *df) {
 	float rval;
 	gut_datafile_read_obj(df, &rval, 4);
 	return rval;
 }
 
-extern double gut_datafile_read_double64(gut_datafile *df) {
+double gut_datafile_read_double64(gut_datafile *df) {
 	double rval;
 	gut_datafile_read_obj(df, &rval, 8);
 	return rval;
 }
 
-extern long double gut_datafile_read_ldouble80(gut_datafile *df) {
+long double gut_datafile_read_ldouble80(gut_datafile *df) {
 	long double rval;
 	gut_datafile_read_obj(df, &rval, 10);
 	return rval;
@@ -555,7 +551,7 @@ extern long double gut_datafile_read_ldouble80(gut_datafile *df) {
 // WRITE METHODS
 //===============
 
-extern void gut_datafile_write_uint16(gut_datafile *df, unsigned int val) {
+void gut_datafile_write_uint16(gut_datafile *df, unsigned int val) {
 	unsigned char data[2];
 
 	for (int i = 0; i < 2; i++) {
@@ -565,7 +561,7 @@ extern void gut_datafile_write_uint16(gut_datafile *df, unsigned int val) {
 	gut_datafile_write_obj(df, data, 2);
 }
 
-extern void gut_datafile_write_uint32(gut_datafile *df, unsigned int val) {
+void gut_datafile_write_uint32(gut_datafile *df, unsigned int val) {
 	unsigned char data[4];
 
 	for (int i = 0; i < 4; i++) {
@@ -575,7 +571,7 @@ extern void gut_datafile_write_uint32(gut_datafile *df, unsigned int val) {
 	gut_datafile_write_obj(df, data, 4);
 }
 
-extern void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val) {
+void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val) {
 	unsigned char data[4];
 
 	for (int i = 0; i < 4; i++) {
@@ -585,7 +581,7 @@ extern void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val) {
 	gut_datafile_write_obj(df, data, 4);
 }
 
-extern void gut_datafile_write_int16(gut_datafile *df, int val) {
+void gut_datafile_write_int16(gut_datafile *df, int val) {
 	if (val < 0) {
 		gut_datafile_write_uint16(df, val);
 	} else {
@@ -594,7 +590,7 @@ extern void gut_datafile_write_int16(gut_datafile *df, int val) {
 	}
 }
 
-extern void gut_datafile_write_int32(gut_datafile *df, int val) {
+void gut_datafile_write_int32(gut_datafile *df, int val) {
 	if (val < 0) {
 		gut_datafile_write_uint32(df, val);
 	} else {
@@ -603,7 +599,7 @@ extern void gut_datafile_write_int32(gut_datafile *df, int val) {
 	}
 }
 
-extern void gut_datafile_write_long32(gut_datafile *df, long val) {
+void gut_datafile_write_long32(gut_datafile *df, long val) {
 	if (val < 0) {
 		gut_datafile_write_ulong32(df, val);
 	} else {
@@ -612,17 +608,14 @@ extern void gut_datafile_write_long32(gut_datafile *df, long val) {
 	}
 }
 
-
-
-
-extern void gut_datafile_write_float32(gut_datafile *df, float val) {
+void gut_datafile_write_float32(gut_datafile *df, float val) {
 	gut_datafile_write_obj(df, &val, 4);
 }
 
-extern void gut_datafile_write_double64(gut_datafile *df, double val) {
+void gut_datafile_write_double64(gut_datafile *df, double val) {
 	gut_datafile_write_obj(df, &val, 8);
 }
 
-extern void gut_datafile_write_ldouble80(gut_datafile *df, long double val) {
+void gut_datafile_write_ldouble80(gut_datafile *df, long double val) {
 	gut_datafile_write_obj(df, &val, 10);
 }

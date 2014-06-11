@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern double sun_delta_gpstime(
+double sun_delta_gpstime(
     int week2,
     double tow2,
     int week1,

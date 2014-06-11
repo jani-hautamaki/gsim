@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_add(
+void cmatrix_add(
     double *m,
     const double *a,
     const double *b,

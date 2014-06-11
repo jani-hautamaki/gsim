@@ -20,13 +20,7 @@
 // For explanation, see
 // http://en.wikipedia.org/wiki/Julian_day#Converting_Julian_or_Gregorian_calendar_date_to_Julian_Day_Number
 
-// Note: leap year occurs when
-//      year = k*4
-// NOT year = k*100
-// 
-// 
-
-extern long sun_date2mjulianday(
+long sun_date2mjulianday(
     int year,
     int month,
     int day

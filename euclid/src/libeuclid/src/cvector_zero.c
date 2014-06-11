@@ -17,7 +17,7 @@
 
 #include "euclid/cvector.h"
 
-extern void cvector_zero(double *v, int n) {
+void cvector_zero(double *v, int n) {
 	for (int i = 0; i < n; i++) {
 		v[i] = 0.0;
 	}

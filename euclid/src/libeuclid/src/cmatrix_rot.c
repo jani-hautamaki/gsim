@@ -31,8 +31,7 @@
  * when looking down the axis.
  *
  */
-
-extern void cmatrix_rotx(double *m, double angle) {
+void cmatrix_rotx(double *m, double angle) {
 
 	// Convenience macro: 1-based addressing for 3x3 matrices.
 	#define ELEM(m, y, x) CMATRIX_ELEM(m, (y)-1, (x)-1, 3)
@@ -57,7 +56,7 @@ extern void cmatrix_rotx(double *m, double angle) {
 }
 
 
-extern void cmatrix_roty(double *m, double angle) {
+void cmatrix_roty(double *m, double angle) {
 
 	// Convenience macro: 1-based addressing for 3x3 matrices.
 	#define ELEM(m, y, x) CMATRIX_ELEM(m, (y)-1, (x)-1, 3)
@@ -81,7 +80,7 @@ extern void cmatrix_roty(double *m, double angle) {
 	#undef ELEM
 }
 
-extern void cmatrix_rotz(double *m, double angle) {
+void cmatrix_rotz(double *m, double angle) {
 
 	// Convenience macro: 1-based addressing for 3x3 matrices.
 	#define ELEM(m, y, x) CMATRIX_ELEM(m, (y)-1, (x)-1, 3)

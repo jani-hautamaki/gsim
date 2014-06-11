@@ -28,7 +28,7 @@ static void free_payload(rrnx_list *list, rrnx_list_item *item) {
 	item->data = NULL;
 }
 
-extern rrnx_list *rrnx_list_alloc() {
+rrnx_list *rrnx_list_alloc(void) {
 	rrnx_list *list = malloc(sizeof(rrnx_list));
 	if (list != NULL) {
 		list->first = NULL;
@@ -38,7 +38,7 @@ extern rrnx_list *rrnx_list_alloc() {
 	return list;
 }
 
-extern void rrnx_list_free(rrnx_list *list) {
+void rrnx_list_free(rrnx_list *list) {
 	if (list == NULL) {
 		// Already deallocated
 		return;
@@ -63,7 +63,7 @@ extern void rrnx_list_free(rrnx_list *list) {
 
 // Manipulation
 
-extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data) {
+rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data) {
 	rrnx_list_item *item = malloc(sizeof(rrnx_list_item));
 	if (item == NULL) {
 		// Allocation failed
@@ -90,7 +90,7 @@ extern rrnx_list_item *rrnx_list_append(rrnx_list *list, void* data) {
 	return item;
 }
 
-extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item) {
+void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item) {
 
 	// Maintain links
 
@@ -122,21 +122,21 @@ extern void rrnx_list_remove(rrnx_list *list, rrnx_list_item *item) {
 // Internally rrnx_list_iterator is just rrnx_list_item
 typedef struct rrnx_list_item rrnx_list_iter;
 
-extern rrnx_list_item *rrnx_list_iterator(rrnx_list *list) {
+rrnx_list_item *rrnx_list_iterator(rrnx_list *list) {
 	rrnx_list_item *item = NULL;
 	if (list != NULL) {
 		item = list->first;
 	}
 	return item;
 }
-extern rrnx_list_item *rrnx_list_next(rrnx_list_item *item) {
+rrnx_list_item *rrnx_list_next(rrnx_list_item *item) {
 	if (item != NULL) {
 		item = item->next;
 	}
 	return item;
 }
 
-extern int rrnx_list_has_next(const rrnx_list_item *item) {
+int rrnx_list_has_next(const rrnx_list_item *item) {
 	if (item != NULL) {
 		return item->next != NULL;
 	}

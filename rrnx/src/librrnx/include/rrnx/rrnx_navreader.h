@@ -101,19 +101,19 @@ typedef struct rrnx_navreader rrnx_navreader;
 // METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
-extern rrnx_navreader *rrnx_navr_alloc(void);
-extern void rrnx_navr_free(rrnx_navreader *navreader);
+rrnx_navreader *rrnx_navr_alloc(void);
+void rrnx_navr_free(rrnx_navreader *navreader);
 
 //============================================================================
 // METHODS: OTHER METHODS
 //============================================================================
 
-extern void rrnx_navr_readfile(
+void rrnx_navr_readfile(
     rrnx_navreader *navreader,
     const char *filename
 );
 
-extern int rrnx_navr_consume(
+int rrnx_navr_consume(
     rrnx_navreader *navreader,
     const char *line
 );
@@ -121,14 +121,14 @@ extern int rrnx_navr_consume(
 /**
  * Transfer the ownership of the built navdata to the caller.
  */
-extern rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader);
+rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader);
 
 //============================================================================
 // METHODS: ERROR MANAGEMENT
 //============================================================================
 
-extern int rrnx_navr_errno(const rrnx_navreader *navreader);
-extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader);
+int rrnx_navr_errno(const rrnx_navreader *navreader);
+const char *rrnx_navr_strerror(const rrnx_navreader *navreader);
 
 
 #ifdef __cplusplus

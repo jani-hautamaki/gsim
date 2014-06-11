@@ -62,10 +62,7 @@
  * the error code @c GUT_E_OTHER is returned.
  *
  */
-extern int gut_parse_long(
-    const char *s,
-    long *result
-) {
+int gut_parse_long(const char *s, long *result) {
 	char *endptr;
 	long val;
 
@@ -161,10 +158,7 @@ extern int gut_parse_long(
  * the error code @c GUT_E_OTHER is returned.
  *
  */
-extern int gut_parse_ulong(
-    const char *s,
-    unsigned long *result
-) {
+int gut_parse_ulong(const char *s, unsigned long *result) {
 	char *endptr;
 	unsigned long val;
 
@@ -245,10 +239,7 @@ extern int gut_parse_ulong(
  *
  * Works similarly to gut_parse_long().
  */
-extern int gut_parse_int(
-    const char *s,
-    int *result
-) {
+int gut_parse_int(const char *s, int *result) {
 	long val;
 	int err;
 
@@ -290,10 +281,7 @@ extern int gut_parse_int(
  *
  * Works similarly to gut_parse_ulong()
  */
-extern int gut_parse_uint(
-    const char *s,
-    unsigned int *result
-) {
+int gut_parse_uint(const char *s, unsigned int *result) {
 	unsigned long val;
 	int err;
 
@@ -346,10 +334,7 @@ extern int gut_parse_uint(
  * TBD: Should the ERANGE cases be converted into
  * DBL_MAX and DBL_MIN?
  */
-extern int gut_parse_double(
-    const char *s,
-    double *result
-) {
+int gut_parse_double(const char *s, double *result) {
 	char *endptr;
 	double val;
 

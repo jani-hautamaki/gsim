@@ -17,7 +17,7 @@
 
 #include "euclid/cquat.h"
 
-extern void cquat_eye(double *q) {
+void cquat_eye(double *q) {
 	q[0] = 1.0;
 	q[1] = 0.0;
 	q[2] = 0.0;

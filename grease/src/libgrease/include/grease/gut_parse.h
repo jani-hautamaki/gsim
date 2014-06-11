@@ -24,34 +24,17 @@ extern "C" {
 
 // The workhorses for integer types...
 
-extern int gut_parse_long(
-    const char *s,
-    long *result
-);
-
-extern int gut_parse_ulong(
-    const char *s,
-    unsigned long *result
-);
+int gut_parse_long(const char *s, long *result);
+int gut_parse_ulong(const char *s, unsigned long *result);
 
 // The narrowing derivative methods...
 
-extern int gut_parse_int(
-    const char *s,
-    int *result
-);
-
-extern int gut_parse_uint(
-    const char *s,
-    unsigned int *result
-);
+int gut_parse_int(const char *s, int *result);
+int gut_parse_uint(const char *s, unsigned int *result);
 
 // The workhorses for floating-point types...
 
-extern int gut_parse_double(
-    const char *s,
-    double *result
-);
+int gut_parse_double(const char *s, double *result);
 
 #ifdef __cplusplus
 } // extern "C"

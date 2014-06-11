@@ -42,7 +42,7 @@ uint32_t strhash(const char *s) {
 	return h;
 }
 
-int main() {
+int main(void) {
 
 	// Create a new doubly linked list.
 	cg_hashmap *map = cg_hashmap_create();

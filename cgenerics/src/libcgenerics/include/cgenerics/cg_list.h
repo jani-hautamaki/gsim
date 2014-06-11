@@ -84,11 +84,11 @@ typedef struct cg_list cg_list;
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern cg_list *cg_list_create();
-extern void cg_list_free(cg_list *list);
+cg_list *cg_list_create(void);
+void cg_list_free(cg_list *list);
 
-extern void cg_list_init(cg_list *list);
-extern void cg_list_deinit(cg_list *list);
+void cg_list_init(cg_list *list);
+void cg_list_deinit(cg_list *list);
 
 // CONFIGURATION
 //===============
@@ -96,69 +96,41 @@ extern void cg_list_deinit(cg_list *list);
 // MISCELLANEOUS
 //===============
 
-extern int cg_list_get_size(
-	const cg_list *list
-);
-
+int cg_list_get_size(const cg_list *list);
 
 // CONTENT INSERTION
 //===================
 
-extern int cg_list_append(
-	cg_list *list,
-	void *itemptr
-);
-
-extern int cg_list_prepend(
-	cg_list *list,
-	void *itemptr
-);
+int cg_list_append(cg_list *list, void *itemptr);
+int cg_list_prepend(cg_list *list, void *itemptr);
 
 // CONTENT REMOVAL
 //=================
 
-extern void cg_list_delete_first(
-	cg_list *list
-);
+void cg_list_delete_first(cg_list *list);
+void cg_list_delete_last(cg_list *list);
+void cg_list_delete_all(cg_list *list);
 
-extern void cg_list_delete_last(
-	cg_list *list
-);
-
-extern void cg_list_delete_all(
-	cg_list *list
-);
-
-
-
-extern void *cg_list_remove_first(
-	cg_list *list
-);
-
-extern void *cg_list_remove_last(
-	cg_list *list
-);
-
-extern void cg_list_remove_all(
-	cg_list *list
-);
+void *cg_list_remove_first(cg_list *list);
+void *cg_list_remove_last(cg_list *list);
+void cg_list_remove_all(cg_list *list);
 
 // SORTING
 //=========
 
-extern void cg_list_bubblesort(
+void cg_list_bubblesort(
     cg_list *list,
     int (*compare)(const void *itemptr1, const void *itemptr2)
 );
 
 /*
-extern void cg_list_find_first_geq(
+void cg_list_find_first_geq(
     cg_list *list,
     int (*compare)(const void *itemptr, const void *value)
     const void *value
 );
 
-extern void cg_list_find_last_lt(
+void cg_list_find_last_lt(
     cg_list *list,
     int (*compare)(const void *itemptr, const void *value)
     const void *value

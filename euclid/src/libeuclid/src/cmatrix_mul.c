@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_mul(
+void cmatrix_mul(
     double *m,
     const double *a,
     const double *b,
@@ -42,7 +42,7 @@ extern void cmatrix_mul(
 	#undef ELEM
 }
 
-extern void cmatrix_mul_t(
+void cmatrix_mul_t(
     double *m,
     const double *a,
     const double *b,

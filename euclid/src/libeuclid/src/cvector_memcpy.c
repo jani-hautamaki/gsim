@@ -20,6 +20,6 @@
 // memcpy
 #include <string.h>
 
-extern void cvector_memcpy(double *vdest, const double *vorg, int n) {
+void cvector_memcpy(double *vdest, const double *vorg, int n) {
 	memcpy(vdest, vorg, n*sizeof(double));
 }

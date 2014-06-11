@@ -22,7 +22,7 @@
 #include "rrnx_error.h" // TODO: rrnx_errmsg, rrnx_errno?
 
 #ifdef __cplusplus
-#define extern "C" {
+extern "C" {
 #endif
 
 
@@ -103,19 +103,19 @@ typedef struct rrnx_filereader rrnx_filereader;
 // METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
-extern rrnx_filereader *rrnx_fr_alloc(void);
-extern void rrnx_fr_free(rrnx_filereader *reader);
+rrnx_filereader *rrnx_fr_alloc(void);
+void rrnx_fr_free(rrnx_filereader *reader);
 
 //============================================================================
 // METHODS: OTHER METHODS
 //============================================================================
 
-extern int rrnx_fr_fclose(rrnx_filereader *reader);
-extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename);
-extern int rrnx_fr_buffer(rrnx_filereader *reader);
+int rrnx_fr_fclose(rrnx_filereader *reader);
+int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename);
+int rrnx_fr_buffer(rrnx_filereader *reader);
 
-extern int rrnx_fr_readchar(rrnx_filereader *reader, char *dest);
-extern int rrnx_fr_readline(rrnx_filereader *reader, char *dest, size_t maxlen);
+int rrnx_fr_readchar(rrnx_filereader *reader, char *dest);
+int rrnx_fr_readline(rrnx_filereader *reader, char *dest, size_t maxlen);
 
 
 

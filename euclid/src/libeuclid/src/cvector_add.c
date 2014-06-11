@@ -17,7 +17,7 @@
 
 #include "euclid/cvector.h"
 
-extern void cvector_add(
+void cvector_add(
     double *v,
     const double *a,
     const double *b,

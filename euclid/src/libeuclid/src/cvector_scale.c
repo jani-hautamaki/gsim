@@ -17,7 +17,7 @@
 
 #include "euclid/cvector.h"
 
-extern void cvector_scale(
+void cvector_scale(
     double *vdest,
     double c,
     const double *vorg, int n

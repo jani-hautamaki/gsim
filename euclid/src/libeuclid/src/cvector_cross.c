@@ -17,7 +17,7 @@
 
 #include "euclid/cvector.h"
 
-extern void cvector_cross(double *v, const double *a, const double *b) {
+void cvector_cross(double *v, const double *a, const double *b) {
 
 	#define X 0
 	#define Y 1

@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern void sun_date2gpstime(
+void sun_date2gpstime(
     int year,
     int month,
     int day,

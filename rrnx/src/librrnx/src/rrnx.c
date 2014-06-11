@@ -20,15 +20,15 @@
 #include "rrnx/rrnx.h"
 #include "rrnx/rrnx_navreader.h"
 
-extern rrnx_file_nav *rrnx_alloc_navfile() {
+rrnx_file_nav *rrnx_alloc_navfile(void) {
 	return rrnx_fnav_alloc();
 }
 
-extern void rrnx_free_navfile(rrnx_file_nav *nav) {
+void rrnx_free_navfile(rrnx_file_nav *nav) {
 	rrnx_fnav_free(nav);
 }
 
-extern int rrnx_read_navfile(const char *filename, rrnx_file_nav **nav) {
+int rrnx_read_navfile(const char *filename, rrnx_file_nav **nav) {
 	int err = RRNX_E_OK;
 
 	rrnx_navreader *navreader = NULL;

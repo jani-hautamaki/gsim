@@ -68,7 +68,7 @@ typedef struct lat_localframe lat_localframe;
 /**
  * Initialize ellipsoid using semi-major axis and eccentricity.
  */
-extern void lat_ellipsoid_set_ae(
+void lat_ellipsoid_set_ae(
     lat_ellipsoid *ellipsoid,
     double a,
     double e
@@ -77,7 +77,7 @@ extern void lat_ellipsoid_set_ae(
 /**
  * Initialize ellipsoid using semi-major axis and inverse flattening.
  */
-extern void lat_ellipsoid_set_af(
+void lat_ellipsoid_set_af(
     lat_ellipsoid *ellipsoid,
     double a,
     double f
@@ -90,7 +90,7 @@ extern void lat_ellipsoid_set_af(
  * Change of coordinates from LLA to XYZ.
  * This is the easy direction.
  */
-extern void lat_ellipsoid_geo2xyz(
+void lat_ellipsoid_geo2xyz(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     double *xyz
@@ -101,7 +101,7 @@ extern void lat_ellipsoid_geo2xyz(
  * This is the difficult direction,
  * and requires iteration.
  */
-extern void lat_ellipsoid_xyz2geo(
+void lat_ellipsoid_xyz2geo(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     double *lla
@@ -110,7 +110,7 @@ extern void lat_ellipsoid_xyz2geo(
 /**
  * Get local coordinate basis at LLA.
  */
-extern void lat_ellipsoid_geo2enu(
+void lat_ellipsoid_geo2enu(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     lat_localframe *frame
@@ -120,7 +120,7 @@ extern void lat_ellipsoid_geo2enu(
 /**
  * Curvature in prime meridian (north-south direction).
  */
-extern double lat_ellipsoid_curvature_prime_meridian(
+double lat_ellipsoid_curvature_prime_meridian(
     const lat_ellipsoid *ellipsoid,
     double latitude
 );
@@ -128,7 +128,7 @@ extern double lat_ellipsoid_curvature_prime_meridian(
 /**
  * Curvature in prime vertical (east-west direction).
  */
-extern double lat_ellipsoid_curvature_prime_vertical(
+double lat_ellipsoid_curvature_prime_vertical(
     const lat_ellipsoid *ellipsoid,
     double latitude
 );
@@ -137,7 +137,7 @@ extern double lat_ellipsoid_curvature_prime_vertical(
  * Curvature in normal section to azimuth direction at a height.
  * Azimuth is measured clockwise from north?
  */
-extern double lat_ellipsoid_curvature_normal_section(
+double lat_ellipsoid_curvature_normal_section(
     const lat_ellipsoid *ellipsoid,
     double latitude,
     double azimuth,
@@ -147,15 +147,14 @@ extern double lat_ellipsoid_curvature_normal_section(
 /**
  *  (Geodesic) Torsion in normal section to azimuth direction at a height.
  */
-extern double lat_ellipsoid_torsion_normal_section(
+double lat_ellipsoid_torsion_normal_section(
     const lat_ellipsoid *ellipsoid,
     double latitude,
     double azimuth,
     double height
 );
 
-
-extern void lat_ellipsoid_localframe_at(
+void lat_ellipsoid_localframe_at(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     double *frame

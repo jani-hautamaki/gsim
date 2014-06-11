@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_from_frame(
+void cmatrix_from_frame(
     double *m,
     const double *v1,
     const double *v2,
@@ -38,7 +38,7 @@ extern void cmatrix_from_frame(
 }
 
 
-extern void cmatrix_to_frame(
+void cmatrix_to_frame(
     const double *m,
     double *v1,
     double *v2,

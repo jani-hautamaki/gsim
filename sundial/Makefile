@@ -54,7 +54,7 @@ libsundial_OBJS := $(patsubst $(libsundial_SRCDIR)/%,$(libsundial_OBJDIR)/%,$(li
 # Output generation
 ####################
 
-libsundial_CFLAGS=-Wall -std=c99 -I$(libsundial_INCDIR)
+libsundial_CFLAGS=-Wall -pedantic -std=c99 -I$(libsundial_INCDIR)
 #libsundial_CPPFLAGS=
 
 

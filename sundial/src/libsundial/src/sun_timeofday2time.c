@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern void sun_timeofday2time(
+void sun_timeofday2time(
     long timeofday,
     int *hour,
     int *min,

@@ -29,7 +29,7 @@
 // sprintf, printf
 #include <stdio.h>
 
-void dump_list(cg_list *list) {
+static void dump_list(cg_list *list) {
 	cg_listiterator iter;
 	cg_listiterator_begin(&iter, list);
 
@@ -44,7 +44,7 @@ static int compare_int(const int *a, const int *b) {
 	return *a - *b;
 }
 
-int main() {
+int main(void) {
 
 	// Create a new doubly linked list.
 	cg_list *list = cg_list_create();

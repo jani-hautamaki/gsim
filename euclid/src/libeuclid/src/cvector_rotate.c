@@ -22,7 +22,7 @@
 
 // Around x-axis
 
-extern void cvector_rotate_x(
+void cvector_rotate_x(
     double *vdest,
     const double *vorg,
     double angle
@@ -32,7 +32,7 @@ extern void cvector_rotate_x(
 	vdest[2] = -vorg[1]*sin(angle) + vorg[2]*cos(angle);
 }
 
-extern void cvector_rotate_x_l(
+void cvector_rotate_x_l(
     double *vdest,
     const double *vorg,
     long double angle
@@ -44,7 +44,7 @@ extern void cvector_rotate_x_l(
 
 // Around y-axis
 
-extern void cvector_rotate_y(
+void cvector_rotate_y(
     double *vdest,
     const double *vorg,
     double angle
@@ -54,7 +54,7 @@ extern void cvector_rotate_y(
 	vdest[2] = vorg[0]*sin(angle) + vorg[2]*cos(angle);
 }
 
-extern void cvector_rotate_y_l(
+void cvector_rotate_y_l(
     double *vdest,
     const double *vorg,
     long double angle
@@ -66,7 +66,7 @@ extern void cvector_rotate_y_l(
 
 // around z-axis
 
-extern void cvector_rotate_z(
+void cvector_rotate_z(
     double *vdest,
     const double *vorg,
     double angle
@@ -76,7 +76,7 @@ extern void cvector_rotate_z(
 	vdest[2] = vorg[2];
 }
 
-extern void cvector_rotate_z_l(
+void cvector_rotate_z_l(
     double *vdest,
     const double *vorg,
     long double angle

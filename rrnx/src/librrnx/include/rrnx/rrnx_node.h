@@ -74,14 +74,14 @@ typedef struct rrnx_node rrnx_node;
 // METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
-extern rrnx_node *rrnx_node_alloc(int type);
-extern void rrnx_node_free(rrnx_node *node);
+rrnx_node *rrnx_node_alloc(int type);
+void rrnx_node_free(rrnx_node *node);
 
 //============================================================================
 // METHODS: CONSTRUCTION & DESTRUCTION
 //============================================================================
 
-extern int rrnx_node_is_type_valid(int type);
+int rrnx_node_is_type_valid(int type);
 
 
 #ifdef __cplusplus

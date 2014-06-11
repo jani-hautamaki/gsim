@@ -122,89 +122,55 @@ typedef struct cg_hashmap cg_hashmap;
 // CONSTRUCTORS & DESTRUCTORS
 //============================
 
-extern cg_hashmap *cg_hashmap_create();
-extern void cg_hashmap_free(cg_hashmap *map);
+cg_hashmap *cg_hashmap_create(void);
+void cg_hashmap_free(cg_hashmap *map);
 
-extern void cg_hashmap_init(cg_hashmap *map);
-extern void cg_hashmap_deinit(cg_hashmap *map);
+void cg_hashmap_init(cg_hashmap *map);
+void cg_hashmap_deinit(cg_hashmap *map);
 
 // MANIPULATION AND RETRIEVAL
 //============================
 
-extern int cg_hashmap_put(
-    cg_hashmap *map,
-    const void *key,
-    const void *itemptr
-);
-
-extern void *cg_hashmap_get(
-    cg_hashmap *map,
-    const void *key
-);
-
-extern void *cg_hashmap_remove(
-    cg_hashmap *map,
-    const void *key
-);
-
-extern void cg_hashmap_delete(
-    cg_hashmap *map,
-    const void *key
-);
+int cg_hashmap_put(cg_hashmap *map, const void *key, const void *itemptr);
+void *cg_hashmap_get(cg_hashmap *map, const void *key);
+void *cg_hashmap_remove(cg_hashmap *map, const void *key);
+void cg_hashmap_delete(cg_hashmap *map, const void *key);
 
 // OTHER METHODS
 //===============
 
-extern int cg_hashmap_get_size(
-    const cg_hashmap *map
-);
+int cg_hashmap_get_size(const cg_hashmap *map);
 
 // CONVENIENCE: INT HASHMAP
 //==========================
 
-extern cg_hashmap *cg_inthashmap_create();
-extern void cg_inthashmap_free(cg_hashmap *map);
+cg_hashmap *cg_inthashmap_create(void);
+void cg_inthashmap_free(cg_hashmap *map);
 
-extern void *cg_inthashmap_get(
-    cg_hashmap *map,
-    int key
-);
-
-extern void cg_inthashmap_put(
-    cg_hashmap *map,
-    int key,
-    const void *itemptr
-);
-
-extern void *cg_inthashmap_remove(
-    cg_hashmap *map,
-    int key
-);
-
-extern void cg_inthashmap_delete(
-    cg_hashmap *map,
-    int key
-);
+void *cg_inthashmap_get(cg_hashmap *map, int key);
+void cg_inthashmap_put(cg_hashmap *map, int key, const void *itemptr);
+void *cg_inthashmap_remove(cg_hashmap *map, int key);
+void cg_inthashmap_delete(cg_hashmap *map, int key);
 
 
 // CONVENIENCE: STR HASHMAP
 //==========================
 
-extern void cg_hashmap_use_string_values(cg_hashmap *map);
-extern void cg_hashmap_use_string_keys(cg_hashmap *map);
+void cg_hashmap_use_string_values(cg_hashmap *map);
+void cg_hashmap_use_string_keys(cg_hashmap *map);
 
 
 /*
 
-extern cg_hashmap *cg_strhashmap_create();
-extern void cg_strhashmap_free(cg_hashmap *map);
+cg_hashmap *cg_strhashmap_create();
+void cg_strhashmap_free(cg_hashmap *map);
 
-extern void *cg_strhashmap_get(
+void *cg_strhashmap_get(
     cg_hashmap *map,
     const char *key
 );
 
-extern void *cg_strhashmap_put(
+void *cg_strhashmap_put(
     cg_hashmap *map,
     const char *key,
     const void *itemptr

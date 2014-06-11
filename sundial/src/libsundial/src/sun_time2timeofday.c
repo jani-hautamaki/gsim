@@ -17,6 +17,6 @@
 
 #include "sundial/sundial.h"
 
-extern long sun_time2timeofday(int hour, int min, int sec) {
+long sun_time2timeofday(int hour, int min, int sec) {
 	return ((long) hour)*3600 + ((long) min)*60 + ((long) sec);
 }

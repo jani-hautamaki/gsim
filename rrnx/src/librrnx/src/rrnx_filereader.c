@@ -85,7 +85,7 @@ static int errmsg_none(rrnx_filereader *reader, int err) {
 
 //--- external methods: basic primitives -----------------------------------//
 
-extern rrnx_filereader *rrnx_fr_alloc(void) {
+rrnx_filereader *rrnx_fr_alloc(void) {
 	int failure = 1;
 
 	// Allocate
@@ -142,7 +142,7 @@ extern rrnx_filereader *rrnx_fr_alloc(void) {
 	return reader;
 }
 
-extern void rrnx_fr_free(rrnx_filereader *reader) {
+void rrnx_fr_free(rrnx_filereader *reader) {
 	if (reader == NULL) {
 		// Already freed
 		return;
@@ -165,7 +165,7 @@ extern void rrnx_fr_free(rrnx_filereader *reader) {
 	free(reader);
 }
 
-extern int rrnx_fr_set_buffer_size(rrnx_filereader *reader, int size) {
+int rrnx_fr_set_buffer_size(rrnx_filereader *reader, int size) {
 	void *newptr = realloc(reader->buffer, size);
 
 	if (newptr != NULL) {
@@ -187,7 +187,7 @@ extern int rrnx_fr_set_buffer_size(rrnx_filereader *reader, int size) {
 	return reader->err;
 }
 
-extern int rrnx_fr_set_filename(
+int rrnx_fr_set_filename(
     rrnx_filereader *reader,
     const char *filename
 ) {
@@ -240,7 +240,7 @@ static int fclose_silently(rrnx_filereader *reader) {
 	return errnum;
 }
 
-extern int rrnx_fr_fclose(rrnx_filereader *reader) {
+int rrnx_fr_fclose(rrnx_filereader *reader) {
 	noerr(reader);
 
 	if (reader->fp != NULL) {
@@ -258,7 +258,7 @@ extern int rrnx_fr_fclose(rrnx_filereader *reader) {
 	return reader->err;
 } // rrnx_fr_fclose()
 
-extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
+int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
 	// Reset error
 	noerr(reader);
 
@@ -300,7 +300,7 @@ extern int rrnx_fr_fopen(rrnx_filereader *reader, const char *filename) {
 	return reader->err;
 }
 
-extern int rrnx_fr_bind(rrnx_filereader *reader, FILE *fp) {
+int rrnx_fr_bind(rrnx_filereader *reader, FILE *fp) {
 	if (reader->fp != NULL) {
 		// Already file open
 		return errmsg(reader, RRNX_E_HASFILE,
@@ -324,7 +324,7 @@ extern int rrnx_fr_bind(rrnx_filereader *reader, FILE *fp) {
 	return noerr(reader);
 }
 
-extern int rrnx_fr_unbind(rrnx_filereader *reader) {
+int rrnx_fr_unbind(rrnx_filereader *reader) {
 	if (reader->fp != NULL) {
                 // Remove handle
                 reader->fp = NULL;
@@ -346,7 +346,7 @@ extern int rrnx_fr_unbind(rrnx_filereader *reader) {
 	return noerr(reader);
 }
 
-extern int rrnx_fr_buffer(rrnx_filereader *reader) {
+int rrnx_fr_buffer(rrnx_filereader *reader) {
 	if (reader->fp == NULL) {
 		// No open file
 		return errmsg_none(reader, RRNX_E_NOFILE);
@@ -386,7 +386,7 @@ extern int rrnx_fr_buffer(rrnx_filereader *reader) {
  * Returns:
  * reader->err
  */
-extern int rrnx_fr_readchar(rrnx_filereader *reader, char *dest) {
+int rrnx_fr_readchar(rrnx_filereader *reader, char *dest) {
 	// Buffer consumed?
 	if (reader->at == reader->len) {
 		// Fill buffer with new data. This updated reader->len.
@@ -418,7 +418,7 @@ extern int rrnx_fr_readchar(rrnx_filereader *reader, char *dest) {
  *     RRNX_E_OVERFLOW  - Current line was too long for the buffer
  *     RRNX_E_SYSCALL   - fread() failed during buffering
  */
-extern int rrnx_fr_readline(
+int rrnx_fr_readline(
     rrnx_filereader *reader,
     char *dest,
     size_t maxlen

@@ -203,6 +203,7 @@ static void consume(gut_argparser *parser) {
 		break;
 
 	case S_OUTFILE:
+		config->outfile = carg;
 		break;
 
 	case S_STEPLEN:
@@ -264,7 +265,7 @@ static void gut_argparser_eof(gut_argparser *parser) {
 }
 
 
-extern int argparser_parse(
+int argparser_parse(
     gut_argparser *parser,
     int argc,
     char *argv[],

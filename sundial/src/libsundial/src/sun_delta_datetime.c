@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern double sun_delta_datetime(
+double sun_delta_datetime(
     const sun_datetime *dt2,
     const sun_datetime *dt1
 ) {

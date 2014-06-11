@@ -24,7 +24,7 @@
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern cg_listiterator *cg_listiterator_create() {
+cg_listiterator *cg_listiterator_create(void) {
 	cg_listiterator *iter
 	    = malloc(sizeof(cg_listiterator));
 
@@ -41,15 +41,13 @@ extern cg_listiterator *cg_listiterator_create() {
 	return iter;
 }
 
-extern void cg_listiterator_free(cg_listiterator *iter) {
+void cg_listiterator_free(cg_listiterator *iter) {
 	if (iter != NULL) {
 		free(iter);
 	}
 }
 
-extern cg_listiterator *cg_listiterator_from_begin(
-        cg_list *list
-) {
+cg_listiterator *cg_listiterator_from_begin(cg_list *list) {
 	cg_listiterator *iter = cg_listiterator_create();
 	if (iter != NULL) {
 		cg_listiterator_begin(iter, list);
@@ -59,9 +57,7 @@ extern cg_listiterator *cg_listiterator_from_begin(
 	return iter;
 }
 
-extern cg_listiterator *cg_listiterator_from_end(
-        cg_list *list
-) {
+cg_listiterator *cg_listiterator_from_end(cg_list *list) {
 	cg_listiterator *iter = cg_listiterator_create();
 	if (iter != NULL) {
 		cg_listiterator_end(iter, list);
@@ -74,10 +70,7 @@ extern cg_listiterator *cg_listiterator_from_end(
 // INITIALIZATION
 //================
 
-extern void cg_listiterator_begin(
-        cg_listiterator *iter,
-        cg_list *list
-) {
+void cg_listiterator_begin(cg_listiterator *iter, cg_list *list) {
 	iter->list = list;
 	iter->prev = NULL;
 	iter->cur = NULL;
@@ -85,10 +78,7 @@ extern void cg_listiterator_begin(
 }
 
 
-extern void cg_listiterator_end(
-        cg_listiterator *iter,
-        cg_list *list
-) {
+void cg_listiterator_end(cg_listiterator *iter, cg_list *list) {
 	iter->list = list;
 	iter->prev = list->tail;
 	iter->cur = NULL;
@@ -98,15 +88,11 @@ extern void cg_listiterator_end(
 // ACCESS METHODS
 //================
 
-extern int cg_listiterator_has_current(
-        const cg_listiterator *iter
-) {
+int cg_listiterator_has_current(const cg_listiterator *iter) {
 	return iter->cur != NULL;
 }
 
-extern void *cg_listiterator_get_current(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_get_current(cg_listiterator *iter) {
 	void *rval = NULL;
 
 	if (iter->cur != NULL) {
@@ -121,21 +107,15 @@ extern void *cg_listiterator_get_current(
 // TRAVERSAL
 //===========
 
-extern int cg_listiterator_has_next(
-        const cg_listiterator *iter
-) {
+int cg_listiterator_has_next(const cg_listiterator *iter) {
 	return iter->next != NULL;
 }
 
-extern int cg_listiterator_has_previous(
-        const cg_listiterator *iter
-) {
+int cg_listiterator_has_previous(const cg_listiterator *iter) {
 	return iter->prev != NULL;
 }
 
-extern void *cg_listiterator_next(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_next(cg_listiterator *iter) {
 	void *rval = NULL;
 
 	cg_listentry *next = iter->next;
@@ -157,9 +137,7 @@ extern void *cg_listiterator_next(
 	return rval;
 }
 
-extern void *cg_listiterator_get_next(
-    const cg_listiterator *iter
-) {
+void *cg_listiterator_get_next(const cg_listiterator *iter) {
 	void *rval = NULL;
 	if (iter->next != NULL) {
 		rval = iter->next->itemptr;
@@ -167,9 +145,7 @@ extern void *cg_listiterator_get_next(
 	return rval;
 }
 
-extern void *cg_listiterator_previous(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_previous(cg_listiterator *iter) {
 	void *rval = NULL;
 
 	cg_listentry *prev = iter->prev;
@@ -191,9 +167,7 @@ extern void *cg_listiterator_previous(
 	return rval;
 }
 
-extern void *cg_listiterator_get_previous(
-    const cg_listiterator *iter
-) {
+void *cg_listiterator_get_previous(const cg_listiterator *iter) {
 	void *rval = NULL;
 	if (iter->prev != NULL) {
 		rval = iter->prev->itemptr;
@@ -205,10 +179,7 @@ extern void *cg_listiterator_get_previous(
 // LIST MANIPULATION: INSERTION
 //==============================
 
-extern void *cg_listiterator_set_current(
-        cg_listiterator *iter,
-        void *itemptr
-) {
+void *cg_listiterator_set_current(cg_listiterator *iter, void *itemptr) {
 	cg_listentry *cur = iter->cur;
 	void *rval = NULL;
 
@@ -222,10 +193,7 @@ extern void *cg_listiterator_set_current(
 	return rval;
 }
 
-extern void cg_listiterator_replace_current(
-        cg_listiterator *iter,
-        void *itemptr
-) {
+void cg_listiterator_replace_current(cg_listiterator *iter, void *itemptr) {
 	void *origptr = cg_listiterator_set_current(iter, itemptr);
 
 	void (*free_itemptr)(void*);
@@ -235,10 +203,7 @@ extern void cg_listiterator_replace_current(
 	}
 }
 
-extern void cg_listiterator_insert_after(
-        cg_listiterator *iter,
-        void *itemptr
-) {
+void cg_listiterator_insert_after(cg_listiterator *iter, void *itemptr) {
 	if (iter->cur != NULL) {
 		// Has current.
 		cg_list_insert_after(
@@ -275,10 +240,7 @@ extern void cg_listiterator_insert_after(
 	}
 }
 
-extern void cg_listiterator_insert_before(
-        cg_listiterator *iter,
-        void *itemptr
-) {
+void cg_listiterator_insert_before(cg_listiterator *iter, void *itemptr) {
 	if (iter->cur != NULL) {
 		// Has current.
 		cg_list_insert_before(
@@ -322,9 +284,7 @@ extern void cg_listiterator_insert_before(
 // LIST MANIPULATION: DELETION
 //=============================
 
-extern void cg_listiterator_delete_current(
-        cg_listiterator *iter
-) {
+void cg_listiterator_delete_current(cg_listiterator *iter) {
 	if (iter->cur != NULL) {
 		cg_list_delete(iter->list, iter->cur);
 		iter->cur = NULL;
@@ -333,9 +293,7 @@ extern void cg_listiterator_delete_current(
 	}
 }
 
-extern void cg_listiterator_delete_next(
-        cg_listiterator *iter
-) {
+void cg_listiterator_delete_next(cg_listiterator *iter) {
 	cg_listentry *next = iter->next;
 	if (next != NULL) {
 		// Update next
@@ -347,9 +305,7 @@ extern void cg_listiterator_delete_next(
 	}
 }
 
-extern void cg_listiterator_delete_previous(
-        cg_listiterator *iter
-) {
+void cg_listiterator_delete_previous(cg_listiterator *iter) {
 	cg_listentry *prev = iter->prev;
 	if (prev != NULL) {
 		// Update previous
@@ -365,9 +321,7 @@ extern void cg_listiterator_delete_previous(
 // LIST MANIPULATION: REMOVAL
 //============================
 
-extern void *cg_listiterator_remove_current(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_remove_current(cg_listiterator *iter) {
 	void *rval = NULL;
 	if (iter->cur != NULL) {
 		rval = cg_list_remove(iter->list, iter->cur);
@@ -378,9 +332,7 @@ extern void *cg_listiterator_remove_current(
 	return rval;
 }
 
-extern void *cg_listiterator_remove_next(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_remove_next(cg_listiterator *iter) {
 	void *rval = NULL;
 
 	cg_listentry *next = iter->next;
@@ -395,9 +347,7 @@ extern void *cg_listiterator_remove_next(
 	return rval;
 }
 
-extern void *cg_listiterator_remove_previous(
-        cg_listiterator *iter
-) {
+void *cg_listiterator_remove_previous(cg_listiterator *iter) {
 	void *rval = NULL;
 
 	cg_listentry *prev = iter->prev;

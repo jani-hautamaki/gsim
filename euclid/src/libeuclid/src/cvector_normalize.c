@@ -20,7 +20,7 @@
 // sqrt, sqrtl
 #include <math.h>
 
-extern void cvector_normalize(double *vdest, const double *vorg, int n) {
+void cvector_normalize(double *vdest, const double *vorg, int n) {
 	double norm = cvector_norm(vorg, n);
 
 	for (int i = 0; i < n; i++) {
@@ -28,7 +28,7 @@ extern void cvector_normalize(double *vdest, const double *vorg, int n) {
 	}
 }
 
-extern void cvector_normalize_l(double *vdest, const double *vorg, int n) {
+void cvector_normalize_l(double *vdest, const double *vorg, int n) {
 	long double norm_l = cvector_norm_l(vorg, n);
 
 	for (int i = 0; i < n; i++) {

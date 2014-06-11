@@ -5,6 +5,6 @@
  *
  * In case of any error, NULL is returned.
  */
-extern rrnx_file_nav *rrnx_read_navfile(const char *filename);
+rrnx_file_nav *rrnx_read_navfile(const char *filename);
 
 

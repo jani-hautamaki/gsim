@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern void sun_subsec2delta(
+void sun_subsec2delta(
     double subsec,
     long *delta_day,
     long *delta_sec,

@@ -182,10 +182,7 @@ static void cg_hashmap_free_bucket(cg_hashmap *map, cg_list *bucket) {
 	free(bucket);
 }
 
-static cg_list *cg_hashmap_get_bucket(
-    cg_hashmap *map,
-    const void *key
-) {
+static cg_list *cg_hashmap_get_bucket(cg_hashmap *map, const void *key) {
 	// Compute hash value
 	uint32_t hash = map->key_hash(key);
 
@@ -200,7 +197,7 @@ static cg_list *cg_hashmap_get_bucket(
 // CONSTRUCTORS & DESTRUCTORS
 //============================
 
-extern cg_hashmap *cg_hashmap_create() {
+cg_hashmap *cg_hashmap_create(void) {
 	cg_hashmap *map = NULL;
 
 	int complete = 0;
@@ -223,7 +220,7 @@ extern cg_hashmap *cg_hashmap_create() {
 	return map;
 }
 
-extern void cg_hashmap_free(cg_hashmap *map) {
+void cg_hashmap_free(cg_hashmap *map) {
 	if (map != NULL) {
 		cg_hashmap_deinit(map);
 	}
@@ -231,7 +228,7 @@ extern void cg_hashmap_free(cg_hashmap *map) {
 }
 
 
-extern void cg_hashmap_init(cg_hashmap *map) {
+void cg_hashmap_init(cg_hashmap *map) {
 	map->num_buckets = 0;
 	map->buckets = NULL;
 	map->keylist = NULL;
@@ -290,7 +287,7 @@ extern void cg_hashmap_init(cg_hashmap *map) {
 	}
 }
 
-extern void cg_hashmap_deinit(cg_hashmap *map) {
+void cg_hashmap_deinit(cg_hashmap *map) {
 	// free buckets
 
 	if (map->buckets != NULL) {
@@ -314,11 +311,7 @@ extern void cg_hashmap_deinit(cg_hashmap *map) {
 // ACCESS METHODS
 //================
 
-extern int cg_hashmap_put(
-	cg_hashmap *map,
-	const void *key,
-	const void *itemptr
-) {
+int cg_hashmap_put(cg_hashmap *map, const void *key, const void *itemptr) {
 	// When true, the operation may be carried on.
 	int still_good = 1;
 
@@ -367,10 +360,7 @@ extern int cg_hashmap_put(
 	return mapentry != NULL;
 }
 
-extern void *cg_hashmap_get(
-	cg_hashmap *map,
-	const void *key
-) {
+void *cg_hashmap_get(cg_hashmap *map, const void *key) {
         // Get the bucket
         cg_list *bucket = cg_hashmap_get_bucket(map, key);
 
@@ -386,10 +376,7 @@ extern void *cg_hashmap_get(
 	return NULL;
 }
 
-extern void *cg_hashmap_remove(
-	cg_hashmap *map,
-	const void *key
-) {
+void *cg_hashmap_remove(cg_hashmap *map, const void *key) {
 	void *rval = NULL;
 
 	// Get the bucket
@@ -412,10 +399,7 @@ extern void *cg_hashmap_remove(
 	return rval;
 }
 
-extern void cg_hashmap_delete(
-	cg_hashmap *map,
-	const void *key
-) {
+void cg_hashmap_delete(cg_hashmap *map, const void *key) {
 	void *itemptr = cg_hashmap_remove(map, key);
 	cg_hashmap_free_item(map, itemptr);
 }
@@ -423,9 +407,7 @@ extern void cg_hashmap_delete(
 // OTHER METHODS
 //===============
 
-extern int cg_hashmap_get_size(
-    const cg_hashmap *map
-) {
+int cg_hashmap_get_size(const cg_hashmap *map) {
 	return cg_list_get_size(map->keylist);
 }
 
@@ -468,12 +450,12 @@ static uint32_t keyhash_str(const char *s) {
 	return hash;
 }
 
-extern void cg_hashmap_use_string_values(cg_hashmap *map) {
+void cg_hashmap_use_string_values(cg_hashmap *map) {
 	map->item_clone = (void *) clone_str;
 	map->item_free = (void *) free;
 }
 
-extern void cg_hashmap_use_string_keys(cg_hashmap *map) {
+void cg_hashmap_use_string_keys(cg_hashmap *map) {
 	map->key_clone = (void *) clone_str;
 	map->key_free = (void *) free;
 	map->key_hash = (void *) keyhash_str;
@@ -491,7 +473,7 @@ static int isequal_int(const int *a, const int *b) {
 	return *a - *b;
 }
 
-extern cg_hashmap *cg_inthashmap_create() {
+cg_hashmap *cg_inthashmap_create(void) {
 	cg_hashmap *map = cg_hashmap_create();
 
 	// Initialize.
@@ -502,22 +484,15 @@ extern cg_hashmap *cg_inthashmap_create() {
 	return map;
 }
 
-extern void cg_inthashmap_free(cg_hashmap *map) {
+void cg_inthashmap_free(cg_hashmap *map) {
 	cg_hashmap_free(map);
 }
 
-extern void *cg_inthashmap_get(
-    cg_hashmap *map,
-    int key
-) {
+void *cg_inthashmap_get(cg_hashmap *map, int key) {
 	return cg_hashmap_get(map, &key);
 }
 
-extern void cg_inthashmap_put(
-    cg_hashmap *map,
-    int key,
-    const void *itemptr
-) {
+void cg_inthashmap_put(cg_hashmap *map, int key, const void *itemptr) {
 	// Dynamically create a copy of the key
 	int *keyptr = malloc(sizeof(int));
 	if (keyptr == NULL) {
@@ -531,17 +506,11 @@ extern void cg_inthashmap_put(
 	cg_hashmap_put(map, keyptr, itemptr);
 }
 
-extern void *cg_inthashmap_remove(
-    cg_hashmap *map,
-    int key
-) {
+void *cg_inthashmap_remove(cg_hashmap *map, int key) {
 	return cg_hashmap_remove(map, &key);
 }
 
-extern void cg_inthashmap_delete(
-    cg_hashmap *map,
-    int key
-) {
+void cg_inthashmap_delete(cg_hashmap *map, int key) {
 	cg_hashmap_delete(map, &key);
 }
 

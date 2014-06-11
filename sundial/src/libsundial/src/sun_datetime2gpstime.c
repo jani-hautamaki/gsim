@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern void sun_datetime2gpstime(
+void sun_datetime2gpstime(
     const sun_datetime *dt,
     int *week,
     double *tow

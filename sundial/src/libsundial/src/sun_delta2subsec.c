@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern double sun_delta2subsec(
+double sun_delta2subsec(
     long delta_day,
     long delta_sec,
     double delta_subsec

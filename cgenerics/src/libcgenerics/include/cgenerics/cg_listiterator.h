@@ -52,121 +52,58 @@ typedef struct cg_listiterator cg_listiterator;
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern cg_listiterator *cg_listiterator_create();
-extern void cg_listiterator_free(cg_listiterator *iter);
+cg_listiterator *cg_listiterator_create(void);
+void cg_listiterator_free(cg_listiterator *iter);
 
-extern cg_listiterator *cg_listiterator_from_begin(
-	cg_list *list
-);
-
-extern cg_listiterator *cg_listiterator_from_end(
-	cg_list *list
-);
+cg_listiterator *cg_listiterator_from_begin(cg_list *list);
+cg_listiterator *cg_listiterator_from_end(cg_list *list);
 
 // INITIALIZATION
 //================
 
-extern void cg_listiterator_begin(
-	cg_listiterator *iter,
-	cg_list *list
-);
-
-extern void cg_listiterator_end(
-	cg_listiterator *iter,
-	cg_list *list
-);
+void cg_listiterator_begin(cg_listiterator *iter, cg_list *list);
+void cg_listiterator_end(cg_listiterator *iter, cg_list *list);
 
 // ACCESS METHODS
 //================
 
-extern int cg_listiterator_has_current(
-	const cg_listiterator *iter
-);
-
-extern void *cg_listiterator_get_current(
-	cg_listiterator *iter
-);
+int cg_listiterator_has_current(const cg_listiterator *iter);
+void *cg_listiterator_get_current(cg_listiterator *iter);
 
 // TRAVERSAL
 //===========
 
-extern int cg_listiterator_has_next(
-	const cg_listiterator *iter
-);
+int cg_listiterator_has_next(const cg_listiterator *iter);
+int cg_listiterator_has_previous(const cg_listiterator *iter);
 
-extern int cg_listiterator_has_previous(
-	const cg_listiterator *iter
-);
+void *cg_listiterator_next(cg_listiterator *iter);
+void *cg_listiterator_get_next(const cg_listiterator *iter);
 
-extern void *cg_listiterator_next(
-	cg_listiterator *iter
-);
-
-extern void *cg_listiterator_get_next(
-    const cg_listiterator *iter
-);
-
-extern void *cg_listiterator_previous(
-	cg_listiterator *iter
-);
-
-extern void *cg_listiterator_get_previous(
-    const cg_listiterator *iter
-);
+void *cg_listiterator_previous(cg_listiterator *iter);
+void *cg_listiterator_get_previous(const cg_listiterator *iter);
 
 
 // LIST MANIPULATION: INSERTION
 //==============================
 
-extern void *cg_listiterator_set_current(
-	cg_listiterator *iter,
-	void *itemptr
-);
-
-extern void cg_listiterator_replace_current(
-	cg_listiterator *iter,
-	void *itemptr
-);
-
-extern void cg_listiterator_insert_after(
-	cg_listiterator *iter,
-	void *itemptr
-);
-
-extern void cg_listiterator_insert_before(
-	cg_listiterator *iter,
-	void *itemptr
-);
+void *cg_listiterator_set_current(cg_listiterator *iter, void *itemptr);
+void cg_listiterator_replace_current(cg_listiterator *iter, void *itemptr);
+void cg_listiterator_insert_after(cg_listiterator *iter, void *itemptr);
+void cg_listiterator_insert_before(cg_listiterator *iter, void *itemptr);
 
 // LIST MANIPULATION: DELETION
 //=============================
 
-extern void cg_listiterator_delete_current(
-	cg_listiterator *iter
-);
-
-extern void cg_listiterator_delete_next(
-	cg_listiterator *iter
-);
-
-extern void cg_listiterator_delete_previous(
-	cg_listiterator *iter
-);
+void cg_listiterator_delete_current(cg_listiterator *iter);
+void cg_listiterator_delete_next(cg_listiterator *iter);
+void cg_listiterator_delete_previous(cg_listiterator *iter);
 
 // LIST MANIPULATION: REMOVAL
 //============================
 
-extern void *cg_listiterator_remove_current(
-	cg_listiterator *iter
-);
-
-extern void *cg_listiterator_remove_next(
-	cg_listiterator *iter
-);
-
-extern void *cg_listiterator_remove_previous(
-	cg_listiterator *iter
-);
+void *cg_listiterator_remove_current(cg_listiterator *iter);
+void *cg_listiterator_remove_next(cg_listiterator *iter);
+void *cg_listiterator_remove_previous(cg_listiterator *iter);
 
 
 #ifdef __cplusplus

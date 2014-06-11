@@ -91,40 +91,32 @@ typedef struct gut_argparser gut_argparser;
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern gut_argparser *gut_argparser_create();
-extern void gut_argparser_free(gut_argparser *parser);
+gut_argparser *gut_argparser_create(void);
+void gut_argparser_free(gut_argparser *parser);
 
-extern void gut_argparser_init(gut_argparser *parser);
-extern void gut_argparser_deinit(gut_argparser *parser);
+void gut_argparser_init(gut_argparser *parser);
+void gut_argparser_deinit(gut_argparser *parser);
 
 // OTHER METHODS
 //===============
 
-extern void gut_argparser_errorfmt(
+void gut_argparser_errorfmt(
     gut_argparser *parser,
     int err,
     const char *fmt,
     ...
 );
 
-extern int gut_argparser_has_error(
-    const gut_argparser *parser
-);
+int gut_argparser_has_error(const gut_argparser *parser);
 
-extern const char *gut_argparser_strerror(
-    const gut_argparser *parser
-);
+const char *gut_argparser_strerror(const gut_argparser *parser);
 
-extern void gut_argparser_set_consume_callback(
+void gut_argparser_set_consume_callback(
     gut_argparser *parser,
     void (*consume)(gut_argparser *parser, const char *carg)
 );
 
-extern void gut_argparser_parse(
-    gut_argparser *parser,
-    int argc,
-    char *argv[]
-);
+void gut_argparser_parse(gut_argparser *parser, int argc, char *argv[]);
 
 #ifdef __cplusplus
 } // extern "C"

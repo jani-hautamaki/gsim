@@ -20,11 +20,7 @@
 // sqrt
 #include <math.h>
 
-extern void cquat_to_axisangle(
-    const double *q,
-    double *v,
-    double *angle
-) {
+void cquat_to_axisangle(const double *q, double *v, double *angle) {
 	double n = sqrt(
 	    q[CQUAT_X]*q[CQUAT_X]
 	    + q[CQUAT_Y]*q[CQUAT_Y]
@@ -41,11 +37,7 @@ extern void cquat_to_axisangle(
 }
 
 
-extern void cquat_from_axisangle(
-    double *q,
-    const double *v,
-    double angle
-) {
+void cquat_from_axisangle(double *q, const double *v, double angle) {
 	double n = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 
 	// Cut the angle half

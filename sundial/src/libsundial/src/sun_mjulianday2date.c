@@ -20,7 +20,7 @@
 // For explanation, see
 // http://en.wikipedia.org/wiki/Julian_day#Gregorian_calendar_from_Julian_day_number
 
-extern void sun_mjulianday2date(
+void sun_mjulianday2date(
     long daynum,
     int *year,
     int *month,

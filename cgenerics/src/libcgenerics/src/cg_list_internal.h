@@ -24,24 +24,16 @@
 extern "C" {
 #endif
 
-extern void *cg_list_remove(
-    cg_list *list,
-    cg_listentry *entry
-);
+void *cg_list_remove(cg_list *list, cg_listentry *entry);
+void cg_list_delete(cg_list *list, cg_listentry *entry);
 
-extern void cg_list_delete(
-    cg_list *list,
-    cg_listentry *entry
-);
-
-
-extern cg_listentry *cg_list_insert_after(
+cg_listentry *cg_list_insert_after(
 	cg_list *list,
 	cg_listentry *entry,
 	void *itemptr
 );
 
-extern cg_listentry *cg_list_insert_before(
+cg_listentry *cg_list_insert_before(
 	cg_list *list,
 	cg_listentry *entry,
 	void *itemptr

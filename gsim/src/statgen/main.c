@@ -20,12 +20,14 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include <math.h>
 
 // libgrease, gut_*
 #include "grease/gut_parse.h"
 #include "grease/gut_argparser.h"
+#include "grease/gut_datafile.h"
 
 // liblatitude, lat_*
 #include "latitude/lat_ellipsoid.h"
@@ -41,6 +43,7 @@
 
 // libgsim, data exchange structures
 #include "gsim/gsim_messages.h"
+#include "gsim/gsim_datafile.h"
 
 // The application-specific configuration
 #include "statgen_config.h"
@@ -306,7 +309,25 @@ static void generate_trajectory(statgen_config *config) {
 	);
 	*/
 
-	return;
+	// Attempt to open the outfile, if any
+	gut_datafile *outdf = NULL;
+	if (config->outfile != NULL) do {
+		outdf = gut_datafile_create();
+		if (outdf == NULL) {
+			fprintf(stderr, "gut_datafile_create: out of memory\n");
+			break;
+		}
+		gut_datafile_open(outdf, config->outfile, "wb");
+		if (outdf->err) {
+			fprintf(stderr, "gut_datafile_open: %s\n", strerror(errno));
+			gut_datafile_free(outdf);
+			outdf = NULL;
+			break;
+		}
+		printf("Recording to file %s\n", config->outfile);
+
+	} while (0);
+
 
 	// TODO:
 	// deduce az, el and roll from dcm and local
@@ -332,7 +353,7 @@ static void generate_trajectory(statgen_config *config) {
 		// Output time tag
 
 		// Initialize trajectory data
-		state.t = tag; // assigns the whole struct
+		memcpy(&state.t, &tag, sizeof(tag));
 		memcpy(state.x, x, sizeof(state.x));
 		memcpy(state.v, v, sizeof(state.v));
 		memcpy(state.a, a, sizeof(state.a));
@@ -341,10 +362,22 @@ static void generate_trajectory(statgen_config *config) {
 
 		// Output motion state
 
-		// TODO:
-		// Output constant orientation, zero angular velocity
-		// Output constant position, zero velocity and zero acceleration.
+		if (outdf == NULL) {
+			continue; // skip output
+		}
 
+		gsim_write_tagcode(outdf, GSIM_TAG_SIMULATION_TIME);
+		gsim_write_simulation_time(outdf, &tag);
+
+		gsim_write_tagcode(outdf, GSIM_TAG_MOTION_STATE);
+		gsim_write_motion_state(outdf, &state);
+	}
+
+	if (outdf != NULL) {
+		gut_datafile_flush(outdf);
+		gut_datafile_close(outdf);
+		gut_datafile_free(outdf);
+		outdf = NULL;
 	}
 }
 
@@ -384,6 +417,8 @@ int main(int argc, char *argv[]) {
 	//config.duration = 60*60*1.0;
 	// Default duration: 5 min
 	config.duration = 5*60*1.0;
+	// No output file
+	config.outfile = NULL;
 
 	// Default orientation coincidences with the local frame
 	config.azimuth = 0.0;

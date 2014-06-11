@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-extern int argparser_parse(
+int argparser_parse(
     gut_argparser *parser,
     int argc,
     char *argv[],

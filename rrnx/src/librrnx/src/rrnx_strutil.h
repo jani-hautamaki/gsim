@@ -22,30 +22,30 @@
 extern "C" {
 #endif
 
-extern int rrnx_substr(
+int rrnx_substr(
     char *dest,
     const char *src,
     unsigned int offset,
     unsigned int len
 );
 
-extern int rrnx_trim_trailing(char *s);
+int rrnx_trim_trailing(char *s);
 
-extern int rrnx_substr_trimmed2(
+int rrnx_substr_trimmed2(
     char *dest,
     const char *src,
     int offset,
     int len
 );
 
-extern int rrnx_substr_trimmed(
+int rrnx_substr_trimmed(
         char *buffer,
         const char *line,
         int offset,
         int len
 );
 
-extern void rrnx_replace_fortran_exponent(char *s);
+void rrnx_replace_fortran_exponent(char *s);
 
 
 #ifdef __cplusplus

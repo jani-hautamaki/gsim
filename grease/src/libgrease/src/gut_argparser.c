@@ -27,7 +27,7 @@
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern gut_argparser *gut_argparser_create() {
+gut_argparser *gut_argparser_create(void) {
 	gut_argparser *parser = NULL;
 	int complete = 0;
 
@@ -49,7 +49,7 @@ extern gut_argparser *gut_argparser_create() {
 	return parser;
 }
 
-extern void gut_argparser_free(gut_argparser *parser) {
+void gut_argparser_free(gut_argparser *parser) {
 	gut_argparser_deinit(parser);
 	free(parser);
 }
@@ -58,10 +58,7 @@ extern void gut_argparser_free(gut_argparser *parser) {
  * Reallocates the error message buffer to the requested size.
  * Returns a pointer on success, or NULL if the reallocation fails.
  */
-extern void *gut_argparser_realloc_errmsg(
-    gut_argparser *parser,
-    int size
-) {
+void *gut_argparser_realloc_errmsg(gut_argparser *parser, int size) {
 	// Free previous buffer, if any.
 	if (parser->errmsg != NULL) {
 		free(parser->errmsg);
@@ -90,7 +87,7 @@ extern void *gut_argparser_realloc_errmsg(
 	return parser->errmsg;
 }
 
-extern void gut_argparser_init(gut_argparser *parser) {
+void gut_argparser_init(gut_argparser *parser) {
 	parser->err = 0;
 	parser->errmsg_size = 0;
 	parser->errmsg = NULL;
@@ -122,7 +119,7 @@ extern void gut_argparser_init(gut_argparser *parser) {
  *
  * NOTE: this method is required to leave error code intact.
  */
-extern void gut_argparser_deinit(gut_argparser *parser) {
+void gut_argparser_deinit(gut_argparser *parser) {
 	if (parser != NULL) {
 		// Deallocate errmsg
 		free(parser->errmsg);
@@ -134,7 +131,7 @@ extern void gut_argparser_deinit(gut_argparser *parser) {
 // OTHER METHODS
 //===============
 
-extern void gut_argparser_errorfmt(
+void gut_argparser_errorfmt(
     gut_argparser *parser,
     int err,
     const char *fmt, ...
@@ -150,29 +147,19 @@ extern void gut_argparser_errorfmt(
         va_end(args);
 }
 
-extern int gut_argparser_has_error(
-    const gut_argparser *parser
-) {
+int gut_argparser_has_error(const gut_argparser *parser) {
 	return parser->err != 0;
 }
 
-extern int gut_argparser_errno(
-    const gut_argparser *parser
-) {
+int gut_argparser_errno(const gut_argparser *parser) {
 	return parser->err;
 }
 
-extern const char *gut_argparser_strerror(
-    const gut_argparser *parser
-) {
+const char *gut_argparser_strerror(const gut_argparser *parser) {
 	return parser->errmsg;
 }
 
-extern void gut_argparser_parse(
-    gut_argparser *parser,
-    int argc,
-    char *argv[]
-) {
+void gut_argparser_parse(gut_argparser *parser, int argc, char *argv[]) {
 	// For each argument
 	for (int i = 1; i < argc; i++) {
 		parser->carg = argv[i];

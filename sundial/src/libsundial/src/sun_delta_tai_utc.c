@@ -46,7 +46,7 @@ static const long TAI_UTC_DELTA[] = {
         56109, 35
 };
 
-extern int sun_delta_tai_utc(long mjd) {
+int sun_delta_tai_utc(long mjd) {
 	// bisect search
 	int len = (sizeof(TAI_UTC_DELTA) / sizeof(TAI_UTC_DELTA[0])) / 2;
 

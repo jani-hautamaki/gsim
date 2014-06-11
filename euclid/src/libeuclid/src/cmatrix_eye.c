@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_eye(double *m, int n) {
+void cmatrix_eye(double *m, int n) {
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			double val;

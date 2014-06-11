@@ -20,7 +20,7 @@
 // floor
 #include <math.h>
 
-extern void sun_translate_gpstime(
+void sun_translate_gpstime(
     int *week,
     double *tow,
     long delta_day,

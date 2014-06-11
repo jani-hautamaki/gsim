@@ -29,7 +29,7 @@
 // sprintf, printf
 #include <stdio.h>
 
-int main() {
+int main(void) {
 
 	// Create a new doubly linked list.
 	cg_list *list = cg_list_create();

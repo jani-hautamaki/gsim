@@ -32,11 +32,11 @@ extern "C" {
 #endif
 
 /*
-extern double maid_deg2rad(double deg);
-extern double maid_rad2deg(double rad);
+double maid_deg2rad(double deg);
+double maid_rad2deg(double rad);
 
-extern long double maid_deg2rad_l(long double deg);
-extern long double maid_rad2deg_l(long double rad);
+long double maid_deg2rad_l(long double deg);
+long double maid_rad2deg_l(long double rad);
 */
 
 #ifdef __cplusplus

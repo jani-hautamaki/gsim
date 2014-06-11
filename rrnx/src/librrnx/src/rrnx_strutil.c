@@ -20,7 +20,7 @@
 #include <string.h> // strlen()
 #include <ctype.h> // isdigit()
 
-extern int rrnx_substr(
+int rrnx_substr(
     char *dest,
     const char *src,
     unsigned int offset,
@@ -53,7 +53,7 @@ extern int rrnx_substr(
 	return i;
 }
 
-extern int rrnx_trim_trailing(char *s) {
+int rrnx_trim_trailing(char *s) {
 	int j = strlen(s);
 	while ((j > 0) && (s[j-1] == ' ')) {
 		j--;
@@ -63,7 +63,7 @@ extern int rrnx_trim_trailing(char *s) {
 	return j;
 }
 
-extern int rrnx_substr_trimmed2(
+int rrnx_substr_trimmed2(
     char *dest,
     const char *src,
     int offset,
@@ -73,7 +73,7 @@ extern int rrnx_substr_trimmed2(
 	return rrnx_trim_trailing(dest);
 }
 
-extern int rrnx_substr_trimmed(
+int rrnx_substr_trimmed(
 	char *buffer,
 	const char *line,
 	int offset,
@@ -117,7 +117,7 @@ extern int rrnx_substr_trimmed(
 	return i;
 }
 
-extern void rrnx_replace_fortran_exponent(char *s) {
+void rrnx_replace_fortran_exponent(char *s) {
 	int i = strlen(s);
 
 	// Skip integer

@@ -965,7 +965,7 @@ static int cycle_eof(rrnx_navreader *navreader) {
 	return navreader->err;
 }
 
-extern rrnx_navreader *rrnx_navr_alloc(void) {
+rrnx_navreader *rrnx_navr_alloc(void) {
 	int incomplete = 1;
 
 	// Allocate new object
@@ -1021,7 +1021,7 @@ extern rrnx_navreader *rrnx_navr_alloc(void) {
 }
 
 
-extern void rrnx_navr_free(rrnx_navreader *navreader) {
+void rrnx_navr_free(rrnx_navreader *navreader) {
 	if (navreader == NULL) {
 		// Already freed
 		return;
@@ -1048,15 +1048,15 @@ extern void rrnx_navr_free(rrnx_navreader *navreader) {
 	free(navreader);
 }
 
-extern int rrnx_navr_errno(const rrnx_navreader *navreader) {
+int rrnx_navr_errno(const rrnx_navreader *navreader) {
 	return navreader->err;
 }
-extern const char *rrnx_navr_strerror(const rrnx_navreader *navreader) {
+const char *rrnx_navr_strerror(const rrnx_navreader *navreader) {
 	return navreader->errmsg->text;
 }
 
 /*
-extern int rrnx_resize_linebuf(
+int rrnx_resize_linebuf(
     rrnx_navreader *navreader,
     unsigned int size
 ) {
@@ -1067,7 +1067,7 @@ extern int rrnx_resize_linebuf(
 }
 */
 
-extern void rrnx_navr_bind(
+void rrnx_navr_bind(
     rrnx_navreader *navreader,
     FILE *fp
 ) {
@@ -1075,7 +1075,7 @@ extern void rrnx_navr_bind(
 }
 
 
-extern int rrnx_navr_consume(rrnx_navreader *navreader, const char *line) {
+int rrnx_navr_consume(rrnx_navreader *navreader, const char *line) {
 
 	// Determine the tag code on the line, if any
 	int linetype = rrnx_enumerate_linetype(line);
@@ -1097,7 +1097,7 @@ extern int rrnx_navr_consume(rrnx_navreader *navreader, const char *line) {
 	return navreader->err;
 }
 
-extern void rrnx_navr_readfile(
+void rrnx_navr_readfile(
     rrnx_navreader *navreader,
     const char *filename
 ) {
@@ -1165,7 +1165,7 @@ extern void rrnx_navr_readfile(
 	rrnx_fr_fclose(fr);
 }
 
-extern rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader) {
+rrnx_list *rrnx_navr_release_nodelist(rrnx_navreader *navreader) {
 	rrnx_list *nodelist = navreader->nodelist;
 	navreader->nodelist = NULL;
 	return nodelist;

@@ -20,7 +20,7 @@
 // memcpy
 #include <string.h>
 
-extern void cmatrix_memcpy(
+void cmatrix_memcpy(
     double *mdest,
     const double *morg,
     int rows, int cols

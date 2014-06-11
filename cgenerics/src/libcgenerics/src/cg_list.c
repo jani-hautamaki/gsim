@@ -20,7 +20,7 @@
 // malloc, free, NULL
 #include <stdlib.h>
 
-extern cg_list *cg_list_create() {
+cg_list *cg_list_create(void) {
 	cg_list *list = NULL;
 	do {
 		list = malloc(sizeof(cg_list));
@@ -31,7 +31,7 @@ extern cg_list *cg_list_create() {
 	return list;
 }
 
-extern void cg_list_init(cg_list *list) {
+void cg_list_init(cg_list *list) {
 	list->head = NULL;
 	list->tail = NULL;
 	list->size = 0;
@@ -39,14 +39,14 @@ extern void cg_list_init(cg_list *list) {
 	list->free = NULL;
 }
 
-extern void cg_list_free(cg_list *list) {
+void cg_list_free(cg_list *list) {
 	if (list != NULL) {
 		cg_list_deinit(list);
 		free(list);
 	}
 }
 
-extern void cg_list_deinit(cg_list *list) {
+void cg_list_deinit(cg_list *list) {
 	cg_list_delete_all(list);
 }
 
@@ -97,10 +97,7 @@ static void cg_listentry_free(cg_listentry *entry) {
  * Remove list-entry and return the itemptr.
  * For internal use only.
  */
-extern void *cg_list_remove(
-    cg_list *list,
-    cg_listentry *entry
-) {
+void *cg_list_remove(cg_list *list, cg_listentry *entry) {
 	// Detach the entry from the list
 	void *itemptr = entry->itemptr;
 	cg_listentry *prev = entry->prev;
@@ -136,10 +133,7 @@ extern void *cg_list_remove(
  * Remove list-entry and free itemptr.
  * For internal use only.
  */
-extern void cg_list_delete(
-    cg_list *list,
-    cg_listentry *entry
-) {
+void cg_list_delete(cg_list *list, cg_listentry *entry) {
 
 	// Detach the entry from the list
 	void *itemptr = cg_list_remove(list, entry);
@@ -152,7 +146,7 @@ extern void cg_list_delete(
  * Creates and inserts a new list-entry after the given one.
  * Returns the new list-entry, or NULL if out of memory.
  */
-extern cg_listentry *cg_list_insert_after(
+cg_listentry *cg_list_insert_after(
     cg_list *list,
     cg_listentry *entry,
     void *itemptr
@@ -190,10 +184,10 @@ extern cg_listentry *cg_list_insert_after(
  * Creates and inserts a new list-entry before the given one.
  * Returns the new list-entry, or NULL if out of memory.
  */
-extern cg_listentry *cg_list_insert_before(
-        cg_list *list,
-        cg_listentry *entry,
-        void *itemptr
+cg_listentry *cg_list_insert_before(
+    cg_list *list,
+    cg_listentry *entry,
+    void *itemptr
 ) {
 	cg_listentry *rval = NULL;
 
@@ -226,9 +220,7 @@ extern cg_listentry *cg_list_insert_before(
 // MISCELLANEOUS
 //===============
 
-extern int cg_list_get_size(
-    const cg_list *list
-) {
+int cg_list_get_size(const cg_list *list) {
 	return list->size;
 }
 
@@ -239,10 +231,7 @@ extern int cg_list_get_size(
  * Appends an item to the end of the list.
  * Returns true if success, false if out of memory.
  */
-extern int cg_list_append(
-    cg_list *list,
-    void *itemptr
-) {
+int cg_list_append(cg_list *list, void *itemptr) {
 	cg_listentry *entry = NULL;
 
 	do {
@@ -271,10 +260,7 @@ extern int cg_list_append(
  * Prependss an item to the beginning of the list.
  * Returns true if success, false if out of memory.
  */
-extern int cg_list_prepend(
-    cg_list *list,
-    void *itemptr
-) {
+int cg_list_prepend(cg_list *list, void *itemptr) {
 
 	cg_listentry *entry = NULL;
 	do {
@@ -302,9 +288,7 @@ extern int cg_list_prepend(
 // CONTENT REMOVAL
 //=================
 
-extern void cg_list_delete_first(
-    cg_list *list
-) {
+void cg_list_delete_first(cg_list *list) {
 	if (list->head != NULL) {
 		cg_list_delete(list, list->head);
 	} else {
@@ -312,9 +296,7 @@ extern void cg_list_delete_first(
 	}
 }
 
-extern void cg_list_delete_last(
-    cg_list *list
-) {
+void cg_list_delete_last(cg_list *list) {
 	if (list->tail != NULL) {
 		cg_list_delete(list, list->tail);
 	} else {
@@ -322,9 +304,7 @@ extern void cg_list_delete_last(
 	}
 }
 
-extern void *cg_list_remove_first(
-    cg_list *list
-) {
+void *cg_list_remove_first(cg_list *list) {
 	void *itemptr = NULL;
 	if (list->head != NULL) {
 		itemptr = cg_list_remove(list, list->head);
@@ -334,9 +314,7 @@ extern void *cg_list_remove_first(
 	return itemptr;
 }
 
-extern void *cg_list_remove_last(
-    cg_list *list
-) {
+void *cg_list_remove_last(cg_list *list) {
 	void *itemptr = NULL;
 	if (list->tail != NULL) {
 		itemptr = cg_list_remove(list, list->tail);
@@ -346,17 +324,13 @@ extern void *cg_list_remove_last(
 	return itemptr;
 }
 
-extern void cg_list_remove_all(
-    cg_list *list
-) {
+void cg_list_remove_all(cg_list *list) {
 	while (list->head != NULL) {
 		cg_list_remove_first(list);
 	}
 }
 
-extern void cg_list_delete_all(
-    cg_list *list
-) {
+void cg_list_delete_all(cg_list *list) {
 	while (list->head != NULL) {
 		cg_list_delete_first(list);
 	}
@@ -368,11 +342,7 @@ extern void cg_list_delete_all(
 /**
  * Swap listentries and maintains head/tail
  */
-extern void cg_list_swap(
-    cg_list *list,
-    cg_listentry *e1,
-    cg_listentry *e2
-) {
+void cg_list_swap(cg_list *list, cg_listentry *e1, cg_listentry *e2) {
 
 	cg_listentry *e1prev = e1->prev;
 	cg_listentry *e1next = e1->next;
@@ -420,7 +390,7 @@ extern void cg_list_swap(
 	}
 }
 
-extern void cg_list_bubblesort(
+void cg_list_bubblesort(
     cg_list *list,
     int (*compare)(const void *itemptr1, const void *itemptr2)
 ) {

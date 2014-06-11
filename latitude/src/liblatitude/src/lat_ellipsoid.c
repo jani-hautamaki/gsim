@@ -29,7 +29,7 @@
 // OTHER METHODS
 //===============
 
-extern void lat_ellipsoid_set_ae(
+void lat_ellipsoid_set_ae(
     lat_ellipsoid *ellipsoid,
     double a,
     double e
@@ -38,7 +38,7 @@ extern void lat_ellipsoid_set_ae(
 	ellipsoid->e = e;
 }
 
-extern void lat_ellipsoid_set_af(
+void lat_ellipsoid_set_af(
     lat_ellipsoid *ellipsoid,
     double a,
     double f
@@ -51,7 +51,7 @@ extern void lat_ellipsoid_set_af(
 /**
  * Semi-latus rectum (the parameter) of a meridian ellipse.
  */
-extern double lat_ellipsoid_p(
+double lat_ellipsoid_p(
     const lat_ellipsoid *ellipsoid
 ) {
 	return 0.0;
@@ -61,7 +61,7 @@ extern double lat_ellipsoid_p(
 /**
  * Flattening of a meridian ellipse.
  */
-extern double lat_ellipsoid_f(
+double lat_ellipsoid_f(
     const lat_ellipsoid *ellipsoid
 ) {
 	// Derived from (Jekeli, p 2-4, Eq 2.7):
@@ -75,7 +75,7 @@ extern double lat_ellipsoid_f(
 /**
  * Semi-minor axis of a meridian ellipse.
  */
-extern double lat_ellipsoid_b(
+double lat_ellipsoid_b(
     const lat_ellipsoid *ellipsoid
 ) {
 	// Derived from (Jekeli, p 2-4, Eq 2.5):
@@ -97,7 +97,7 @@ extern double lat_ellipsoid_b(
  * called the prime vertical.
  *
  */
-extern double lat_ellipsoid_N(
+double lat_ellipsoid_N(
     const lat_ellipsoid *ellipsoid,
     double latitude
 ) {
@@ -115,7 +115,7 @@ extern double lat_ellipsoid_N(
  * by the longitude.
  *
  */
-extern double lat_ellipsoid_M(
+double lat_ellipsoid_M(
     const lat_ellipsoid *ellipsoid,
     double latitude
 ) {
@@ -130,7 +130,7 @@ extern double lat_ellipsoid_M(
 /**
  * Radius of curvature in the normal section
  */
-extern double lat_ellipsoid_R_alfa(
+double lat_ellipsoid_R_alfa(
     const lat_ellipsoid *ellipsoid,
     double latitude,
     double height,
@@ -151,7 +151,7 @@ extern double lat_ellipsoid_R_alfa(
  * The geodetic coordinates (longitude, latitude, altitude)
  * are converted into rectangular coordinates (x, y, z).
  */
-extern void lat_ellipsoid_geo2xyz(
+void lat_ellipsoid_geo2xyz(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     double *xyz
@@ -171,7 +171,7 @@ extern void lat_ellipsoid_geo2xyz(
 	xyz[2] = ((N*(1.0-e2))+h)*sin(lat);
 }
 
-extern void lat_ellipsoid_xyz2geo(
+void lat_ellipsoid_xyz2geo(
     const lat_ellipsoid *ellipsoid,
     const double *xyz,
     double *geo
@@ -221,7 +221,7 @@ extern void lat_ellipsoid_xyz2geo(
 /**
  * Get local coordinate basis at LLA.
  */
-extern void lat_ellipsoid_localframe_at_geo(
+void lat_ellipsoid_localframe_at_geo(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     lat_localframe *frame
@@ -260,7 +260,7 @@ extern void lat_ellipsoid_localframe_at_geo(
 	frame->u[2] = sin(lat);
 }
 
-extern void lat_ellipsoid_localframe_at(
+void lat_ellipsoid_localframe_at(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     double *frame
@@ -284,7 +284,7 @@ extern void lat_ellipsoid_localframe_at(
 }
 
 
-extern void lat_ellipsoid_geo2enu(
+void lat_ellipsoid_geo2enu(
     const lat_ellipsoid *ellipsoid,
     const double *geo,
     lat_localframe *frame

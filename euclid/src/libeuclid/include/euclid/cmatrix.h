@@ -28,10 +28,10 @@ extern "C" {
 #define CMATRIX_INDEX(y, x, cols) (((y)*cols)+(x))
 #define CMATRIX_ELEM(m, y, x, cols) m[CMATRIX_INDEX(y, x, cols)]
 
-extern void cmatrix_zero(double *m, int rows, int cols);
-extern void cmatrix_eye(double *m, int n);
+void cmatrix_zero(double *m, int rows, int cols);
+void cmatrix_eye(double *m, int n);
 
-extern void cmatrix_memcpy(
+void cmatrix_memcpy(
     double *mdest,
     const double *morg,
     int rows,
@@ -39,14 +39,14 @@ extern void cmatrix_memcpy(
 );
 
 
-extern void cmatrix_transpose(
+void cmatrix_transpose(
     double *mdest,
     const double *morg,
     int rows,
     int cols
 );
 
-extern void cmatrix_add(
+void cmatrix_add(
     double *m,
     const double *a,
     const double *b,
@@ -54,7 +54,7 @@ extern void cmatrix_add(
     int cols
 );
 
-extern void cmatrix_sub(
+void cmatrix_sub(
     double *m,
     const double *a,
     const double *b,
@@ -62,7 +62,7 @@ extern void cmatrix_sub(
     int cols
 );
 
-extern void cmatrix_mul(
+void cmatrix_mul(
     double *m,
     const double *a,
     const double *b,
@@ -71,7 +71,7 @@ extern void cmatrix_mul(
     int bcols
 );
 
-extern void cmatrix_mul_t(
+void cmatrix_mul_t(
     double *m,
     const double *a,
     const double *b,
@@ -82,14 +82,14 @@ extern void cmatrix_mul_t(
 
 // Operations specific for 3x3 matrices
 
-extern void cmatrix_from_frame(
+void cmatrix_from_frame(
     double *m,
     const double *v1,
     const double *v2,
     const double *v3
 );
 
-extern void cmatrix_to_frame(
+void cmatrix_to_frame(
     const double *m,
     double *v1,
     double *v2,
@@ -98,38 +98,35 @@ extern void cmatrix_to_frame(
 
 // Operations specific for 3x3 rotation matrices
 
-extern void cmatrix_rotx(double *m, double angle);
-extern void cmatrix_roty(double *m, double angle);
-extern void cmatrix_rotz(double *m, double angle);
+void cmatrix_rotx(double *m, double angle);
+void cmatrix_roty(double *m, double angle);
+void cmatrix_rotz(double *m, double angle);
 
-extern void cmatrix_mrotx(double *mdest, const double *morg, double angle);
-extern void cmatrix_mroty(double *mdest, const double *morg, double angle);
-extern void cmatrix_mrotz(double *mdest, const double *morg, double angle);
+void cmatrix_mrotx(double *mdest, const double *morg, double angle);
+void cmatrix_mroty(double *mdest, const double *morg, double angle);
+void cmatrix_mrotz(double *mdest, const double *morg, double angle);
 
-extern void cmatrix_mrotx_l(
+void cmatrix_mrotx_l(
     double *mdest,
     const double *morg,
     long double angle
 );
 
-extern void cmatrix_mroty_l(
+void cmatrix_mroty_l(
     double *mdest,
     const double *morg,
     long double angle
 );
 
-extern void cmatrix_mrotz_l(
+void cmatrix_mrotz_l(
     double *mdest,
     const double *morg,
     long double angle
 );
-
-
 
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
 
 #endif

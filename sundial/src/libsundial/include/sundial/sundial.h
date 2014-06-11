@@ -110,25 +110,25 @@ struct sun_gpstime {
 // LEAP SECONDS
 //==============
 
-extern int sun_delta_tai_utc(long mjd);
+int sun_delta_tai_utc(long mjd);
 
 // CONVERSIONS
 //=============
 
-extern long sun_date2mjulianday(
+long sun_date2mjulianday(
     int year,
     int month,
     int day
 );
 
-extern void sun_mjulianday2date(
+void sun_mjulianday2date(
     long daynum,
     int *year,
     int *month,
     int *day
 );
 
-extern void sun_date2gpstime(
+void sun_date2gpstime(
     int year,
     int month,
     int day,
@@ -136,7 +136,7 @@ extern void sun_date2gpstime(
     double *tow
 );
 
-extern void sun_gpstime2date(
+void sun_gpstime2date(
     int week,
     double tow,
     int *year,
@@ -144,25 +144,25 @@ extern void sun_gpstime2date(
     int *day
 );
 
-extern void sun_datetime2gpstime(
+void sun_datetime2gpstime(
     const sun_datetime *dt,
     int *week,
     double *tow
 );
 
-extern void sun_gpstime2datetime(
+void sun_gpstime2datetime(
     int week,
     double tow,
     sun_datetime *dt
 );
 
-extern void sun_gpstime2utcdatetime(
+void sun_gpstime2utcdatetime(
     int week,
     double tow,
     sun_datetime *dt
 );
 
-extern void sun_utcdatetime2gpstime(
+void sun_utcdatetime2gpstime(
     const sun_datetime *dt,
     int *week,
     double *tow
@@ -171,14 +171,14 @@ extern void sun_utcdatetime2gpstime(
 // TIME OF DAY
 //=============
 
-extern void sun_timeofday2time(
+void sun_timeofday2time(
     long timeofday,
     int *hour,
     int *min,
     int *sec
 );
 
-extern long sun_time2timeofday(
+long sun_time2timeofday(
     int hour,
     int min,
     int sec
@@ -187,13 +187,13 @@ extern long sun_time2timeofday(
 // TRANSLATION AND DELTA
 //=======================
 
-extern void sun_normalize_delta(
+void sun_normalize_delta(
     long *delta_day,
     long *delta_timeofday,
     double *delta_subsec
 );
 
-extern void sun_translate_gpstime(
+void sun_translate_gpstime(
     int *week,
     double *tow,
     long delta_day,
@@ -201,45 +201,45 @@ extern void sun_translate_gpstime(
     double delta_subsec
 );
 
-extern double sun_delta_gpstime(
+double sun_delta_gpstime(
     int week2,
     double tow2,
     int week1,
     double tow1
 );
 
-extern void sun_translate_datetime(
+void sun_translate_datetime(
     sun_datetime *dt,
     long delta_day,
     long delta_sec,
     double delta_subsec
 );
 
-extern double sun_delta_datetime(
+double sun_delta_datetime(
    const sun_datetime *dt2,
    const sun_datetime *dt1
 );
 
-extern void sun_translate_utcdatetime(
+void sun_translate_utcdatetime(
     sun_datetime *dt,
     long delta_day,
     long delta_sec,
     double delta_subsec
 );
 
-extern double sun_delta_utcdatetime(
+double sun_delta_utcdatetime(
     const sun_datetime *dt2,
     const sun_datetime *dt1
 );
 
-extern void sun_subsec2delta(
+void sun_subsec2delta(
     double subsec,
     long *delta_day,
     long *delta_sec,
     double *delta_subsec
 );
 
-extern double sun_delta2subsec(
+double sun_delta2subsec(
     long delta_day,
     long delta_sec,
     double delta_subsec

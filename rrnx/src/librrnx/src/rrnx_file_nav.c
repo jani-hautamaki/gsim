@@ -31,7 +31,7 @@
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern rrnx_file_nav *rrnx_fnav_alloc() {
+rrnx_file_nav *rrnx_fnav_alloc(void) {
 	rrnx_file_nav *nav = NULL;
 
 	int complete = 0;
@@ -78,7 +78,7 @@ extern rrnx_file_nav *rrnx_fnav_alloc() {
 
 }
 
-extern void rrnx_fnav_free(rrnx_file_nav *nav) {
+void rrnx_fnav_free(rrnx_file_nav *nav) {
 	if (nav == NULL) return;
 
 	rrnx_list_free(nav->navmsg_list);
@@ -240,7 +240,7 @@ static int parse_node(rrnx_file_nav *nav, const rrnx_node *node) {
 	return err;
 }
 
-extern rrnx_file_nav *rrnx_fnav_deserialize(const rrnx_list *nodelist) {
+rrnx_file_nav *rrnx_fnav_deserialize(const rrnx_list *nodelist) {
 	rrnx_file_nav *nav = NULL;
 
 	nav = rrnx_fnav_alloc();
@@ -275,6 +275,6 @@ extern rrnx_file_nav *rrnx_fnav_deserialize(const rrnx_list *nodelist) {
 	return nav;
 }
 
-//extern rrnx_list *rrnx_fnav_serialize(rrnx_file_nav *nav);
+//rrnx_list *rrnx_fnav_serialize(rrnx_file_nav *nav);
 
 

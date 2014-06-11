@@ -17,7 +17,7 @@
 
 #include "euclid/cmatrix.h"
 
-extern void cmatrix_transpose(
+void cmatrix_transpose(
     double *mdest,
     const double *morg,
     int rows,

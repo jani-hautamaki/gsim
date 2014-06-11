@@ -21,23 +21,23 @@
 #include <math.h>
 
 
-extern double cquat_norm2(const double *q) {
+double cquat_norm2(const double *q) {
 	double sum
 	    = (q[0]*q[0]) + (q[1]*q[1]) + (q[2]*q[2]) + (q[3]*q[3]);
 	return sum;
 }
 
-extern double cquat_norm(const double *q) {
+double cquat_norm(const double *q) {
 	return sqrt(cquat_norm2(q));
 }
 
-extern long double cquat_norm2_l(const double *q) {
+long double cquat_norm2_l(const double *q) {
 	long double sum
 	    = (q[0]*q[0]) + (q[1]*q[1]) + (q[2]*q[2]) + (q[3]*q[3]);
 	return sum;
 }
 
-extern long double cquat_norm_l(const double *q) {
+long double cquat_norm_l(const double *q) {
 	return sqrtl(cquat_norm2_l(q));
 }
 

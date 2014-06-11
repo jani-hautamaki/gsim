@@ -17,7 +17,7 @@
 
 #include "euclid/cquat.h"
 
-extern void cquat_set(double *q, double x, double y, double z, double w) {
+void cquat_set(double *q, double x, double y, double z, double w) {
 	q[CQUAT_X] = x;
 	q[CQUAT_Y] = y;
 	q[CQUAT_Z] = z;

@@ -20,7 +20,7 @@
 // sqrt, sqrtl
 #include <math.h>
 
-extern double cvector_norm2(const double *a, int n) {
+double cvector_norm2(const double *a, int n) {
 	double sum = 0.0;
 	for (int i = 0; i < n; i++) {
 		sum += a[i] * a[i];
@@ -28,13 +28,13 @@ extern double cvector_norm2(const double *a, int n) {
 	return sum;
 }
 
-extern double cvector_norm(const double *a, int n) {
+double cvector_norm(const double *a, int n) {
 	return sqrt(cvector_norm2(a, n));
 }
 
 
 
-extern long double cvector_norm2_l(const double *a, int n) {
+long double cvector_norm2_l(const double *a, int n) {
 	long double sum = 0.0;
 	for (int i = 0; i < n; i++) {
 		sum += a[i] * a[i];
@@ -42,7 +42,7 @@ extern long double cvector_norm2_l(const double *a, int n) {
 	return sum;
 }
 
-extern long double cvector_norm_l(const double *a, int n) {
+long double cvector_norm_l(const double *a, int n) {
 	return sqrtl(cvector_norm2_l(a, n));
 }
 

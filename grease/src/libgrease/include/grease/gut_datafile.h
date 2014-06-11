@@ -90,84 +90,85 @@ typedef struct gut_datafile gut_datafile;
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern gut_datafile *gut_datafile_create();
-extern void gut_datafile_free(gut_datafile *df);
+gut_datafile *gut_datafile_create(void);
+void gut_datafile_free(gut_datafile *df);
 
-extern int gut_datafile_init(gut_datafile *df);
-extern void gut_datafile_deinit(gut_datafile *df);
+int gut_datafile_init(gut_datafile *df);
+void gut_datafile_deinit(gut_datafile *df);
 
 // OTHER METHODS
 //===============
 
-extern int gut_datafile_open(
-    gut_datafile *df, const char *fname, const char *mode);
-extern int gut_datafile_close(gut_datafile *df);
+int gut_datafile_open(gut_datafile *df, const char *fname, const char *mode);
+int gut_datafile_close(gut_datafile *df);
 
-extern int gut_datafile_flush(gut_datafile *df);
+int gut_datafile_flush(gut_datafile *df);
 
-extern int gut_datafile_error(gut_datafile *df);
-extern int gut_datafile_eof(gut_datafile *df);
+int gut_datafile_error(gut_datafile *df);
+int gut_datafile_eof(gut_datafile *df);
 
-extern int gut_datafile_set_buffer_size(gut_datafile *df, int size);
-extern int gut_datafile_get_buffer_size(gut_datafile *df);
+int gut_datafile_is_open(gut_datafile *df);
+
+int gut_datafile_set_buffer_size(gut_datafile *df, int size);
+int gut_datafile_get_buffer_size(gut_datafile *df);
 
 // LOW-LEVEL READ
 //================
 
-extern int gut_datafile_read_byte(gut_datafile *df);
-extern int gut_datafile_read(gut_datafile *df, void *ptr, int size);
-extern int gut_datafile_read_r(gut_datafile *df, void *ptr, int size);
+int gut_datafile_read_byte(gut_datafile *df);
+int gut_datafile_read(gut_datafile *df, void *ptr, int size);
+int gut_datafile_read_r(gut_datafile *df, void *ptr, int size);
 
 // LOW-LEVEL WRITE
 //=================
 
-extern int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval);
-extern int gut_datafile_write(gut_datafile *df, void *ptr, int size);
-extern int gut_datafile_write_r(gut_datafile *df, void *ptr, int size);
+int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval);
+int gut_datafile_write(gut_datafile *df, void *ptr, int size);
+int gut_datafile_write_r(gut_datafile *df, void *ptr, int size);
 
 // READ METHODS
 //==============
 
-extern char gut_datafile_read_char8(gut_datafile *df);
+char gut_datafile_read_char8(gut_datafile *df);
 
-extern int gut_datafile_read_int8(gut_datafile *df);
-extern unsigned int gut_datafile_read_uint8(gut_datafile *df);
+int gut_datafile_read_int8(gut_datafile *df);
+unsigned int gut_datafile_read_uint8(gut_datafile *df);
 
-extern int gut_datafile_read_int16(gut_datafile *df);
-extern unsigned int gut_datafile_read_uint16(gut_datafile *df);
+int gut_datafile_read_int16(gut_datafile *df);
+unsigned int gut_datafile_read_uint16(gut_datafile *df);
 
 // both unsafe
-extern unsigned int gut_datafile_read_uint32(gut_datafile *df);
-extern int gut_datafile_read_int32(gut_datafile *df);
+unsigned int gut_datafile_read_uint32(gut_datafile *df);
+int gut_datafile_read_int32(gut_datafile *df);
 
-extern long gut_datafile_read_long32(gut_datafile *df);
-extern unsigned long gut_datafile_read_ulong32(gut_datafile *df);
+long gut_datafile_read_long32(gut_datafile *df);
+unsigned long gut_datafile_read_ulong32(gut_datafile *df);
 
 // all unsafe
-extern float gut_datafile_read_float32(gut_datafile *df);
-extern double gut_datafile_read_double64(gut_datafile *df);
-extern long double gut_datafile_read_ldouble80(gut_datafile *df);
+float gut_datafile_read_float32(gut_datafile *df);
+double gut_datafile_read_double64(gut_datafile *df);
+long double gut_datafile_read_ldouble80(gut_datafile *df);
 
 // WRITE METHODS
 //===============
 
-extern void gut_datafile_write_int8(gut_datafile *df, int val);
-extern void gut_datafile_write_uint8(gut_datafile *df, unsigned int val);
+void gut_datafile_write_int8(gut_datafile *df, int val);
+void gut_datafile_write_uint8(gut_datafile *df, unsigned int val);
 
-extern void gut_datafile_write_int16(gut_datafile *df, int val);
-extern void gut_datafile_write_uint16(gut_datafile *df, unsigned int val);
+void gut_datafile_write_int16(gut_datafile *df, int val);
+void gut_datafile_write_uint16(gut_datafile *df, unsigned int val);
 
 // both unsafe
-extern void gut_datafile_write_int32(gut_datafile *df, int val);
-extern void gut_datafile_write_uint32(gut_datafile *df, unsigned int val);
+void gut_datafile_write_int32(gut_datafile *df, int val);
+void gut_datafile_write_uint32(gut_datafile *df, unsigned int val);
 
-extern void gut_datafile_write_long32(gut_datafile *df, long val);
-extern void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val);
+void gut_datafile_write_long32(gut_datafile *df, long val);
+void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val);
 
 // all unsafe
-extern void gut_datafile_write_float32(gut_datafile *df, float val);
-extern void gut_datafile_write_double64(gut_datafile *df, double val);
-extern void gut_datafile_write_ldouble80(gut_datafile *df, long double val);
+void gut_datafile_write_float32(gut_datafile *df, float val);
+void gut_datafile_write_double64(gut_datafile *df, double val);
+void gut_datafile_write_ldouble80(gut_datafile *df, long double val);
 
 
 #ifdef __cplusplus

@@ -20,7 +20,7 @@
 // floor
 #include <math.h>
 
-extern void sun_translate_utcdatetime(
+void sun_translate_utcdatetime(
     sun_datetime *dt,
     long delta_day,
     long delta_sec,

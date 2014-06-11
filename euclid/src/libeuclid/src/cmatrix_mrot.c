@@ -23,7 +23,7 @@
 // memcpy
 #include <string.h>
 
-extern void cmatrix_mrotx(double *mdest, const double *morg, double angle) {
+void cmatrix_mrotx(double *mdest, const double *morg, double angle) {
 	double temp[3*3];
 
 	if (morg == mdest) {
@@ -51,8 +51,10 @@ extern void cmatrix_mrotx(double *mdest, const double *morg, double angle) {
 	#undef ELEM
 }
 
-extern void cmatrix_mrotx_l(
-    double *mdest, const double *morg, long double angle
+void cmatrix_mrotx_l(
+    double *mdest,
+    const double *morg,
+    long double angle
 ) {
 	double temp[3*3];
 
@@ -83,7 +85,7 @@ extern void cmatrix_mrotx_l(
 
 
 
-extern void cmatrix_mroty(double *mdest, const double *morg, double angle) {
+void cmatrix_mroty(double *mdest, const double *morg, double angle) {
 	double temp[3*3];
 
 	if (morg == mdest) {
@@ -112,8 +114,10 @@ extern void cmatrix_mroty(double *mdest, const double *morg, double angle) {
 	#undef ELEM
 }
 
-extern void cmatrix_mroty_l(
-    double *mdest, const double *morg, long double angle
+void cmatrix_mroty_l(
+    double *mdest,
+    const double *morg,
+    long double angle
 ) {
 	double temp[3*3];
 
@@ -145,7 +149,7 @@ extern void cmatrix_mroty_l(
 
 
 
-extern void cmatrix_mrotz(double *mdest, const double *morg, double angle) {
+void cmatrix_mrotz(double *mdest, const double *morg, double angle) {
 	double temp[3*3];
 
 	if (morg == mdest) {
@@ -174,8 +178,10 @@ extern void cmatrix_mrotz(double *mdest, const double *morg, double angle) {
 	#undef ELEM
 }
 
-extern void cmatrix_mrotz_l(
-    double *mdest, const double *morg, long double angle
+void cmatrix_mrotz_l(
+    double *mdest,
+    const double *morg,
+    long double angle
 ) {
 	double temp[3*3];
 

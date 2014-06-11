@@ -23,11 +23,11 @@
 #include <string.h> // memcpy
 
 
-extern rrnx_string *rrnx_str_alloc(void) {
+rrnx_string *rrnx_str_alloc(void) {
 	return rrnx_str_alloc_size(RRNX_DEFAULT_STRING_SIZE);
 }
 
-extern rrnx_string *rrnx_str_alloc_size(size_t size) {
+rrnx_string *rrnx_str_alloc_size(size_t size) {
 	int incomplete = 1;
 
 	rrnx_string *s = malloc(sizeof(rrnx_string));
@@ -59,7 +59,7 @@ extern rrnx_string *rrnx_str_alloc_size(size_t size) {
 	return s;
 }
 
-extern rrnx_string *rrnx_str_clone(rrnx_string *src) {
+rrnx_string *rrnx_str_clone(rrnx_string *src) {
 	rrnx_string *s = NULL;
 	if (src != NULL) do {
 		// Attempt to allocate with same size
@@ -75,7 +75,7 @@ extern rrnx_string *rrnx_str_clone(rrnx_string *src) {
 	return s;
 }
 
-extern void rrnx_str_free(rrnx_string *s) {
+void rrnx_str_free(rrnx_string *s) {
 	if (s == NULL) {
 		// Already freed
 		return;
@@ -89,7 +89,7 @@ extern void rrnx_str_free(rrnx_string *s) {
 	free(s);
 }
 
-extern void rrnx_str_format(rrnx_string *s, const char *fmt, ...) {
+void rrnx_str_format(rrnx_string *s, const char *fmt, ...) {
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -100,11 +100,11 @@ extern void rrnx_str_format(rrnx_string *s, const char *fmt, ...) {
 }
 
 // for vargargs
-extern void rrnx_str_vformat(rrnx_string *s, const char *fmt, va_list args) {
+void rrnx_str_vformat(rrnx_string *s, const char *fmt, va_list args) {
 	vsnprintf(s->text, s->size, fmt, args);
 }
 
-extern int rrnx_str_length(const rrnx_string *s) {
+int rrnx_str_length(const rrnx_string *s) {
 	if (s == NULL) {
 		return -1;
 	}
@@ -120,7 +120,7 @@ extern int rrnx_str_length(const rrnx_string *s) {
 	return i;
 }
 
-extern void rrnx_str_concat(rrnx_string *s, const rrnx_string *q) {
+void rrnx_str_concat(rrnx_string *s, const rrnx_string *q) {
 	if ((s == NULL) || (q == NULL)) {
 		return;
 	}
@@ -139,7 +139,7 @@ extern void rrnx_str_concat(rrnx_string *s, const rrnx_string *q) {
 	s->text[s->size-1] = '\0';
 }
 
-extern void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list args) {
+void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list args) {
 	int len = rrnx_str_length(s);
 
 	// See how many bytes left in the string
@@ -149,11 +149,11 @@ extern void rrnx_str_concat_vformat(rrnx_string *s, const char *fmt, va_list arg
 }
 
 
-extern void rrnx_str_reset(rrnx_string *s) {
+void rrnx_str_reset(rrnx_string *s) {
 	s->text[0] = '\0';
 }
 
-extern int rrnx_str_resize(rrnx_string *s, size_t size) {
+int rrnx_str_resize(rrnx_string *s, size_t size) {
 	void *newptr = realloc(s->text, size);
 
 	if (newptr != NULL) {
@@ -165,7 +165,7 @@ extern int rrnx_str_resize(rrnx_string *s, size_t size) {
 	return 0;
 }
 
-extern void rrnx_str_strcpy(rrnx_string *s, const char *cstr) {
+void rrnx_str_strcpy(rrnx_string *s, const char *cstr) {
 	int max_size = s->size - 1;
 	int i = 0;
 	for (i = 0; i < max_size; i++) {

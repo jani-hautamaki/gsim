@@ -159,7 +159,7 @@
  *
  */
 
-extern void cquat_to_matrix(const double *q, double *m) {
+void cquat_to_matrix(const double *q, double *m) {
 
 	// Define convenience macros
 	#define X CQUAT_X
@@ -192,7 +192,7 @@ extern void cquat_to_matrix(const double *q, double *m) {
 	#undef W
 }
 
-extern void cquat_to_matrix_t(const double *q, double *m) {
+void cquat_to_matrix_t(const double *q, double *m) {
 
 	// Define convenience macros
 	#define X CQUAT_X
@@ -350,10 +350,7 @@ extern void cquat_to_matrix_t(const double *q, double *m) {
  *
  */
 
-extern void cquat_from_matrix(
-    double *q,
-    const double *m
-) {
+void cquat_from_matrix(double *q, const double *m) {
 
 	// Use 1-based column-major addressing for 3x3 matrices.
 	#define ELEM(m, y, x) ELEM_COLMAJ(m, (y)-1, (x)-1, 3)
@@ -402,10 +399,7 @@ extern void cquat_from_matrix(
 	#undef ELEM
 }
 
-extern void cquat_from_matrix_t(
-    double *q,
-    const double *m
-) {
+void cquat_from_matrix_t(double *q, const double *m) {
 
 	// Use 1-based row-major addressing for 3x3 matrices.
 	#define ELEM(m, y, x) ELEM_ROWMAJ(m, (y)-1, (x)-1, 3)

@@ -20,7 +20,7 @@
 // sqrt, sqrtl
 #include <math.h>
 
-extern void cquat_conjugate(double *qdest, const double *qorg) {
+void cquat_conjugate(double *qdest, const double *qorg) {
 	qdest[CQUAT_X] = -qorg[CQUAT_X];
 	qdest[CQUAT_Y] = -qorg[CQUAT_Y];
 	qdest[CQUAT_Z] = -qorg[CQUAT_Z];

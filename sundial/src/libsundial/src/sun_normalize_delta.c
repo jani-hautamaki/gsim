@@ -17,7 +17,7 @@
 
 #include "sundial/sundial.h"
 
-extern void sun_normalize_delta(
+void sun_normalize_delta(
     long *delta_day,
     long *delta_timeofday,
     double *delta_subsec

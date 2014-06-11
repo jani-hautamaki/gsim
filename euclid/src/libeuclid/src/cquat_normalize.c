@@ -20,7 +20,7 @@
 // sqrt, sqrtl
 #include <math.h>
 
-extern void cquat_normalize(double *qdest, const double *qorg) {
+void cquat_normalize(double *qdest, const double *qorg) {
 	double norm = cquat_norm(qorg);
 	qdest[0] = qorg[0] / norm;
 	qdest[1] = qorg[1] / norm;
@@ -28,7 +28,7 @@ extern void cquat_normalize(double *qdest, const double *qorg) {
 	qdest[3] = qorg[3] / norm;
 }
 
-extern void cquat_normalize_l(double *qdest, const double *qorg) {
+void cquat_normalize_l(double *qdest, const double *qorg) {
 	long double norm_l = cquat_norm_l(qorg);
 	qdest[0] = qorg[0] / norm_l;
 	qdest[1] = qorg[1] / norm_l;

@@ -48,6 +48,6 @@
 /**
  * Human-readable error message for the error code.
  */
-//extern const char *gut_strerror(int err);
+//const char *gut_strerror(int err);
 
 #endif

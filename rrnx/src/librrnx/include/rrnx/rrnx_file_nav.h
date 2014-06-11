@@ -127,13 +127,13 @@ typedef struct rrnx_file_nav rrnx_file_nav;
 // CONSTRUCTION & DESTRUCTION
 //============================
 
-extern rrnx_file_nav *rrnx_fnav_alloc();
-extern void rrnx_fnav_free(rrnx_file_nav *nav);
+rrnx_file_nav *rrnx_fnav_alloc(void);
+void rrnx_fnav_free(rrnx_file_nav *nav);
 
 // OTHER METHODS
 //===============
 
-extern rrnx_file_nav *rrnx_fnav_deserialize(const rrnx_list *nodelist);
+rrnx_file_nav *rrnx_fnav_deserialize(const rrnx_list *nodelist);
 //extern rrnx_list *rrnx_fnav_serialize(rrnx_file_nav *nav);
 
 #ifdef __cplusplus

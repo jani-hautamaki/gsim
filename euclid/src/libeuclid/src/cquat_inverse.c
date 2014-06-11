@@ -17,7 +17,7 @@
 
 #include "euclid/cquat.h"
 
-extern void cquat_inverse(double *qdest, const double *qorg) {
+void cquat_inverse(double *qdest, const double *qorg) {
 	double norm2 = cquat_norm2(qorg);
 	qdest[CQUAT_X] = -qorg[CQUAT_X] / norm2;
 	qdest[CQUAT_Y] = -qorg[CQUAT_Y] / norm2;
@@ -25,7 +25,7 @@ extern void cquat_inverse(double *qdest, const double *qorg) {
 	qdest[CQUAT_W] = qorg[CQUAT_W] / norm2;
 }
 
-extern void cquat_inverse_l(double *qdest, const double *qorg) {
+void cquat_inverse_l(double *qdest, const double *qorg) {
 	long double norm2_l = cquat_norm2_l(qorg);
 	qdest[CQUAT_X] = -qorg[CQUAT_X] / norm2_l;
 	qdest[CQUAT_Y] = -qorg[CQUAT_Y] / norm2_l;

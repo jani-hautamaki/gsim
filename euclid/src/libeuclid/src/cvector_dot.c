@@ -17,7 +17,7 @@
 
 #include "euclid/cvector.h"
 
-extern double cvector_dot(const double *a, const double *b, int n) {
+double cvector_dot(const double *a, const double *b, int n) {
 	double sum = 0.0;
 	for (int i = 0; i < n; i++) {
 		sum += a[i] * b[i];
@@ -25,7 +25,7 @@ extern double cvector_dot(const double *a, const double *b, int n) {
 	return sum;
 }
 
-extern long double cvector_dot_l(const double *a, const double *b, int n) {
+long double cvector_dot_l(const double *a, const double *b, int n) {
 	long double sum = 0.0;
 	for (int i = 0; i < n; i++) {
 		sum += a[i] * b[i];
