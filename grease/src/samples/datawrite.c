@@ -43,15 +43,20 @@ int main(int argc, char *argv[]) {
 
 		df = gut_datafile_create();
 		if (df == NULL) {
-			fprintf(stderr, "gut_datafile_create: %s\n", strerror(errno));
+			fprintf(stderr, "gut_datafile_create(): %s\n",
+			    strerror(errno));
 			break;
 		}
 
 		// Attempt to reset buffer size
-		gut_datafile_set_buffer_size(df, 16); // 16 bytes
+		if (!gut_datafile_set_buffer_size(df, 16)) {
+			fprintf(stderr, "gut_datafile_set_buffer_size(): %s\n",
+			    strerror(errno));
+		}
 
-		if (gut_datafile_open(df, fname, "wb") == -1) {
-			fprintf(stderr, "fopen() failed: %s\n", strerror(errno));
+		if (!gut_datafile_open(df, fname, "wb")) {
+			fprintf(stderr, "gut_datafile_open() failed: %s\n",
+			    strerror(errno));
 			break;
 		}
 
@@ -84,7 +89,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 
-		if (gut_datafile_flush(df) == -1) {
+		if (!gut_datafile_flush(df)) {
 			fprintf(stderr, "flush failed: %s\n", strerror(errno));
 			break;
 		}

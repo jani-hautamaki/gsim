@@ -29,6 +29,7 @@
 // strerror, strcmp
 #include <string.h>
 
+#define BUFFER_SIZE 64
 
 int main(int argc, char *argv[]) {
 
@@ -48,29 +49,30 @@ int main(int argc, char *argv[]) {
 		df2 = gut_datafile_create();
 
 		if ((df1 == NULL) || (df2 == NULL)) {
-			fprintf(stderr, "Cannot create gut_datafile: out of memory\n");
-			break;
-		}
-
-		// Attempt to reset buffer size
-		gut_datafile_set_buffer_size(df1, 64); // 64 bytes only
-		gut_datafile_set_buffer_size(df2, 64); // 64 bytes only
-
-		// Open the files
-		if ((gut_datafile_get_buffer_size(df1) != 64)
-		   || (gut_datafile_get_buffer_size(df2) != 64))
-		{
-			fprintf(stderr, "Buffer realloc failed: %s\n",
+			fprintf(stderr, "gut_datafile_create(): malloc failed: %s\n",
 			    strerror(errno));
 			break;
 		}
 
-		if (gut_datafile_open(df1, source, "rb") == -1) {
+		// Attempt to reset buffer size; use 64 bytes only
+		gut_datafile_set_buffer_size(df1, BUFFER_SIZE);
+		gut_datafile_set_buffer_size(df2, BUFFER_SIZE);
+
+		// Open the files
+		if ((gut_datafile_get_buffer_size(df1) != BUFFER_SIZE)
+		   || (gut_datafile_get_buffer_size(df2) != BUFFER_SIZE))
+		{
+			fprintf(stderr, "gut_dataile_set_buffer_size(): realloc failed: %s\n",
+			    strerror(errno));
+			break;
+		}
+
+		if (!gut_datafile_open(df1, source, "rb")) {
 			fprintf(stderr, "%s: %s\n", source, strerror(errno));
 			break;
 		}
 
-		if (gut_datafile_open(df2, dest, "wb") == -1) {
+		if (!gut_datafile_open(df2, dest, "wb")) {
 			fprintf(stderr, "%s: %s\n", dest, strerror(errno));
 			break;
 		}
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
 
 			int ok = gut_datafile_write_byte(df2, byteval);
 
-			if (ok == -1) {
+			if (!ok) {
 				fprintf(stderr, "%s: %s\n",
 				    dest, strerror(errno));
 				retval = EXIT_FAILURE;
@@ -106,7 +108,7 @@ int main(int argc, char *argv[]) {
 		if (retval == EXIT_FAILURE) break;
 
 		// Flush dest
-		if (gut_datafile_flush(df2) == -1) {
+		if (!gut_datafile_flush(df2)) {
 			fprintf(stderr, "%s: %s\n",
 			    dest, strerror(errno));
 			retval = EXIT_FAILURE;

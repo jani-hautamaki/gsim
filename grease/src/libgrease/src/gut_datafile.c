@@ -32,17 +32,17 @@
 gut_datafile *gut_datafile_create(void) {
 	gut_datafile *df = NULL;
 
-	int complete = 0;
+	int success = 0;
 	do {
 		df = malloc(sizeof(gut_datafile));
 		if (df == NULL) break;
 
 		// Allocate default size buffer
-		complete = gut_datafile_init(df);
-		//complete = 1;
+		success = gut_datafile_init(df);
+		//success = 1;
 	} while(0);
 
-	if (complete == 0) {
+	if (!success) {
 		// Incomplete; destroy partial
 		gut_datafile_free(df);
 		df = NULL;
@@ -58,14 +58,13 @@ void gut_datafile_free(gut_datafile *df) {
 
 
 int gut_datafile_init(gut_datafile *df) {
-	int complete = 0;
+	int success = 0;
 
 	df->file = NULL;
 	df->buffer = NULL;
 	df->size = 0;
 	df->next = 0;
 	df->len = 0;
-	df->err = GUT_E_OK;
 
 	df->endianness = GUT_DATAFILE_DEFAULT_ENDIANNESS;
 
@@ -74,32 +73,28 @@ int gut_datafile_init(gut_datafile *df) {
 		int size = GUT_DATAFILE_DEFAULT_BUFFER_SIZE;
 
 		df->buffer = malloc(size);
-		if (df->buffer == NULL) {
-			df->err = GUT_E_NOMEM;
-			break;
-		}
+		if (df->buffer == NULL) break;
 
 		// Otherwise buffer succesfully allocated
 		df->size = size;
 
 		// Initialization completed
-		complete = 1;
+		success = 1;
 	} while (0);
 
-	if (!complete) {
+	if (!success) {
+		// Deinit partial
 		gut_datafile_deinit(df);
 	}
 
-	return complete;
+	return success;
 }
 
 void gut_datafile_deinit(gut_datafile *df) {
 	if (df != NULL) {
-		if (df->buffer != NULL) {
-			free(df->buffer);
-			df->buffer = NULL;
-			df->size = 0;
-		}
+		free(df->buffer);
+		df->buffer = NULL;
+		df->size = 0;
 	}
 }
 
@@ -112,57 +107,69 @@ int gut_datafile_open(
     const char *path,
     const char *mode
 ) {
-	int rval;
+	int success = 1;
 
 	df->file = fopen(path, mode);
 
 	// Determine rval
 	if (df->file == NULL) {
-		// Error
-		df->err = GUT_E_SYSCALL;
-		rval = -1;
-	} else {
-		rval = 0;
+		success = 0;
 	}
 
 	// Reset buffer state
 	df->len = 0;
 	df->next = 0;
 
-	return rval;
+	return success;
 }
 
 int gut_datafile_close(gut_datafile *df) {
-	int rval = 0;
+	int success = 1;
 
 	if (df->file != NULL) {
 		int result;
 		result = fclose(df->file);
 		if (result != 0) {
 			// Error
-			df->err = GUT_E_SYSCALL;
-			rval = -1;
+			success = 0;
 		}
 		df->file = NULL;
 	}
 
-	return rval;
+	return success;
 }
 
+/**
+ * Tests the error indicator for the underlying FILE stream,
+ * returning nonzero if it is set.
+ */
 int gut_datafile_error(gut_datafile *df) {
 	return ferror(df->file);
 }
 
+/**
+ * Returns non-zero when the underlying FILE stream
+ * has the end-of-file indicator set AND when the buffered
+ * data, if any, has been consumed.
+ */
 int gut_datafile_eof(gut_datafile *df) {
-	return feof(df->file);
+	return feof(df->file) && (df->next == df->len);
 }
 
+/**
+ * Returns non-zero if the underlying FILE stream is open.
+ */
 int gut_datafile_is_open(gut_datafile *df) {
 	return df->file != NULL;
 }
 
+/**
+ * Attempts to resize the buffer.
+ * On success the buffer state is reset, and non-zero value is returned.
+ * On failure the previous buffer is retained, and zero is returned.
+ */
 int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
-	int rval = 0;
+	int success = 1;
 	void *ptr;
 
 	ptr = realloc(df->buffer, size);
@@ -172,21 +179,27 @@ int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
 		df->size = size;
 	} else {
 		// Failure; original untouched.
-		rval = -1;
+		success = 0;
 	}
 
-	return rval;
+	return success;
 }
 
+/**
+ * Return the buffer size.
+ */
 int gut_datafile_get_buffer_size(gut_datafile *df) {
 	return df->size;
 }
 
 /**
  * Read data from file to buffer.
+ * Returns non-zero if some data was succesfully read to the buffer.
+ * Returns zero if a syscall error occurred or if nothing was read
+ * because the end-of-file had been reached already.
  */
 int gut_datafile_readbuf(gut_datafile *df) {
-	int rval = 0;
+	int success = 1;
 
 	// "On success, fread() and fwrite() return the number of
 	//  items read or written. This number equals the number of
@@ -199,13 +212,14 @@ int gut_datafile_readbuf(gut_datafile *df) {
 	//  the return value is a short item count (or zero)."
 
 	if ((bytes < df->size) && ferror(df->file)) {
-		// error after transmitting some or zero bytes.
-		df->err = GUT_E_SYSCALL;
-		rval = -1;
+		// Error after transmitting some or zero bytes.
+		// Signal the error eagerly. The bytes read
+		// are discarded.
+		success = 0;
 	}
 	else if ((bytes == 0) && feof(df->file)) {
-		// end-of-file
-		rval = -1;
+		// End-of-file has been reached, and zero bytes read.
+		success = 0;
 	}
 	else {
 		// Read some bytes succesfully (assert bytes > 0).
@@ -214,20 +228,20 @@ int gut_datafile_readbuf(gut_datafile *df) {
 		df->next = 0;
 	} // if-else
 
-	return rval;
+	return success;
 }
 
 /**
  * Returns the next byte in file, or -1 when eof/error.
  */
 int gut_datafile_read_byte(gut_datafile *df) {
-	int rval = 0;
+	int rval = -1;
 
 	// See if there's data in the buffer
 	if (df->next == df->len) {
 		// The buffer has been consumed.
 		// Attempt to fill the buffer
-		rval = gut_datafile_readbuf(df);
+		gut_datafile_readbuf(df);
 	}
 
 	if (df->next < df->len) {
@@ -240,52 +254,63 @@ int gut_datafile_read_byte(gut_datafile *df) {
 	return rval;
 }
 
+/**
+ * Reads a block from the file into memory.
+ *
+ * Returns:
+ *    1   on success
+ *    0   on error (premature eof or syscall failure)
+ *
+ */
 int gut_datafile_read(gut_datafile *df, void *ptr, int size) {
-	int rval = 0;
+	int success = 1;
 	char *data = ptr;
 
 	for (int i = 0; i < size; i++) {
 		int byteval = gut_datafile_read_byte(df);
 		if (byteval == -1) {
-			// error or unexpected eof
-			if (feof(df->file)) {
-				df->err = GUT_E_EOF;
-			} else {
-				df->err = GUT_E_SYSCALL;
-			}
-			rval = -1;
+			success = 0;
 			break;
 		}
 		data[i] = (unsigned char)(byteval);
 	}
 
-	return rval;
+	return success;
 }
 
+/**
+ * Reads a block from the file into memory in reverse order.
+ *
+ * Returns:
+ *    1  on success
+ *    0  on error (premature eof or syscall failure)
+ *
+ */
 int gut_datafile_read_r(gut_datafile *df, void *ptr, int size) {
-	int rval = 0;
+	int success = 1;
 	char *data = ptr;
 
 	for (int i = size-1; i >= 0; i--) {
 		int byteval = gut_datafile_read_byte(df);
 		if (byteval == -1) {
-			// error or unexpected eof
-			if (feof(df->file)) {
-				df->err = GUT_E_EOF;
-			} else {
-				df->err = GUT_E_SYSCALL;
-			}
-			rval = -1;
+			success = 0;
 			break;
 		}
 		data[i] = (unsigned char)(byteval);
 	}
 
-	return rval;
+	return success;
 }
 
+/**
+ * Reads an object into memory according to endianness byte order.
+ *
+ * Returns:
+ *    1   on success
+ *    0   on error (premature eof or syscall failure)
+ *
+ */
 int gut_datafile_read_obj(gut_datafile *df, void *ptr, int size) {
-
 	switch(df->endianness) {
 	case GUT_DATAFILE_BIG_ENDIAN:
 		return gut_datafile_read_r(df, ptr, size);
@@ -295,11 +320,11 @@ int gut_datafile_read_obj(gut_datafile *df, void *ptr, int size) {
 		return gut_datafile_read(df, ptr, size);
 	}
 
-	return -1; // Never reached
+	return 0; // Never reached
 }
 
 int gut_datafile_writebuf(gut_datafile *df) {
-	int rval = 0;
+	int success = 1;
 
 	// "On success, fread() and fwrite() return the number of
 	//  items read or written. This number equals the number of
@@ -313,8 +338,7 @@ int gut_datafile_writebuf(gut_datafile *df) {
 
 	if (bytes < df->len) {
 		// Either error or eof after transmitting some or zero bytes.
-		df->err = GUT_E_SYSCALL;
-		rval = -1;
+		success = 0;
 	} else {
 		// Wrote all bytes succesfully.
 		// Reset buffer state.
@@ -322,7 +346,7 @@ int gut_datafile_writebuf(gut_datafile *df) {
 		df->next = 0;
 	} // if-else
 
-	return rval;
+	return success;
 }
 
 
@@ -330,13 +354,13 @@ int gut_datafile_writebuf(gut_datafile *df) {
  * Writes a byte into the file. Returns -1 when eof/error.
  */
 int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval) {
-	int rval = 0;
+	int success = 1;
 
 	// See if there's space in the buffer.
 	if (df->len == df->size) {
 		// The buffer has been consumed.
 		// Flush the buffer.
-		rval = gut_datafile_writebuf(df);
+		success = gut_datafile_writebuf(df);
 	}
 
 	if (df->len < df->size) {
@@ -346,61 +370,51 @@ int gut_datafile_write_byte(gut_datafile *df, unsigned int byteval) {
 		df->len++;
 	}
 
-	return rval;
+	return success;
 }
 
 int gut_datafile_flush(gut_datafile *df) {
-	int rval = 0;
+	int success;
 
 	do {
 		// Flush buffer
-		rval = gut_datafile_writebuf(df);
-		if (rval == -1) break;
+		success = gut_datafile_writebuf(df);
+		if (!success) break;
 
 		// Attempt fflush()
 		if (fflush(df->file) != 0) {
 			// Syscall failed
-			df->err = GUT_E_SYSCALL;
-			rval = -1;
+			success = 0;
 			break;
 		}
 
-		rval = 0;
 	} while(0);
 
-	return rval;
+	return success;
 }
 
 int gut_datafile_write(gut_datafile *df, void *ptr, int size) {
-	int rval = -1;
+	int success = 1;
 	char *data = ptr;
 
-	do {
-		for (int i = 0; i < size; i++) {
-			int ok = gut_datafile_write_byte(df, data[i]);
-			if (ok == -1) break; // error
-		}
+	for (int i = 0; i < size; i++) {
+		success = gut_datafile_write_byte(df, data[i]);
+		if (!success) break; // error
+	}
 
-		rval = 0;
-	} while(0);
-
-	return rval;
+	return success;
 }
 
 int gut_datafile_write_r(gut_datafile *df, void *ptr, int size) {
-	int rval = -1;
+	int success = 1;
 	char *data = ptr;
 
-	do {
-		for (int i = size-1; i >= 0; i++) {
-			int ok = gut_datafile_write_byte(df, data[i]);
-			if (ok == -1) break; // error
-		}
+	for (int i = size-1; i >= 0; i++) {
+		success = gut_datafile_write_byte(df, data[i]);
+		if (!success) break; // error
+	}
 
-		rval = 0;
-	} while(0);
-
-	return rval;
+	return success;
 }
 
 int gut_datafile_write_obj(gut_datafile *df, void *ptr, int size) {
@@ -419,203 +433,207 @@ int gut_datafile_write_obj(gut_datafile *df, void *ptr, int size) {
 // READ METHODS
 //==============
 
-char gut_datafile_read_char8(gut_datafile *df) {
+int gut_datafile_read_char8(gut_datafile *df, char *val) {
+	int success;
 	#if CHAR_MIN < 0
 		// char is signed
-		return (char) gut_datafile_read_int8(df);
+		int temp;
+		success = gut_datafile_read_int8(df, &temp);
+		*val = temp;
 	#else
 		// char is unsigned
-		return (char) gut_datafile_read_uint8(df);
+		unsigned int temp;
+		success = gut_datafile_read_uint8(df, &temp);
+		*val = temp;
 	#endif
+
+	return success;
 }
 
 
-unsigned int gut_datafile_read_uint8(gut_datafile *df) {
+int gut_datafile_read_uint8(gut_datafile *df, unsigned int *val) {
 	unsigned char data[1];
+	int success = gut_datafile_read_obj(df, data, 1);
 
-	gut_datafile_read_obj(df, data, 1);
+	*val = data[0];
 
-	return (unsigned int) data[0];
+	return success;
 }
 
-unsigned int gut_datafile_read_uint16(gut_datafile *df) {
+int gut_datafile_read_uint16(gut_datafile *df, unsigned int *val) {
 	unsigned char data[2];
+	int success = gut_datafile_read_obj(df, data, 2);
 
-	gut_datafile_read_obj(df, data, 2);
-
-	unsigned int rval = 0;
+	*val = 0;
 	for (int i = 0; i < 2; i++) {
-		rval |= ((unsigned int) data[i]) << (i*8);
+		*val |= ((unsigned int) data[i]) << (i*8);
 	}
 
-	return rval;
+	return success;
 }
 
-unsigned int gut_datafile_read_uint32(gut_datafile *df) {
+int gut_datafile_read_uint32(gut_datafile *df, unsigned int *val) {
 	unsigned char data[4];
+	int success = gut_datafile_read_obj(df, data, 4);
 
-	gut_datafile_read_obj(df, data, 4);
-
-	unsigned int rval = 0;
+	*val = 0;
 	for (int i = 0; i < 4; i++) {
-		rval |= ((unsigned int) data[i]) << (i*8);
+		*val |= ((unsigned int) data[i]) << (i*8);
 	}
 
-	return rval;
+	return success;
 }
 
-unsigned long gut_datafile_read_ulong32(gut_datafile *df) {
+int gut_datafile_read_ulong32(gut_datafile *df, unsigned long *val) {
 	unsigned char data[4];
+	int success = gut_datafile_read_obj(df, data, 4);
 
-	gut_datafile_read_obj(df, data, 4);
-
-	unsigned long rval = 0;
+	*val = 0;
 	for (int i = 0; i < 4; i++) {
-		rval |= ((unsigned long) data[i]) << (i*8);
+		*val |= ((unsigned long) data[i]) << (i*8);
 	}
 
-	return rval;
+	return success;
 }
 
-int gut_datafile_read_int8(gut_datafile *df) {
-	int rval = 0;
-	unsigned int uval = gut_datafile_read_uint8(df);
+int gut_datafile_read_int8(gut_datafile *df, int *val) {
+	unsigned int uval;
+	int success = gut_datafile_read_uint8(df, &uval);
 
 	if (uval > 0x7f) {
-		rval = -((int)(0xff - uval)) - 1;
+		*val = -((int)(0xff - uval)) - 1;
 	} else {
-		rval = (int) uval;
+		*val = (int) uval;
 	}
 
-	return rval;
+	return success;
 }
 
-int gut_datafile_read_int16(gut_datafile *df) {
-	int rval = 0;
-	unsigned int uval = gut_datafile_read_uint16(df);
+int gut_datafile_read_int16(gut_datafile *df, int *val) {
+	unsigned int uval;
+	int success = gut_datafile_read_uint16(df, &uval);
 
 	if (uval > 0x7fff) {
-		rval = -((int)(0xffff - uval)) - 1;
+		*val = -((int)(0xffff - uval)) - 1;
 	} else {
-		rval = (int) uval;
+		*val = (int) uval;
 	}
 
-	return rval;
+	return success;
 }
 
-int gut_datafile_read_int32(gut_datafile *df) {
-	int rval = 0;
-	unsigned int uval = gut_datafile_read_uint32(df);
+int gut_datafile_read_int32(gut_datafile *df, int *val) {
+	unsigned int uval;
+	int success = gut_datafile_read_uint32(df, &uval);
 
 	if (uval > 0x7fffffff) {
-		rval = -((int)(0xffffffff - uval)) - 1;
+		*val = -((int)(0xffffffff - uval)) - 1;
 	} else {
-		rval = (int) uval;
+		*val = (int) uval;
 	}
 
-	return rval;
+	return success;
 }
 
-long gut_datafile_read_long32(gut_datafile *df) {
-	long rval = 0;
-	unsigned long uval = gut_datafile_read_uint32(df);
+int gut_datafile_read_long32(gut_datafile *df, long *val) {
+	unsigned long uval;
+	int success = gut_datafile_read_ulong32(df, &uval);
 
 	if (uval > 0x7fffffff) {
-		rval = -((long)(0xffffffff - uval)) - 1;
+		*val = -((long)(0xffffffff - uval)) - 1;
 	} else {
-		rval = (long) uval;
+		*val = (long) uval;
 	}
 
-	return rval;
+	return success;
 }
 
-float gut_datafile_read_float32(gut_datafile *df) {
-	float rval;
-	gut_datafile_read_obj(df, &rval, 4);
-	return rval;
+int gut_datafile_read_float32(gut_datafile *df, float *val) {
+	return gut_datafile_read_obj(df, val, 4);
 }
 
-double gut_datafile_read_double64(gut_datafile *df) {
-	double rval;
-	gut_datafile_read_obj(df, &rval, 8);
-	return rval;
+int gut_datafile_read_double64(gut_datafile *df, double *val) {
+	return gut_datafile_read_obj(df, val, 8);
 }
 
-long double gut_datafile_read_ldouble80(gut_datafile *df) {
-	long double rval;
-	gut_datafile_read_obj(df, &rval, 10);
-	return rval;
+int gut_datafile_read_ldouble80(gut_datafile *df, long double *val) {
+	return gut_datafile_read_obj(df, val, 10);
 }
 
 
 // WRITE METHODS
 //===============
 
-void gut_datafile_write_uint16(gut_datafile *df, unsigned int val) {
+int gut_datafile_write_uint16(gut_datafile *df, unsigned int val) {
 	unsigned char data[2];
 
 	for (int i = 0; i < 2; i++) {
 		data[i] = (unsigned char) ((val >> (i*8)) & 0xff);
 	}
 
-	gut_datafile_write_obj(df, data, 2);
+	return gut_datafile_write_obj(df, data, 2);
 }
 
-void gut_datafile_write_uint32(gut_datafile *df, unsigned int val) {
+int gut_datafile_write_uint32(gut_datafile *df, unsigned int val) {
 	unsigned char data[4];
 
 	for (int i = 0; i < 4; i++) {
 		data[i] = (unsigned char) ((val >> (i*8)) & 0xff);
 	}
 
-	gut_datafile_write_obj(df, data, 4);
+	return gut_datafile_write_obj(df, data, 4);
 }
 
-void gut_datafile_write_ulong32(gut_datafile *df, unsigned long val) {
+int gut_datafile_write_ulong32(gut_datafile *df, unsigned long val) {
 	unsigned char data[4];
 
 	for (int i = 0; i < 4; i++) {
 		data[i] = (unsigned char) ((val >> (i*8)) & 0xff);
 	}
 
-	gut_datafile_write_obj(df, data, 4);
+	return gut_datafile_write_obj(df, data, 4);
 }
 
-void gut_datafile_write_int16(gut_datafile *df, int val) {
-	if (val < 0) {
-		gut_datafile_write_uint16(df, val);
+int gut_datafile_write_int16(gut_datafile *df, int val) {
+	unsigned int uval;
+	if (val > 0) {
+		uval = val;
 	} else {
-		gut_datafile_write_uint16(
-		    df, 0xffff - (unsigned int) (-(val+1)) );
+		uval = 0xffff - (unsigned int)(-(val+1));
 	}
+
+	return gut_datafile_write_uint16(df, uval);
 }
 
-void gut_datafile_write_int32(gut_datafile *df, int val) {
-	if (val < 0) {
-		gut_datafile_write_uint32(df, val);
+int gut_datafile_write_int32(gut_datafile *df, int val) {
+	unsigned int uval;
+	if (val > 0) {
+		uval = val;
 	} else {
-		gut_datafile_write_uint32(
-		    df, 0xffffffff - (unsigned int) (-(val+1)) );
+		uval = 0xffffffff - (unsigned int)(-(val+1));
 	}
+
+	return gut_datafile_write_uint32(df, uval);
 }
 
-void gut_datafile_write_long32(gut_datafile *df, long val) {
-	if (val < 0) {
-		gut_datafile_write_ulong32(df, val);
+int gut_datafile_write_long32(gut_datafile *df, long val) {
+	unsigned long uval;
+	if (val > 0) {
+		uval = val;
 	} else {
-		gut_datafile_write_uint32(
-		    df, 0xffffffff - (unsigned long) (-(val+1)) );
+		uval = 0xffffffff - (unsigned long)(-(val+1));
 	}
+	return gut_datafile_write_ulong32(df, uval);
 }
 
-void gut_datafile_write_float32(gut_datafile *df, float val) {
-	gut_datafile_write_obj(df, &val, 4);
+int gut_datafile_write_float32(gut_datafile *df, float val) {
+	return gut_datafile_write_obj(df, &val, 4);
 }
 
-void gut_datafile_write_double64(gut_datafile *df, double val) {
-	gut_datafile_write_obj(df, &val, 8);
+int gut_datafile_write_double64(gut_datafile *df, double val) {
+	return gut_datafile_write_obj(df, &val, 8);
 }
 
-void gut_datafile_write_ldouble80(gut_datafile *df, long double val) {
-	gut_datafile_write_obj(df, &val, 10);
+int gut_datafile_write_ldouble80(gut_datafile *df, long double val) {
+	return gut_datafile_write_obj(df, &val, 10);
 }

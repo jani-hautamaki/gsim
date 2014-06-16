@@ -16,6 +16,7 @@
 //********************************{end:header}******************************//
 
 #include "grease/gut_argparser.h"
+#include "grease/gut_error.h"
 
 // malloc, free, NULL
 #include <stdlib.h>
@@ -76,7 +77,7 @@ void *gut_argparser_realloc_errmsg(gut_argparser *parser, int size) {
 		parser->errmsg = malloc((unsigned int)size);
 		if (parser->errmsg == NULL) {
 			// Error, out of memory.
-			parser->err = -1;
+			parser->err = GUT_E_NOMEM;
 			break;
 		}
 
@@ -88,7 +89,7 @@ void *gut_argparser_realloc_errmsg(gut_argparser *parser, int size) {
 }
 
 void gut_argparser_init(gut_argparser *parser) {
-	parser->err = 0;
+	parser->err = GUT_E_OK;
 	parser->errmsg_size = 0;
 	parser->errmsg = NULL;
 	parser->state = 0;
@@ -133,13 +134,12 @@ void gut_argparser_deinit(gut_argparser *parser) {
 
 void gut_argparser_errorfmt(
     gut_argparser *parser,
-    int err,
     const char *fmt, ...
 ) {
         va_list args;
 
 	// Set error
-	parser->err = err;
+	parser->err = GUT_E_USER;
 
 	// Format human-readable error message
         va_start(args, fmt);
@@ -147,8 +147,20 @@ void gut_argparser_errorfmt(
         va_end(args);
 }
 
+void gut_argparser_verrorfmt(
+    gut_argparser *parser,
+    const char *fmt,
+    va_list ap
+) {
+	// Set error
+	parser->err = GUT_E_USER;
+	// Format human-readable error message
+        vsnprintf(parser->errmsg, parser->errmsg_size, fmt, ap);
+}
+
+
 int gut_argparser_has_error(const gut_argparser *parser) {
-	return parser->err != 0;
+	return parser->err != GUT_E_OK;
 }
 
 int gut_argparser_errno(const gut_argparser *parser) {
@@ -169,3 +181,12 @@ void gut_argparser_parse(gut_argparser *parser, int argc, char *argv[]) {
 		parser->cycle(parser);
 	}
 }
+
+const char *gut_argparser_get_arg(const gut_argparser *parser) {
+	return parser->carg;
+}
+
+void *gut_argparser_get_itemptr(gut_argparser *parser) {
+	return parser->itemptr;
+}
+

@@ -16,6 +16,7 @@
 //********************************{end:header}******************************//
 
 #include "grease/gut_datafile.h"
+#include "grease/gut_datafile_macros.h"
 #include "grease/gut_error.h"
 
 // exit, EXIT_SUCCESS
@@ -29,6 +30,50 @@
 
 // strerror
 #include <string.h>
+
+#define MAY_BREAK(fun_call) if (!(fun_call)) break
+
+static int read_datafile(gut_datafile *df) {
+	int success = 1; // returns success if zero loops
+	for (int i = 0; i < 16; i++) {
+		//int val = i-8;
+
+		int val_int16;
+		int val_int32;
+		long val_long32;
+		float val_float32;
+		double val_double64;
+		unsigned char padding[16];
+
+		//printf("Reading %d\n", val);
+
+		success = 0;
+		MAY_BREAK(read_int16(df, &val_int16));
+		MAY_BREAK(read_bytes(df, padding, 6));
+
+		MAY_BREAK(read_int32(df, &val_int32));
+		MAY_BREAK(read_bytes(df, padding, 4));
+
+		MAY_BREAK(read_long32(df, &val_long32));
+		MAY_BREAK(read_bytes(df, padding, 4));
+
+		MAY_BREAK(read_float32(df, &val_float32));
+		MAY_BREAK(read_bytes(df, padding, 4));
+
+		MAY_BREAK(read_double64(df, &val_double64));
+		MAY_BREAK(read_bytes(df, padding, 8));
+		success = 1;
+
+		printf("Read:   % d   % d   % ld    % f    % f\n",
+		    val_int16, val_int32, val_long32,
+		    val_float32, val_double64
+		);
+
+		if (gut_datafile_eof(df)) break; // anticipated eof
+	} // for
+
+	return success;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -44,62 +89,38 @@ int main(int argc, char *argv[]) {
 
 		df = gut_datafile_create();
 		if (df == NULL) {
-			fprintf(stderr, "gut_datafile_create: %s\n", strerror(errno));
+			fprintf(stderr, "gut_datafile_create: %s\n",
+			    strerror(errno));
 			break;
 		}
 
 		// Attempt to reset buffer size
-		gut_datafile_set_buffer_size(df, 16); // 16 bytes
-
-		if (gut_datafile_open(df, fname, "rb") == -1) {
-			fprintf(stderr, "fopen() failed: %s\n", strerror(errno));
+		if (!gut_datafile_set_buffer_size(df, 16)) {
+			fprintf(stderr, "gut_datafile_set_buffer_size(): %s\n",
+			    strerror(errno));
 			break;
 		}
 
-		for (int i = 0; i < 16; i++) {
-			//int val = i-8;
-			int val_int16;
-			int val_int32;
-			long val_long32;
-			float val_float32;
-			double val_double64;
-			unsigned char padding[16];
-
-			//printf("Reading %d\n", val);
-			val_int16 = gut_datafile_read_int16(df);
-			gut_datafile_read(df, padding, 6);
-
-			val_int32 = gut_datafile_read_int32(df);
-			gut_datafile_read(df, padding, 4);
-
-			val_long32 = gut_datafile_read_long32(df);
-			gut_datafile_read(df, padding, 4);
-
-			val_float32 = gut_datafile_read_float32(df);
-			gut_datafile_read(df, padding, 4);
-
-			val_double64 = gut_datafile_read_double64(df);
-			gut_datafile_read(df, padding, 8);
-
-			gut_datafile_read(df, padding, 40);
-
-			if (df->err == GUT_E_EOF) break; // premature eof
-			if (gut_datafile_error(df)) break; // file error
-
-			printf("Read:   % d   % d   % ld    % f    % f\n",
-			    val_int16, val_int32, val_long32,
-			    val_float32, val_double64
-			);
-
-			if (gut_datafile_eof(df)) break; // anticipated eof
-
+		if (!gut_datafile_open(df, fname, "rb")) {
+			fprintf(stderr, "fopen() failed: %s\n",
+			    strerror(errno));
+			break;
 		}
 
-		if (df->err == GUT_E_EOF) {
+		int success;
+		success = read_datafile(df);
+
+		if (success) {
+			// Succesfully read.
+		}
+		else if (gut_datafile_eof(df)) {
+			// Premature eof
 			fprintf(stderr, "read failed: unexpected end-of-file\n");
 			break;
 		}
-		if (gut_datafile_error(df)) {
+		else {
+			// assert gut_datafile_error(df)
+			// Syscall failed
 			fprintf(stderr, "read failed: %s\n", strerror(errno));
 			break;
 		}

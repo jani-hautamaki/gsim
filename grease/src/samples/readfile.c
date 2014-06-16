@@ -60,15 +60,20 @@ int main(int argc, char *argv[]) {
 
 		df = gut_datafile_create();
 		if (df == NULL) {
-			fprintf(stderr, "Cannot create gut_datafile: out of memory\n");
+			fprintf(stderr, "gut_datafile_create(): %s\n",
+			    strerror(errno));
 			break;
 		}
 
 		// Attempt to reset buffer size
-		gut_datafile_set_buffer_size(df, 64); // 64 bytes only
+		if (!gut_datafile_set_buffer_size(df, 64)) {
+			fprintf(stderr, "gut_datafile_set_buffer_size(): %s\n",
+			    strerror(errno));
+		}
 
-		if (gut_datafile_open(df, fname, "rb") == -1) {
-			fprintf(stderr, "fopen() failed: %s\n", strerror(errno));
+		if (!gut_datafile_open(df, fname, "rb")) {
+			fprintf(stderr, "fopen() failed: %s\n",
+			    strerror(errno));
 			break;
 		}
 

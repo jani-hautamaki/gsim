@@ -18,6 +18,9 @@
 #ifndef GUT_ARGPARSER_H
 #define GUT_ARGPARSER_H
 
+// va_list
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -102,13 +105,16 @@ void gut_argparser_deinit(gut_argparser *parser);
 
 void gut_argparser_errorfmt(
     gut_argparser *parser,
-    int err,
+     const char *fmt, ...
+);
+
+void gut_argparser_verrorfmt(
+    gut_argparser *parser,
     const char *fmt,
-    ...
+    va_list ap
 );
 
 int gut_argparser_has_error(const gut_argparser *parser);
-
 const char *gut_argparser_strerror(const gut_argparser *parser);
 
 void gut_argparser_set_consume_callback(
@@ -117,6 +123,9 @@ void gut_argparser_set_consume_callback(
 );
 
 void gut_argparser_parse(gut_argparser *parser, int argc, char *argv[]);
+
+const char *gut_argparser_get_arg(const gut_argparser *parser);
+void *gut_argparser_get_itemptr(gut_argparser *parser);
 
 #ifdef __cplusplus
 } // extern "C"

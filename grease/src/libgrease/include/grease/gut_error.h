@@ -30,7 +30,7 @@
 /** Either an overflow or an underflow occurred. */
 #define GUT_E_RANGE             -3
 
-/** Application-specific error. */
+/** Application-specific error; see errmsg. */
 #define GUT_E_USER              -4
 
 // gut_datafile
