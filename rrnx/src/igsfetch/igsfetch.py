@@ -20,8 +20,11 @@
 # To read all broadcast ephemerides for one month, 
 # you can use the following command:
 #
-#     python igsfetch.py 2014-05-01 2014-06-01 ign
+#     python igsfetch.py 2014-05-01 2014-06-01 ign > script.sh
 #
+# or
+#
+#     python igsfetch.py 2014-05-01 2014-06-01 ign - > urls.txt
 #
 
 
@@ -93,7 +96,8 @@ def display_usage(program):
 	print "The site abbreviation, <site_abbr>, is expected to be"
 	print "one of the pre-defined values: ign, cddis, sopac, kasi"
 	print
-	print "The command is the command prefix used for the URLS."
+	print "The command is the command prefix used for the URLs."
+	print "If the command is '-' then only the URLs are listed."
 	print "Default value: 'wget -nv'"
 
 def main(argv):
@@ -109,7 +113,16 @@ def main(argv):
 	cmd = 'wget -nv'
 	if len(argv) >= 5:
 		cmd = ' '.join(argv[4:])
-		print "cmd = <%s>" % (cmd, )
+		#print "# Command = <%s>" % (cmd, )
+
+	list_only = None
+	if cmd != '-':
+		list_only = False
+		cmd = cmd + ' '
+	else:
+		list_only = True
+		cmd = ''
+	# if-else
 
 	# Convert to Julian Day numbers
 	from_mjday = date2mjday(from_date)
@@ -118,14 +131,16 @@ def main(argv):
 	# Compute the GPS zero day
 	gps_zeroday = date2mjday(datetime(1980, 1, 6))
 
-
-	print "#!/bin/bash"
-	print
-	print "# Automatically generated script for downloading "\
-	    " RINEX NAV files."
-	print "# From date:   %s" % (from_date.strftime("%Y-%m-%d"), )
-	print "# To date:     %s (excluded)" % (to_date.strftime("%Y-%m-%d"), )
-	print "# Span:        %d days" % (to_mjday - from_mjday, )
+	if list_only == False:
+		print "#!/bin/bash"
+		print
+		print "# Automatically generated script for downloading "\
+		    "RINEX NAV files."
+		print "# From date:   %s" % (from_date.strftime("%Y-%m-%d"), )
+		print "# To date:     %s (excluded)" % (to_date.strftime("%Y-%m-%d"), )
+		print "# Span:        %d days" % (to_mjday - from_mjday, )
+		print
+	# if: not list_only
 
 	# Loop from the first day until the last day (exclusive)
 	for mjday in range(from_mjday, to_mjday):
@@ -158,7 +173,7 @@ def main(argv):
 		# Select correct base url.
 		urls = build_urls_for(year, yday)
 
-		print "%s %s" % (cmd, urls[site_abbr],)	
+		print "%s%s" % (cmd, urls[site_abbr],)	
 	# for
 # main()
 
