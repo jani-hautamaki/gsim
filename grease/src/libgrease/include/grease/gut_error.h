@@ -42,8 +42,20 @@
 /** Syscall failed; consult errno. */
 #define GUT_E_SYSCALL           -6
 
-/** Unexpected end-of-file. */
+/** Cannot read: end-of-file / end-of-buffer. */
 #define GUT_E_EOF               -7
+
+// gut_buffer
+//============
+
+/** Cannot write; buffer is full. */
+#define GUT_E_FULL              -8
+
+/** Stream error. */
+#define GUT_E_STREAM            -9
+
+/** Invalid parameter/argument value. */
+#define GUT_E_PARAM             -10
 
 /**
  * Human-readable error message for the error code.

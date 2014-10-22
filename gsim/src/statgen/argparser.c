@@ -52,6 +52,17 @@
 // INTERNAL HELPERS
 //==================
 
+static void errorfmt(gut_argparser *parser, const char *fmt, ...) {
+	// Set error state
+	parser->state = S_ERROR;
+
+	// Format human-readable error message
+	va_list args;
+	va_start(args, fmt);
+	gut_argparser_verrorfmt(parser, fmt, args);
+	va_end(args);
+}
+
 static void parse_int(
     gut_argparser *parser,
     const char *carg,
@@ -60,9 +71,7 @@ static void parse_int(
 	// Parse the string into int
 	if (gut_parse_int(carg, result) != 0) {
 		// Error, conversion failed.
-		gut_argparser_errorfmt(parser, GUT_E_USER,
-		    "Cannot convert to int: %s", carg);
-		parser->state = S_ERROR;
+		errorfmt(parser, "Cannot convert to int: %s", carg);
 	}
 }
 
@@ -74,9 +83,7 @@ static void parse_uint(
 	// Parse the string into int
 	if (gut_parse_uint(carg, result) != 0) {
 		// Error, conversion failed.
-		gut_argparser_errorfmt(parser, GUT_E_USER,
-		    "Cannot convert to unsigned int: %s", carg);
-		parser->state = S_ERROR;
+		errorfmt(parser, "Cannot convert to unsigned int: %s", carg);
 	}
 }
 
@@ -87,8 +94,7 @@ static void parse_double(
 ) {
 	if (gut_parse_double(carg, result) != 0) {
 		// Conversion failed
-		gut_argparser_errorfmt(parser, GUT_E_USER,
-		    "Cannot convert to double: %s", carg);
+		errorfmt(parser, "Cannot convert to double: %s", carg);
 		parser->state = S_ERROR;
 	}
 }
@@ -174,9 +180,7 @@ static void consume(gut_argparser *parser) {
 		}
 		else {
 			// Error, unexpected argument
-			gut_argparser_errorfmt(parser, GUT_E_USER,
-			    "Unexpected argument: %s", carg);
-			state = S_ERROR;
+			errorfmt(parser, "Unexpected argument: %s", carg);
 		}
 		break;
 
@@ -253,16 +257,21 @@ static void consume(gut_argparser *parser) {
 		state = S_NOMINAL;
 	}
 
-	// Store the updated state
-	parser->state = state;
+	// Store the updated state only if the parser
+	// has not been set to error state
+	if (parser->state != S_ERROR) {
+		parser->state = state;
+	}
 }
 
 /**
  * TODO:
  */
+/*
 static void gut_argparser_eof(gut_argparser *parser) {
 	// inspect the ending state
 }
+*/
 
 
 int argparser_parse(
@@ -281,7 +290,7 @@ int argparser_parse(
 
 	// Inspect the ending state?
 	if ((parser->err == 0) && (parser->state != S_NOMINAL)) {
-		gut_argparser_errorfmt(parser, GUT_E_OTHER,
+		gut_argparser_errorfmt(parser,
 		    "Unexpected end of command-line");
 	}
 	// If err!=0 the state should be S_ERROR

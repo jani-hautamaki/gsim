@@ -15,7 +15,7 @@
 //
 //********************************{end:header}******************************//
 
-#include "grease/gut_datafile.h"
+#include "grease/gut_file.h"
 
 // exit, EXIT_SUCCESS
 #include <stdlib.h>
@@ -29,14 +29,20 @@
 // strerror, strcmp
 #include <string.h>
 
+// Read/Write buffer size
 #define BUFFER_SIZE 64
+
+static void notify_file_error(const char *path, gut_file *f) {
+	fprintf(stderr, "%s: %s\n", path, gut_file_strerror(f));
+}
 
 int main(int argc, char *argv[]) {
 
-	gut_datafile *df1 = NULL;
-	gut_datafile *df2 = NULL;
+	gut_file *f1 = NULL;
+	gut_file *f2 = NULL;
 
-	int retval = EXIT_FAILURE;
+	int success = 0;
+
 	do {
 		if (argc < 3) {
 			fprintf(stderr, "Usage: %s <sourcefile> <destfile>\n", argv[0]);
@@ -45,83 +51,72 @@ int main(int argc, char *argv[]) {
 		const char *source = argv[1];
 		const char *dest = argv[2];
 
-		df1 = gut_datafile_create();
-		df2 = gut_datafile_create();
+		f1 = gut_file_create(BUFFER_SIZE);
+		f2 = gut_file_create(BUFFER_SIZE);
 
-		if ((df1 == NULL) || (df2 == NULL)) {
-			fprintf(stderr, "gut_datafile_create(): malloc failed: %s\n",
-			    strerror(errno));
+		if ((f1 == NULL) || (f2 == NULL)) {
+			perror("gut_file_create()");
 			break;
 		}
 
-		// Attempt to reset buffer size; use 64 bytes only
-		gut_datafile_set_buffer_size(df1, BUFFER_SIZE);
-		gut_datafile_set_buffer_size(df2, BUFFER_SIZE);
-
-		// Open the files
-		if ((gut_datafile_get_buffer_size(df1) != BUFFER_SIZE)
-		   || (gut_datafile_get_buffer_size(df2) != BUFFER_SIZE))
-		{
-			fprintf(stderr, "gut_dataile_set_buffer_size(): realloc failed: %s\n",
-			    strerror(errno));
+		if (!gut_file_open(f1, source, "rb")) {
+			notify_file_error(source, f1);
 			break;
 		}
 
-		if (!gut_datafile_open(df1, source, "rb")) {
-			fprintf(stderr, "%s: %s\n", source, strerror(errno));
-			break;
-		}
-
-		if (!gut_datafile_open(df2, dest, "wb")) {
-			fprintf(stderr, "%s: %s\n", dest, strerror(errno));
+		if (!gut_file_open(f2, dest, "wb")) {
+			notify_file_error(dest, f2);
 			break;
 		}
 
 		// Copy the file.
 
-		retval = EXIT_SUCCESS;
+		success = 1;
 
 		while (1) {
-			int byteval = gut_datafile_read_byte(df1);
+			unsigned char byteval;
 
-			if (byteval == -1) {
+			success = gut_file_read_byte(f1, &byteval);
+			if (!success) {
 				// Either error or eof.
-				if (gut_datafile_error(df1)) {
-					fprintf(stderr, "%s: %s\n",
-					    source, strerror(errno));
-					retval = EXIT_FAILURE;
-				}
+				if (gut_file_error(f1)) {
+					notify_file_error(source, f1);
+					success = 0;
+				} else {
+					// Must be eof; anticipated.
+
+					success = 1;
+				} // if-else
 				break;
 			}
 
-			int ok = gut_datafile_write_byte(df2, byteval);
-
-			if (!ok) {
-				fprintf(stderr, "%s: %s\n",
-				    dest, strerror(errno));
-				retval = EXIT_FAILURE;
+			success = gut_file_write_byte(f2, byteval);
+			if (!success) {
+				// Cannot be eof, thus it must be an error.
+				notify_file_error(dest, f2);
+				success = 0;
 				break;
 			}
 		} // while forever
 
 		// Check whether the copy succeeded
-		if (retval == EXIT_FAILURE) break;
+		if (!success) break;
 
 		// Flush dest
-		if (!gut_datafile_flush(df2)) {
-			fprintf(stderr, "%s: %s\n",
-			    dest, strerror(errno));
-			retval = EXIT_FAILURE;
+		success = gut_file_flush(f2);
+		if (!success) {
+			notify_file_error(dest, f2);
+			success = 0;
 			break;
 		}
 
 	} while (0);
 
-	gut_datafile_close(df1);
-	gut_datafile_close(df2);
+	gut_file_close(f1);
+	gut_file_close(f2);
 
-	gut_datafile_free(df1);
-	gut_datafile_free(df2);
+	gut_file_free(f1);
+	gut_file_free(f2);
 
-	exit(retval);
+	exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
 }

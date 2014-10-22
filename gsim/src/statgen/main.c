@@ -42,8 +42,7 @@
 
 
 // libgsim, data exchange structures
-#include "gsim/gsim_messages.h"
-#include "gsim/gsim_datafile.h"
+#include "gsim/gsim_node_datafile.h"
 
 // The application-specific configuration
 #include "statgen_config.h"
@@ -254,9 +253,9 @@ static void generate_trajectory(statgen_config *config) {
 	printf("    z:          %.6f\n", xyz[2]);
 
 	// For maintaining event time tag
-	gsim_simulation_time tag;
+	gsim_node_timeoffset tag;
 	// For maintaining receiver's state
-	gsim_motion_state state;
+	gsim_node_motion state;
 
 	double x[3];
 	double v[3];
@@ -317,8 +316,7 @@ static void generate_trajectory(statgen_config *config) {
 			fprintf(stderr, "gut_datafile_create: out of memory\n");
 			break;
 		}
-		gut_datafile_open(outdf, config->outfile, "wb");
-		if (outdf->err) {
+		if (!gut_datafile_open(outdf, config->outfile, "wb")) {
 			fprintf(stderr, "gut_datafile_open: %s\n", strerror(errno));
 			gut_datafile_free(outdf);
 			outdf = NULL;
@@ -342,7 +340,7 @@ static void generate_trajectory(statgen_config *config) {
 		printf("i=%d    t=%d  subsec=%f\n", i, t_sec, t_subsec);
 
 		// Initialize gsim_simulation_time with proper values.
-		tag.event_number = i;
+		//tag.event_number = i;
 		tag.cycles = count;
 		tag.freq = steplen_denom;
 
@@ -353,7 +351,6 @@ static void generate_trajectory(statgen_config *config) {
 		// Output time tag
 
 		// Initialize trajectory data
-		memcpy(&state.t, &tag, sizeof(tag));
 		memcpy(state.x, x, sizeof(state.x));
 		memcpy(state.v, v, sizeof(state.v));
 		memcpy(state.a, a, sizeof(state.a));
@@ -366,11 +363,11 @@ static void generate_trajectory(statgen_config *config) {
 			continue; // skip output
 		}
 
-		gsim_write_tagcode(outdf, GSIM_TAG_SIMULATION_TIME);
-		gsim_write_simulation_time(outdf, &tag);
+		gsim_write_header2(outdf, GSIM_NODE_TIMEOFFSET, 0);
+		gsim_write_timeoffset(outdf, &tag);
 
-		gsim_write_tagcode(outdf, GSIM_TAG_MOTION_STATE);
-		gsim_write_motion_state(outdf, &state);
+		gsim_write_header2(outdf, GSIM_NODE_MOTION, 0);
+		gsim_write_motion(outdf, &state);
 	}
 
 	if (outdf != NULL) {

@@ -33,13 +33,18 @@ OBJDIR := $(BUILDDIR)/obj
 LIBDIR := $(BUILDDIR)/lib
 SRCDIR := src
 
-
 # general targets
 ##################
 
-.PHONY: _rebuild_all _rebuild_navmssgen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump
+.PHONY: _rebuild_all _rebuild_navmssgen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump _rebuild_measgen
 
-_rebuild_all: _rebuild_navmsggen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump
+_rebuild_all: _rebuild_navmsggen _rebuild_statgen _rebuild_libgsim _rebuild_msgdump _rebuild_measgen
+
+# dependencies for libgsim
+###########################
+
+libgsim_INCDIR := $(SRCDIR)/libgsim/include ../grease/src/libgrease/include ../coregps/src/libcoregps/include ../sundial/src/libsundial/include
+libgsim_LIBS := $(LIBDIR)/libgsim.a ../grease/build/lib/libgrease.a ../coregps/build/lib/libcoregps.a ../sundial/build/lib/libsundial.a 
 
 
 # navmsggen input
@@ -48,8 +53,8 @@ _rebuild_all: _rebuild_navmsggen _rebuild_statgen _rebuild_libgsim _rebuild_msgd
 navmsggen_SRCDIR := $(SRCDIR)/navmsggen
 navmsggen_SOURCES := $(wildcard $(navmsggen_SRCDIR)/*.c)
 
-navmsggen_INCDIR := ../rrnx/src/librrnx/include ../cgenerics/src/libcgenerics/include ../coregps/src/libcoregps/include ../grease/src/libgrease/include
-navmsggen_LIBS := ../rrnx/build/lib/librrnx.a ../cgenerics/build/lib/libcgenerics.a ../coregps/build/lib/libcoregps.a ../grease/build/lib/libgrease.a
+navmsggen_INCDIR := $(libgsim_INCDIR) ../rrnx/src/librrnx/include ../cgenerics/src/libcgenerics/include
+navmsggen_LIBS := $(libgsim_LIBS) ../rrnx/build/lib/librrnx.a ../cgenerics/build/lib/libcgenerics.a
 
 # navmsggen output
 ###################
@@ -100,8 +105,8 @@ $(navmsggen_OBJDIR):
 statgen_SRCDIR := $(SRCDIR)/statgen
 statgen_SOURCES := $(wildcard $(statgen_SRCDIR)/*.c)
 
-statgen_INCDIR := ../latitude/src/liblatitude/include ../grease/src/libgrease/include ../maid/src/libmaid/include ../euclid/src/libeuclid/include src/libgsim/include
-statgen_LIBS := ../latitude/build/lib/liblatitude.a ../grease/build/lib/libgrease.a ../maid/build/lib/libmaid.a ../euclid/build/lib/libeuclid.a build/lib/libgsim.a
+statgen_INCDIR := $(libgsim_INCDIR) ../latitude/src/liblatitude/include ../maid/src/libmaid/include ../euclid/src/libeuclid/include
+statgen_LIBS := $(libgsim_LIBS) ../latitude/build/lib/liblatitude.a ../maid/build/lib/libmaid.a ../euclid/build/lib/libeuclid.a build/lib/libgsim.a
 
 # statgen output
 #################
@@ -152,8 +157,8 @@ $(statgen_OBJDIR):
 msgdump_SRCDIR := $(SRCDIR)/msgdump
 msgdump_SOURCES := $(wildcard $(msgdump_SRCDIR)/*.c)
 
-msgdump_INCDIR := src/libgsim/include ../grease/src/libgrease/include 
-msgdump_LIBS := build/lib/libgsim.a ../grease/build/lib/libgrease.a 
+msgdump_INCDIR := $(libgsim_INCDIR)
+msgdump_LIBS := $(libgsim_LIBS)
 
 # msgdump output
 #################
@@ -195,24 +200,76 @@ $(msgdump_OBJDIR):
 
 
 
+# TARGET: measgen
+##################
+
+# measgen input
+################
+
+measgen_SRCDIR := $(SRCDIR)/measgen
+measgen_SOURCES := $(wildcard $(measgen_SRCDIR)/*.c)
+
+measgen_INCDIR := $(libgsim_INCDIR)
+measgen_LIBS := $(libgsim_LIBS)
+
+# measgen output
+#################
+
+measgen_OBJDIR := $(OBJDIR)/measgen
+measgen_OBJS := $(patsubst $(measgen_SRCDIR)/%,$(measgen_OBJDIR)/%,$(measgen_SOURCES:.c=.o))
+
+measgen_BIN := $(BINDIR)/measgen
+
+# measgen output generation
+############################
+
+measgen_CFLAGS := -Wall -std=c99 $(addprefix -I ,$(measgen_INCDIR))
+measgen_LDLIBS :=
+measgen_LDFLAGS := -lm
+
+# measgen recipes
+##################
+
+_rebuild_measgen: $(measgen_BIN)
+
+# Pull in previously computed dependencies
+-include $(measgen_OBJS:.o=.d)
+
+# Compile a single object
+$(measgen_OBJDIR)/%.o: $(measgen_SRCDIR)/%.c | $(measgen_OBJDIR)
+	$(CC) -c $(measgen_CFLAGS) $(measgen_CPPFLAGS) -o $@ $<
+	@$(CC) $(measgen_CFLAGS) -MM -MT"$@" $< -MF"$(patsubst %.o,%.d,$@)"
+
+# Link a single binary
+$(measgen_BIN): $(measgen_OBJS) $(measgen_LIBS) | $(BINDIR)
+	$(LD) $(measgen_LDFLAGS) $^ $(measgen_LDLIBS) -o $@
+
+
+# Create directory
+$(measgen_OBJDIR):
+	-mkdir -p $(measgen_OBJDIR)
+
+
+
+
 # TARGET: libgsim
 ##################
 
 # libgsim input
 ################
 
-libgsim_INCDIR := $(SRCDIR)/libgsim/include ../grease/src/libgrease/include
+libgsim_INCDIR := $(SRCDIR)/libgsim/include ../grease/src/libgrease/include ../coregps/src/libcoregps/include ../sundial/src/libsundial/include
 libgsim_SRCDIR := $(SRCDIR)/libgsim/src
 libgsim_SOURCES := $(wildcard $(libgsim_SRCDIR)/*.c)
 
-libgsim_LIBS := 
+libgsim_LIBS := $(LIBDIR)/libgsim.a ../libgrease/build/lib/libgrease.a ../coregps/build/libcoregps/libcoregps.a ../sundial/build/lib/libsundial.a 
 
 # libgsim output
 #################
 
 libgsim_LIBDIR := $(LIBDIR)
 libgsim_OBJDIR := $(OBJDIR)/libgsim
-libgsim_LIBNAME := $(libgsim_LIBDIR)/libgsim.a
+libgsim_LIBNAME := $(libgsim_LIBDIR)/libgsim.a ../coregps/build/lib/libcoregps.a
 libgsim_OBJS := $(patsubst $(libgsim_SRCDIR)/%,$(libgsim_OBJDIR)/%,$(libgsim_SOURCES:.c=.o))
 
 # libgsim output generation

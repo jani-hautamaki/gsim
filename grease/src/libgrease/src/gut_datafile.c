@@ -15,11 +15,19 @@
 //
 //********************************{end:header}******************************//
 
+
+
+/* DEPRECATED FILE */
+
+
+
 #include "grease/gut_datafile.h"
 #include "grease/gut_error.h"
 
 // malloc, free
 #include <stdlib.h>
+// errno
+#include <errno.h>
 
 // CONSTRUCTION & DESTRUCTION
 //============================
@@ -65,6 +73,7 @@ int gut_datafile_init(gut_datafile *df) {
 	df->size = 0;
 	df->next = 0;
 	df->len = 0;
+	df->sys_errno = 0;
 
 	df->endianness = GUT_DATAFILE_DEFAULT_ENDIANNESS;
 
@@ -111,9 +120,10 @@ int gut_datafile_open(
 
 	df->file = fopen(path, mode);
 
-	// Determine rval
+	// Check for errors
 	if (df->file == NULL) {
 		success = 0;
+		df->sys_errno = errno;
 	}
 
 	// Reset buffer state
@@ -132,6 +142,7 @@ int gut_datafile_close(gut_datafile *df) {
 		if (result != 0) {
 			// Error
 			success = 0;
+			df->sys_errno = errno;
 		}
 		df->file = NULL;
 	}
@@ -145,6 +156,14 @@ int gut_datafile_close(gut_datafile *df) {
  */
 int gut_datafile_error(gut_datafile *df) {
 	return ferror(df->file);
+}
+
+int gut_datafile_errno(const gut_datafile *df) {
+	return df->sys_errno;
+}
+
+void gut_datafile_clear_errno(gut_datafile *df) {
+	df->sys_errno = 0;
 }
 
 /**
@@ -173,12 +192,13 @@ int gut_datafile_set_buffer_size(gut_datafile *df, int size) {
 	void *ptr;
 
 	ptr = realloc(df->buffer, size);
+
 	if (ptr != NULL) {
-		// Success
+		// Success; update
 		df->buffer = ptr;
 		df->size = size;
 	} else {
-		// Failure; original untouched.
+		// Failure; retain
 		success = 0;
 	}
 
@@ -216,10 +236,12 @@ int gut_datafile_readbuf(gut_datafile *df) {
 		// Signal the error eagerly. The bytes read
 		// are discarded.
 		success = 0;
+		df->sys_errno = errno;
 	}
 	else if ((bytes == 0) && feof(df->file)) {
 		// End-of-file has been reached, and zero bytes read.
 		success = 0;
+		//df->eof = 1;
 	}
 	else {
 		// Read some bytes succesfully (assert bytes > 0).
@@ -331,7 +353,11 @@ int gut_datafile_writebuf(gut_datafile *df) {
 	//  bytes transferred only when size is 1."
 
 	size_t bytes;
-	bytes = fwrite(df->buffer, 1, df->len, df->file);
+	if (df->len > 0) {
+		bytes = fwrite(df->buffer, 1, df->len, df->file);
+	} else {
+		bytes = df->len;
+	}
 
 	// "If an error occurs, or the end of the file is reached,
 	//  the return value is a short item count (or zero)."
@@ -339,6 +365,7 @@ int gut_datafile_writebuf(gut_datafile *df) {
 	if (bytes < df->len) {
 		// Either error or eof after transmitting some or zero bytes.
 		success = 0;
+		df->sys_errno = errno;
 	} else {
 		// Wrote all bytes succesfully.
 		// Reset buffer state.
@@ -347,6 +374,15 @@ int gut_datafile_writebuf(gut_datafile *df) {
 	} // if-else
 
 	return success;
+}
+
+
+int gut_datafile_get_writeaddr(const gut_datafile *df) {
+	return df->len;
+}
+
+void gut_datafile_set_writeaddr(gut_datafile *df, int offset) {
+	df->len = offset;
 }
 
 

@@ -26,9 +26,15 @@
 #
 #     python igsfetch.py 2014-05-01 2014-06-01 ign - > urls.txt
 #
+# or
+#
+#     python igsfetch.py 2013-01-01 2014-01-01 ign - | awk '!(NR % 7)
+#
+# The awk in the last command will cause the every 7th line to be selected.
+# This is an easy way to pick only one day of each week.
+#
 
-
-# python
+# built-in
 
 import sys
 from datetime import datetime

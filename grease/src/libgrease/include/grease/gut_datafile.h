@@ -66,6 +66,13 @@ struct gut_datafile {
 	 * Endianness of the multi-byte objects.
 	 */
 	int endianness;
+
+	/**
+	 * Copy of the errno after a failed syscall.
+	 * Set initially to zero.
+	 */
+	int sys_errno;
+
 };
 
 typedef struct gut_datafile gut_datafile;
@@ -79,7 +86,6 @@ typedef struct gut_datafile gut_datafile;
  * Default endianness for gut_datafile.
  */
 #define GUT_DATAFILE_DEFAULT_ENDIANNESS         GUT_DATAFILE_LITTLE_ENDIAN
-
 
 
 // CONSTRUCTION & DESTRUCTION
@@ -99,6 +105,9 @@ int gut_datafile_close(gut_datafile *df);
 
 int gut_datafile_flush(gut_datafile *df);
 
+int gut_datafile_errno(const gut_datafile *df);
+void gut_datafile_clear_errno(gut_datafile *df);
+
 int gut_datafile_error(gut_datafile *df);
 int gut_datafile_eof(gut_datafile *df);
 
@@ -106,6 +115,9 @@ int gut_datafile_is_open(gut_datafile *df);
 
 int gut_datafile_set_buffer_size(gut_datafile *df, int size);
 int gut_datafile_get_buffer_size(gut_datafile *df);
+
+int gut_datafile_get_writeaddr(const gut_datafile *df);
+void gut_datafile_set_writeaddr(gut_datafile *df, int offset);
 
 // LOW-LEVEL READ
 //================
