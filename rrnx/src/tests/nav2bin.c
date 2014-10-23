@@ -28,10 +28,6 @@
 #define MODE_CSV 2
 
 
-static void display_usage(void) {
-	printf("nav2bin <rinex_nav>\n");
-}
-
 /*
 static void display_syscall_error(int syscall_errno) {
 	printf("%s", strerror(syscall_errno));
@@ -272,14 +268,14 @@ static int write_navmsg_csv(bytebuffer *bb, const rrnx_navmsg *navmsg) {
 	int ok = 1;
 	if (navmsg != NULL) {
 		bytebuffer_printf(
-		    bb, "%d, %d, %f, %f, ",
+		    bb, "%d, %d, %g, %g, ",
                     navmsg->sv_id,
 		    (int) navmsg->IODE,
 		    navmsg->toe_week,
 		    navmsg->toe
 		);
 		bytebuffer_printf(
-		    bb, "%f, %f, %f, %f, %f, %f, ",
+		    bb, "%g, %g, %g, %g, %g, %g, ",
 		    navmsg->sqrtA,
 		    navmsg->e,
 		    navmsg->i0,
@@ -288,13 +284,13 @@ static int write_navmsg_csv(bytebuffer *bb, const rrnx_navmsg *navmsg) {
 		    navmsg->M0
 		);
 		bytebuffer_printf(
-		    bb, "%f, %f, %f, ",
+		    bb, "%g, %g, %g, ",
 		    navmsg->delta_n,
 		    navmsg->OMEGADOT,
 		    navmsg->idot
 		);
 		bytebuffer_printf(
-		    bb, "%f, %f, %f, %f, %f, %f, ",
+		    bb, "%g, %g, %g, %g, %g, %g, ",
 		    navmsg->Crs,
 		    navmsg->Crc,
 		    navmsg->Cus,
@@ -303,14 +299,14 @@ static int write_navmsg_csv(bytebuffer *bb, const rrnx_navmsg *navmsg) {
 		    navmsg->Crc
 		);
 		bytebuffer_printf(
-		    bb, "%d, %f, %f, %f, ",
+		    bb, "%d, %g, %g, %g, ",
 		    (int) navmsg->IODC,
 		    navmsg->af0,
 		    navmsg->af1,
 		    navmsg->af2
 		);
 		bytebuffer_printf(
-		    bb, "%f, %d, %d, %d, %d",
+		    bb, "%g, %d, %d, %d, %d",
 		    navmsg->Tgd,
 		    (int) navmsg->health,
 		    (int) navmsg->accuracy,
@@ -390,16 +386,104 @@ static int write_binfile(FILE *fp, const rrnx_file_nav *nav, int mode) {
 	return ok;
 }
 
+struct run_params {
+	//const char *self_filename;
+	const char *input_filename;
+	const char *output_filename;
+
+	int mode;
+};
+
+typedef struct run_params run_params;
+
+static int parse_args(run_params *params, int argc, char *argv[]) {
+	int success = 1;
+	for (int i = 1; i < argc; i++) {
+		const char *carg = argv[i];
+		if (strcmp(carg, "-csv") == 0) {
+			params->mode = MODE_CSV;
+		}
+		else if (strcmp(carg, "-bin") == 0) {
+			params->mode = MODE_BINARY;
+		}
+		else if (carg[0] == '-') {
+			success = 0;
+			fprintf(stderr,
+			    "Error: unrecognized switch: %s\n", carg);
+			break;
+		}
+		else if (params->input_filename == NULL) {
+			params->input_filename = carg;
+		}
+		else if (params->output_filename == NULL) {
+			params->output_filename = carg;
+		}
+		else {
+			success = 0;
+			fprintf(stderr,
+			    "Error: too many files on the command line: %s", carg);
+			break;
+		}
+	}
+	return success;
+}
+
+static void display_usage(void) {
+	printf("nav2bin <rinex_nav> [<dest_file>] [<options>]\n");
+	printf("\n");
+	printf("where options is one of the following\n");
+	printf("    -csv       format as csv (default)\n");
+	printf("    -bin       format as binary (must have dest file)\n");
+	printf("\n");
+	printf("When dest file is not specified, stdout is used\n");
+	printf("\n");
+	printf("Example:\n");
+	printf("find -iname \"*.??n\" | xargs -l1 -I \"{}\" nav2bin {} {}.csv\n");
+	//printf("Rename afterwards:\n");
+	//printf("find -iname \"*.csv\" | sed \"s/[^\\/]*\\/\\(....\\)\\(...\\)..\\(..\\).*/\\0 \\1_20\\3_\\2.csv/\" | xargs -l1 mv\n");
+	//printf("Combine files:\n");
+	//printf("find -iname \"*.csv\" | sort | xargs cat > combined.csv\n");
+
+}
 
 int main(int argc, char *argv[]) {
 	int exitcode = EXIT_FAILURE;
 
 	do {
+		run_params params;
+		params.input_filename = NULL;
+		params.output_filename = NULL;
+		params.mode = MODE_CSV;
+
 		if (argc < 2) {
 			display_usage();
 			break;
 		}
-		const char *input_filename = argv[1];
+
+		if (!parse_args(&params, argc, argv)) {
+			break;
+		}
+
+		// Verify that we have a working configuration.
+
+		// For convenience
+		const char *input_filename
+		    = params.input_filename;
+		const char *output_filename
+		    = params.output_filename;
+		int mode = params.mode;
+
+		if (input_filename == NULL) {
+			fprintf(stderr,
+			    "Error: input filename not specified\n");
+			display_usage();
+			break;
+		}
+		if ((mode == MODE_BINARY) && (output_filename == NULL)) {
+			fprintf(stderr,
+			    "Error: when binary format is specified, it is not allowed to use stdout for output\n");
+			break;
+		}
 
 		rrnx_file_nav *nav = NULL;
 		int err = rrnx_read_navfile(input_filename, &nav);
@@ -410,9 +494,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		FILE *fp = NULL;
-		int mode = MODE_BINARY;
-		if (argc >= 3) {
-			const char *output_filename = argv[2];
+
+		if (output_filename != NULL) {
 			fp = fopen(output_filename, "wb");
 			if (fp == NULL) {
 				perror("fopen");
@@ -420,7 +503,6 @@ int main(int argc, char *argv[]) {
 			}
 		} else {
 			fp = stdout;
-			mode = MODE_CSV;
 		}
 
 		write_binfile(fp, nav, mode);
