@@ -141,7 +141,7 @@ static void dump_datarecord_nav(void *ptr) {
 
 	printf("Node: broadcast orbit 7\n");
 	printf("  tow:        %19.12g\n", data->tow);
-	printf("  Fit intvl:  %19.12g\n", data->fit_interval);
+	printf("  Fit intvl:  %19.12g (is_valid: %d)\n", data->fit_interval, data->valid_fit_interval);
 	printf("  Spare1:     %19.12g (is_valid: %d)\n", data->spare1, data->valid_spare1);
 	printf("  Spare2:     %19.12g (is_valid: %d)\n", data->spare2, data->valid_spare2);
 

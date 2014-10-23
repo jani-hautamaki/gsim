@@ -723,7 +723,8 @@ static void parse_broadcast_orbit7(
 	parse_bco_value(navreader, line, 0, &data->tow, NULL);
 	if (navreader->err) return;
 
-	parse_bco_value(navreader, line, 1, &data->fit_interval, NULL);
+	parse_bco_value(navreader, line, 1,
+	    &data->fit_interval, &data->valid_fit_interval);
 	if (navreader->err) return;
 
 	parse_bco_value(navreader, line, 2,

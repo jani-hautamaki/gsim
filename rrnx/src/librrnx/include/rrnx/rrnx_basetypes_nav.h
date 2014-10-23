@@ -49,6 +49,10 @@ struct rrnx_navmsg {
 	 */
 	int valid_spare2;
 
+	/**
+	 * Indicates whether fit_interval is defined.
+	 */
+	int valid_fit_interval;
 
 	// PAYLOAD DATA
 	//==============
