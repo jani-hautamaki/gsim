@@ -25,9 +25,9 @@ include Makefile.*
 .SECONDARY:
 
 # List phony targets defined in this makefile
-.PHONY: debug_echo all clean doc clean_doc
+.PHONY: all clean doc
 
-all: build_librrnx build_tests debug_echo
+all: build_librrnx build_tests
 
 clean: clean_librrnx clean_tests clean_doc
 
@@ -37,6 +37,7 @@ doc: | build/doc
 build/doc:
 	mkdir -p $@
 
+.PHONY: clean_doc
 clean_doc:
 	rm -rf build/doc
 
@@ -53,7 +54,7 @@ CFLAGS := -Wall --std=c99
 # Compiler flags for test snippets
 tests_CFLAGS := -I src/librrnx/include
 
-# Self-providedDependency libraries
+# Self-contained dependency libraries
 tests_LIBS := build/lib/librrnx.a
 
 $(eval $(call LIBRARY_template,librrnx))
