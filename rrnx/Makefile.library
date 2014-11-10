@@ -1,0 +1,79 @@
+#*******************************{begin:header}*******************************#
+#                       rrnx - The Robust RINEX Library                      #
+#****************************************************************************#
+#
+#       Part of the GPS/INS measurement simulation system GSIM,
+#       https://code.google.com/p/gsim
+#
+#       Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#
+#       Licensed under the terms of GNU General Public License v3.
+#
+#       You should have received a copy of the GNU General Public License v3
+#       along with this program as the file LICENSE.txt; if not, please see
+#       http://www.gnu.org/licenses/gpl-3.0.html
+#
+#*********************************{end:header}*******************************#
+
+# Output directories follow loosely the convetion of GNU projects,
+# https://www.gnu.org/software/automake/manual/automake.html#Standard-Directory-Variables
+
+define LIBRARY_template
+
+# Input directories
+$(1)_lsrcdir := src/$(1)/src
+$(1)_lincdir := src/$(1)/include
+
+# Output directories
+$(1)_objdir := build/obj/$(1)
+$(1)_libdir := build/lib
+$(1)_bindir := build/bin
+$(1)_docdir := build/doc
+$(1)_includedir := build/include/
+
+# Target path and filename for the library
+$(1)_libfile := $$($(1)_libdir)/$(1).a
+
+# Gather sources
+$(1)_sources := $$(wildcard $$($(1)_lsrcdir)/*.c)
+
+# Convert each source into an object
+$(1)_objs := $$(patsubst $$($(1)_lsrcdir)/%,$$($(1)_objdir)/%,$$($(1)_sources:.c=.o))
+
+# Append include directories to CFLAGS
+$(1)_CFLAGS += $$(CFLAGS) -I$$($(1)_lincdir)
+$(1)_CPPFLAGS += $$(CPPFLAGS)
+
+# Main target: build_xxx
+
+.PHONY: build_$(1)
+build_$(1): $$($(1)_libfile)
+
+# objects -> libxxx.a
+$$($(1)_libfile): $$($(1)_objs) | $$($(1)_libdir)
+	$$(AR) rs $$($(1)_libfile) $$($(1)_objs)
+
+# Pull in the previously computed dependencies
+-include $$($(1)_objs:.o=.d)
+
+# sources -> objects
+$$($(1)_objdir)/%.o: $$($(1)_lsrcdir)/%.c | $$($(1)_objdir)
+	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) -c $$(OUTPUT_OPTION) $$<
+	@$$(CC) $$($(1)_CFLAGS) -MM -MT"$$@" $$< -MF"$$(patsubst %.o,%.d,$$@)"
+
+# Order-only pre-requisities for directories
+
+# (TODO: Could use the shortcurt for the target name
+$$($(1)_objdir):
+	-mkdir -p $$@
+
+$$($(1)_libdir):
+	-mkdir -p $$@
+
+.PHONY: clean_$(1)
+clean_$(1):
+	rm -rf $$($(1)_objdir)
+	rm $$($(1)_libfile)
+
+endef
+

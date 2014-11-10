@@ -1,0 +1,88 @@
+#*******************************{begin:header}*******************************#
+#                       rrnx - The Robust RINEX Library                      #
+#****************************************************************************#
+#
+#       Part of the GPS/INS measurement simulation system GSIM,
+#       https://code.google.com/p/gsim
+#
+#       Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#
+#       Licensed under the terms of GNU General Public License v3.
+#
+#       You should have received a copy of the GNU General Public License v3
+#       along with this program as the file LICENSE.txt; if not, please see
+#       http://www.gnu.org/licenses/gpl-3.0.html
+#
+#*********************************{end:header}*******************************#
+
+define SNIPPETS_template
+
+# Input directories
+$(1)_srcdir := src/$(1)
+
+# Output directories
+$(1)_objdir := build/obj/$(1)
+$(1)_bindir := build/bin
+$(1)_docdir := build/doc
+
+# Gather sources
+$(1)_sources := $$(wildcard $$($(1)_srcdir)/*.c)
+
+# Convert each source into an object
+$(1)_objs := $$(patsubst $$($(1)_srcdir)/%,$$($(1)_objdir)/%,$$($(1)_sources:.c=.o))
+
+# Convert each source into a binary
+$(1)_bins := $$(patsubst $$($(1)_srcdir)/%,$$($(1)_bindir)/%,$$($(1)_sources:.c=))
+
+# Compiler flags
+$(1)_CFLAGS += $$(CFLAGS)
+$(1)_CPPFLAGS += $$(CPPFLAGS)
+
+# Linker flags
+$(1)_LDFLAGS += $$(LDFLAGS)
+$(1)_LDLIBS += $$(LDLIBS)
+
+# Extract additional linker flags from dependency libraries
+#$(1)_LDFLAGS += $$(patsubst %,-L%,$$(abspath $$(sort $$(dir $$($(1)_LIBS)))))
+$(1)_LDFLAGS += $$(patsubst %,-L%,$$(sort $$(dir $$($(1)_LIBS))))
+$(1)_LDLIBS += $$(patsubst %,-l%,$$(basename $$(notdir $$($(1)_LIBS))))
+
+# Main target: build_xxx
+
+.PHONY: build_$(1)
+build_$(1): $$($(1)_bins)
+
+# objects -> binaries
+$$($(1)_bindir)/%: $$($(1)_objdir)/%.o $$($(1)_LIBS) | $$($(1)_bindir)
+	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) $$($(1)_LDFLAGS) $$^ -o $$@
+#	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) $$($(1)_LDFLAGS) $$^ $$($(1)_LDLIBS) -o $$@
+
+#	$$(LD) $$($(1)_LDFLAGS) $$^ $$($(1)_LDLIBS) -o $$@
+
+# Pull in the previously computed dependencies
+-include $$($(1)_objs:.o=.d)
+
+# sources -> objects
+$$($(1)_objdir)/%.o: $$($(1)_srcdir)/%.c | $$($(1)_objdir)
+	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) -c $$(OUTPUT_OPTION) $$<
+	@$$(CC) $$($(1)_CFLAGS) -MM -MT"$$@" $$< -MF"$$(patsubst %.o,%.d,$$@)"
+
+# Directories
+
+$$($(1)_bindir):
+	-mkdir -p $$@
+
+$$($(1)_objdir):
+	-mkdir -p $$@
+
+# Cleaning target: clean_xxx
+
+.PHONY: clean_$(1)
+
+clean_$(1):
+	rm -rf $$($(1)_objdir)
+	rm $$($(1)_bins)
+
+endef
+
+

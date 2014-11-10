@@ -15,30 +15,46 @@
 #
 #*********************************{end:header}*******************************#
 
-#
-# References:
-#
-# [1] GNU Make documentation:
-#     http://www.gnu.org/software/make/manual/make.html
-#
+# Pull in template definitions
+include Makefile.*
 
-.PHONY: all doc src
+# Disable the default implicit rules (simplies debugging)
+.SUFFIXES:
 
+# Treat all targets as secondary (simplifies build)
+.SECONDARY:
 
-all: src
+# List phony targets defined in this makefile
+.PHONY: debug_echo all clean doc clean_doc
 
+all: build_librrnx build_tests debug_echo
 
-src:
-	$(MAKE) -C src
-
+clean: clean_librrnx clean_tests clean_doc
 
 doc: | build/doc
 	doxygen
 
 build/doc:
-	mkdir -p build/doc
+	mkdir -p $@
 
-
-clean:
+clean_doc:
 	rm -rf build/doc
-	$(MAKE) -C src clean
+
+# TODO:
+#install: install_librrnx install_tests
+
+# Programs / Tooling
+CC=gcc
+LD=gcc
+
+# Arguments common for all compiler invocations
+CFLAGS := -Wall --std=c99
+
+# Compiler flags for test snippets
+tests_CFLAGS := -I src/librrnx/include
+
+# Self-providedDependency libraries
+tests_LIBS := build/lib/librrnx.a
+
+$(eval $(call LIBRARY_template,librrnx))
+$(eval $(call SNIPPETS_template,tests))
