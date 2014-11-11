@@ -1,0 +1,44 @@
+#*******************************{begin:header}*******************************#
+#                       rrnx - The Robust RINEX Library                      #
+#****************************************************************************#
+#
+#       Part of the GPS/INS measurement simulation system GSIM,
+#       https://code.google.com/p/gsim
+#
+#       Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#
+#       Licensed under the terms of GNU General Public License v3.
+#
+#       You should have received a copy of the GNU General Public License v3
+#       along with this program as the file LICENSE.txt; if not, please see
+#       http://www.gnu.org/licenses/gpl-3.0.html
+#
+#*********************************{end:header}*******************************#
+
+#
+# Generates a variable PARENTS which lists all parent directories 
+# up to the root. This template includes a conditionally executed 
+# eval call recursion. 
+#
+# NOTE. Using this template in a setup where Makefiles are included 
+# from the parent directories may cause the project to become 
+# dependend on the parent project. Such a dependency may be undesirable.
+#
+
+define find_parents
+
+CUR_ABSPATH := $(abspath $(1))
+#$$(info CUR_ABSPATH := $$(CUR_ABSPATH))
+
+ifneq ($$(CUR_ABSPATH),/)
+$$(eval $$(call find_parents, $$(CUR_ABSPATH)/..))
+# CUR_ABSPATH is now destroyed
+else
+# Current path is the root; halt recursion here.
+endif
+
+# Append parents (use $(1) since CUR_ABSPATH was destroyed)
+PARENTS += $$(abspath $(1))
+#$$(info PARENTS is now $$(PARENTS))
+
+endef
