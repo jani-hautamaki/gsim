@@ -16,7 +16,7 @@
 #*********************************{end:header}*******************************#
 
 # Pull in template definitions
-include Makefile.*
+include ../Makefile.*
 
 # Disable the default implicit rules (simplies debugging)
 .SUFFIXES:
@@ -33,9 +33,6 @@ clean: clean_librrnx clean_tests clean_doc
 
 doc: | build/doc
 	doxygen
-
-build/doc:
-	mkdir -p $@
 
 .PHONY: clean_doc
 clean_doc:
@@ -59,3 +56,6 @@ tests_LIBS := build/lib/librrnx.a
 
 $(eval $(call LIBRARY_template,librrnx))
 $(eval $(call SNIPPETS_template,tests))
+
+$(eval $(call MKDIR_template))
+$(eval $(call RMDIR_template))

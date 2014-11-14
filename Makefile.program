@@ -15,15 +15,19 @@
 #
 #*********************************{end:header}*******************************#
 
-define SNIPPETS_template
+#
+# Assumes Makefile.cdefs is included.
+#
+
+define PROGRAM_template
 
 # Input directories
-$(1)_srcdir := src/$(1)
+$(1)_srcdir := $$(srcdir)/$(1)
 
 # Output directories
-$(1)_objdir := build/obj/$(1)
-$(1)_bindir := build/bin
-$(1)_docdir := build/doc
+$(1)_objdir := $$(objdir)/$(1)
+$(1)_bindir := $$(bindir)
+$(1)_docdir := $$(docdir)
 
 # Gather sources
 $(1)_sources := $$(wildcard $$($(1)_srcdir)/*.c)
@@ -31,8 +35,8 @@ $(1)_sources := $$(wildcard $$($(1)_srcdir)/*.c)
 # Convert each source into an object
 $(1)_objs := $$(patsubst $$($(1)_srcdir)/%,$$($(1)_objdir)/%,$$($(1)_sources:.c=.o))
 
-# Convert each source into a binary
-$(1)_bins := $$(patsubst $$($(1)_srcdir)/%,$$($(1)_bindir)/%,$$($(1)_sources:.c=))
+# Program binary
+$(1)_prog := $$($(1)_bindir)/$(1)
 
 # Compiler flags
 $(1)_CFLAGS += $$(CFLAGS)
@@ -49,10 +53,10 @@ $(1)_LDLIBS += $$(patsubst %,-l%,$$(basename $$(notdir $$($(1)_LIBS))))
 # Main target: build_xxx
 
 .PHONY: build_$(1)
-build_$(1): $$($(1)_bins)
+build_$(1): $$($(1)_prog)
 
-# objects -> binaries
-$$($(1)_bindir)/%: $$($(1)_objdir)/%.o $$($(1)_LIBS) | $$($(1)_bindir)
+# objects -> bin
+$$($(1)_prog): $$($(1)_objs) $$($(1)_LIBS) | $$($(1)_bindir)
 	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) $$($(1)_LDFLAGS) $$^ -o $$@
 
 # Pull in the previously computed dependencies
@@ -65,9 +69,6 @@ $$($(1)_objdir)/%.o: $$($(1)_srcdir)/%.c | $$($(1)_objdir)
 
 # Directories
 
-$$($(1)_bindir):
-	-mkdir -p $$@
-
 $$($(1)_objdir):
 	-mkdir -p $$@
 
@@ -77,7 +78,7 @@ $$($(1)_objdir):
 
 clean_$(1):
 	rm -rf $$($(1)_objdir)
-	rm $$($(1)_bins)
+	rm -f $$($(1)_prog)
 
 endef
 
