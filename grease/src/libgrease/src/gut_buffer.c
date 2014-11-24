@@ -157,6 +157,14 @@ void *gut_buffer_addr(gut_buffer *buf) {
 	return buf->addr;
 }
 
+void *gut_buffer_addrr(gut_buffer *buf) {
+	return &buf->addr[buf->index_read];
+}
+
+void *gut_buffer_addrw(gut_buffer *buf) {
+	return &buf->addr[buf->index_write];
+}
+
 size_t gut_buffer_size(const gut_buffer *buf) {
 	return buf->size;
 }
@@ -167,7 +175,7 @@ size_t gut_buffer_size(const gut_buffer *buf) {
 /**
  * @return Number of bytes written. On success 1, otherwise 0.
  */
-int gut_buffer_write1(gut_buffer *buf, unsigned char val) {
+size_t gut_buffer_write1(gut_buffer *buf, unsigned char val) {
 	if (buf->index_write < buf->size) {
 		buf->addr[buf->index_write] = val;
 		buf->index_write++;
@@ -179,7 +187,7 @@ int gut_buffer_write1(gut_buffer *buf, unsigned char val) {
 /**
  * @return Number of bytes written. On success @c len, otherwise 0.
  */
-int gut_buffer_writeall(gut_buffer *buf, const void *ptr, size_t len) {
+size_t gut_buffer_writeall(gut_buffer *buf, const void *ptr, size_t len) {
 	if (buf->index_write+len <= buf->size) {
 		memcpy(&buf->addr[buf->index_write], ptr, len);
 	} else {
@@ -194,9 +202,9 @@ int gut_buffer_writeall(gut_buffer *buf, const void *ptr, size_t len) {
 /**
  * @return Number of bytes written, or 0 if no space left.
  */
-int gut_buffer_write(gut_buffer *buf, const void *ptr, size_t len) {
+size_t gut_buffer_write(gut_buffer *buf, const void *ptr, size_t len) {
 	// Compute the space left in the buffer
-	int max_len = buf->size - buf->index_write;
+	size_t max_len = buf->size - buf->index_write;
 
 	// If not enough space left, saturate length
 	if (len > max_len) {
@@ -212,7 +220,7 @@ int gut_buffer_write(gut_buffer *buf, const void *ptr, size_t len) {
 /**
  * @return Number of bytes read. On success 1, otherwise 0.
  */
-int gut_buffer_read1(gut_buffer *buf, unsigned char *val) {
+size_t gut_buffer_read1(gut_buffer *buf, unsigned char *val) {
 	int success = 0;
 	if (buf->index_read < buf->len) {
 		*val = buf->addr[buf->index_read];
@@ -225,7 +233,7 @@ int gut_buffer_read1(gut_buffer *buf, unsigned char *val) {
 /**
  * @return Number of bytes read. On success @c len, otherwise 0.
  */
-int gut_buffer_readall(gut_buffer *buf, void *ptr, size_t len) {
+size_t gut_buffer_readall(gut_buffer *buf, void *ptr, size_t len) {
 	int success = 0;
 	if (buf->index_read+len <= buf->len) {
 		memcpy(ptr, &buf->addr[buf->index_read], len);
@@ -238,9 +246,9 @@ int gut_buffer_readall(gut_buffer *buf, void *ptr, size_t len) {
 /**
  * @return Number of bytes read, or 0 if nothing to read.
  */
-int gut_buffer_read(gut_buffer *buf, void *ptr, size_t len) {
+size_t gut_buffer_read(gut_buffer *buf, void *ptr, size_t len) {
 	// Compute the bytes left in the buffer
-	int max_len = buf->len - buf->index_read;
+	size_t max_len = buf->len - buf->index_read;
 
 	// If not enough space left, saturate length
 	if (len > max_len) {

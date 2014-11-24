@@ -88,19 +88,21 @@ void gut_buffer_limitr(gut_buffer *buf);
 void gut_buffer_clear(gut_buffer *buf);
 
 void *gut_buffer_addr(gut_buffer *buf);
+void *gut_buffer_addrr(gut_buffer *buf);
+void *gut_buffer_addrw(gut_buffer *buf);
 size_t gut_buffer_size(const gut_buffer *buf);
 
 
 // READ/WRITE METHODS
 //====================
 
-int gut_buffer_write1(gut_buffer *buf, unsigned char val);
-int gut_buffer_writeall(gut_buffer *buf, const void *ptr, size_t len);
-int gut_buffer_write(gut_buffer *buf, const void *ptr, size_t len);
+size_t gut_buffer_write1(gut_buffer *buf, unsigned char val);
+size_t gut_buffer_writeall(gut_buffer *buf, const void *ptr, size_t len);
+size_t gut_buffer_write(gut_buffer *buf, const void *ptr, size_t len);
 
-int gut_buffer_read1(gut_buffer *buf, unsigned char *val);
-int gut_buffer_readall(gut_buffer *buf, void *ptr, size_t len);
-int gut_buffer_read(gut_buffer *buf, void *ptr, size_t len);
+size_t gut_buffer_read1(gut_buffer *buf, unsigned char *val);
+size_t gut_buffer_readall(gut_buffer *buf, void *ptr, size_t len);
+size_t gut_buffer_read(gut_buffer *buf, void *ptr, size_t len);
 
 #ifdef __cplusplus
 } // extern "C"
