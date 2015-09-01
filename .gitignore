@@ -1,0 +1,10 @@
+# Build directories for various sub-projects
+rrnx/build/
+cgenerics/build/
+gsim/build/
+coregps/build/
+grease/build/
+sundial/build/
+latitude/build/
+euclid/build/
+maid/build/
