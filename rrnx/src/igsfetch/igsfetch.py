@@ -5,7 +5,7 @@
 #      Part of the GPS/INS measurement simulation system GSIM
 #      https://github.com/jani-hautamaki/gsim
 #
-#      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#      Copyright (C) 2013-2015 Jani Hautamaki <jani.hautamaki@hotmail.com>
 #
 #      Licensed under the terms of GNU General Public License v3.
 #
