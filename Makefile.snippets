@@ -1,11 +1,11 @@
 #*******************************{begin:header}*******************************#
-#                       rrnx - The Robust RINEX Library                      #
+#                    gsim - GPS/INS measurement simulation                   #
 #****************************************************************************#
 #
 #       Part of the GPS/INS measurement simulation system GSIM,
 #       https://code.google.com/p/gsim
 #
-#       Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
+#       Copyright (C) 2013-2015 Jani Hautamaki <jani.hautamaki@hotmail.com>
 #
 #       Licensed under the terms of GNU General Public License v3.
 #
@@ -48,7 +48,7 @@ $(1)_LDLIBS += $$(LDLIBS)
 
 # Extract additional linker flags from dependency libraries
 $(1)_LDFLAGS += $$(patsubst %,-L%,$$(sort $$(dir $$($(1)_LIBS))))
-$(1)_LDLIBS += $$(patsubst %,-l%,$$(basename $$(notdir $$($(1)_LIBS))))
+$(1)_LDLIBS += $$(patsubst lib%,-l%,$$(basename $$(notdir $$($(1)_LIBS))))
 
 # Main target: build_xxx
 
@@ -57,7 +57,7 @@ build_$(1): $$($(1)_bins)
 
 # objects -> binaries
 $$($(1)_bindir)/%: $$($(1)_objdir)/%.o $$($(1)_LIBS) | $$($(1)_bindir)
-	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) $$($(1)_LDFLAGS) $$^ -o $$@
+	$$(CC) $$($(1)_CFLAGS) $$($(1)_CPPFLAGS) $$($(1)_LDFLAGS) $$^ $$($(1)_LDLIBS) -o $$@
 
 # Pull in the previously computed dependencies
 -include $$($(1)_objs:.o=.d)
