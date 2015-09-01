@@ -3,7 +3,7 @@
 #****************************************************************************#
 #
 #      Part of the GPS/INS measurement simulation system GSIM
-#      https://code.google.com/p/gsim
+#      https://github.com/jani-hautamaki/gsim
 #
 #      Copyright (C) 2013-2014 Jani Hautamaki <jani.hautamaki@hotmail.com>
 #
